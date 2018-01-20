@@ -1,21 +1,47 @@
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#include "Precompiled.hpp"
+#include "globaldata.hpp"
 
 #include <ctype.h>
 
 #include "doomdef.hpp"
 
 #include "v_video.hpp"
+#include "m_swap.hpp"
 
 #include "hu_lib.hpp"
 #include "r_local.hpp"
 #include "r_draw.hpp"
 
-//JONNY//
-#include <SFML/Window.hpp>
+// qboolean : whether the screen is always erased
 
-// bool : whether the screen is always erased
-#define noterased viewwindowx
-
-extern bool	automapactive;	// in AM_map.c
 
 void HUlib_init(void)
 {
@@ -43,7 +69,7 @@ HUlib_initTextLine
     HUlib_clearTextLine(t);
 }
 
-bool
+qboolean
 HUlib_addCharToTextLine
 ( hu_textline_t*	t,
   char			ch )
@@ -61,7 +87,7 @@ HUlib_addCharToTextLine
 
 }
 
-bool HUlib_delCharFromTextLine(hu_textline_t* t)
+qboolean HUlib_delCharFromTextLine(hu_textline_t* t)
 {
 
     if (!t->len) return false;
@@ -77,7 +103,7 @@ bool HUlib_delCharFromTextLine(hu_textline_t* t)
 void
 HUlib_drawTextLine
 ( hu_textline_t*	l,
-  bool		drawcursor )
+  qboolean		drawcursor )
 {
 
     int			i;
@@ -94,7 +120,7 @@ HUlib_drawTextLine
 	    && c >= l->sc
 	    && c <= '_')
 	{
-	    w = l->f[c - l->sc]->width;
+	    w = SHORT(l->f[c - l->sc]->width);
 	    if (x+w > SCREENWIDTH)
 		break;
 	    V_DrawPatchDirect(x, l->y, FG, l->f[c - l->sc]);
@@ -110,7 +136,7 @@ HUlib_drawTextLine
 
     // draw the cursor if requested
     if (drawcursor
-	&& x + l->f['_' - l->sc]->width <= SCREENWIDTH)
+	&& x + SHORT(l->f['_' - l->sc]->width) <= SCREENWIDTH)
     {
 	V_DrawPatchDirect(x, l->y, FG, l->f['_' - l->sc]);
     }
@@ -128,23 +154,24 @@ void HUlib_eraseTextLine(hu_textline_t* l)
     // and the text must either need updating or refreshing
     // (because of a recent change back from the automap)
 
-    if (!automapactive &&
-	viewwindowx && l->needsupdate)
+    if (!::g->automapactive &&
+	::g->viewwindowx && l->needsupdate)
     {
-	lh = l->f[0]->height + 1;
+	lh = SHORT(l->f[0]->height) + 1;
 	for (y=l->y,yoffset=y*SCREENWIDTH ; y<l->y+lh ; y++,yoffset+=SCREENWIDTH)
 	{
-	    if (y < viewwindowy || y >= viewwindowy + viewheight)
+	    if (y < ::g->viewwindowy || y >= ::g->viewwindowy + ::g->viewheight)
 		R_VideoErase(yoffset, SCREENWIDTH); // erase entire line
 	    else
 	    {
-		R_VideoErase(yoffset, viewwindowx); // erase left border
-		R_VideoErase(yoffset + viewwindowx + viewwidth, viewwindowx);
+		R_VideoErase(yoffset, ::g->viewwindowx); // erase left border
+		R_VideoErase(yoffset + ::g->viewwindowx + ::g->viewwidth, ::g->viewwindowx);
 		// erase right border
 	    }
 	}
     }
-    
+
+    ::g->lastautomapactive = ::g->automapactive;
     if (l->needsupdate) l->needsupdate--;
 
 }
@@ -157,7 +184,7 @@ HUlib_initSText
   int		h,
   patch_t**	font,
   int		startchar,
-  bool*	on )
+  qboolean*	on )
 {
 
     int i;
@@ -168,7 +195,7 @@ HUlib_initSText
     s->cl = 0;
     for (i=0;i<h;i++)
 	HUlib_initTextLine(&s->l[i],
-			   x, y - i*(font[0]->height+1),
+			   x, y - i*(SHORT(font[0]->height)+1),
 			   font, startchar);
 
 }
@@ -217,7 +244,7 @@ void HUlib_drawSText(hu_stext_t* s)
     {
 	idx = s->cl - i;
 	if (idx < 0)
-	    idx += s->h; // handle queue of lines
+	    idx += s->h; // handle queue of ::g->lines
 	
 	l = &s->l[idx];
 
@@ -249,7 +276,7 @@ HUlib_initIText
   int		y,
   patch_t**	font,
   int		startchar,
-  bool*	on )
+  qboolean*	on )
 {
     it->lm = 0; // default left margin is start of text
     it->on = on;
@@ -290,7 +317,7 @@ HUlib_addPrefixToIText
 
 // wrapper function for handling general keyed input.
 // returns true if it ate the key
-bool
+qboolean
 HUlib_keyInIText
 ( hu_itext_t*	it,
   unsigned char ch )
@@ -299,10 +326,10 @@ HUlib_keyInIText
     if (ch >= ' ' && ch <= '_') 
   	HUlib_addCharToTextLine(&it->l, (char) ch);
     else 
-	if (ch == sf::Keyboard::BackSpace)
+	if (ch == KEY_BACKSPACE) 
 	    HUlib_delCharFromIText(it);
 	else 
-	    if (ch != sf::Keyboard::Return)
+	    if (ch != KEY_ENTER) 
 		return false; // did not eat key
 
     return true; // ate the key
@@ -327,4 +354,5 @@ void HUlib_eraseIText(hu_itext_t* it)
     HUlib_eraseTextLine(&it->l);
     it->laston = *it->on;
 }
+
 

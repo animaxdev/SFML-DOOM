@@ -1,4 +1,35 @@
-#pragma once
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#ifndef __R_DEFS__
+#define __R_DEFS__
+
+#include "Precompiled.hpp"
 
 // Screenwidth.
 #include "doomdef.hpp"
@@ -13,6 +44,7 @@
 // SECTORS do store MObjs anyway.
 #include "p_mobj.hpp"
 
+
 // Silhouette, needed for clipping Segs (mainly)
 // and sprites representing things.
 #define SIL_NONE		0
@@ -20,7 +52,11 @@
 #define SIL_TOP			2
 #define SIL_BOTH		3
 
-#define MAXDRAWSEGS		256
+#define MAXDRAWSEGS		1280
+
+
+
+
 
 //
 // INTERNAL MAP TYPES
@@ -34,8 +70,8 @@
 //
 typedef struct
 {
-    int	x;
-    int	y;
+    fixed_t	x;
+    fixed_t	y;
     
 } vertex_t;
 
@@ -52,9 +88,9 @@ struct line_s;
 typedef struct
 {
     thinker_t		thinker;	// not used for anything
-    int		x;
-    int		y;
-    int		z;
+    fixed_t		x;
+    fixed_t		y;
+    fixed_t		z;
 
 } degenmobj_t;
 
@@ -64,8 +100,8 @@ typedef struct
 //
 typedef	struct
 {
-    int	floorheight;
-    int	ceilingheight;
+    fixed_t	floorheight;
+    fixed_t	ceilingheight;
     short	floorpic;
     short	ceilingpic;
     short	lightlevel;
@@ -108,10 +144,10 @@ typedef	struct
 typedef struct
 {
     // add this to the calculated texture column
-    int	textureoffset;
+    fixed_t	textureoffset;
     
     // add this to the calculated texture top
-    int	rowoffset;
+    fixed_t	rowoffset;
 
     // Texture indices.
     // We do not maintain names here. 
@@ -147,8 +183,8 @@ typedef struct line_s
     vertex_t*	v2;
 
     // Precalculated v2 - v1 for side checking.
-    int	dx;
-    int	dy;
+    fixed_t	dx;
+    fixed_t	dy;
 
     // Animation related.
     short	flags;
@@ -161,7 +197,7 @@ typedef struct line_s
 
     // Neat. Another bounding box, for the extent
     //  of the LineDef.
-    int	bbox[4];
+    fixed_t	bbox[4];
 
     // To aid move clipping.
     slopetype_t	slopetype;
@@ -206,7 +242,7 @@ typedef struct
     vertex_t*	v1;
     vertex_t*	v2;
     
-    int	offset;
+    fixed_t	offset;
 
     angle_t	angle;
 
@@ -229,13 +265,13 @@ typedef struct
 typedef struct
 {
     // Partition line.
-    int	x;
-    int	y;
-    int	dx;
-    int	dy;
+    fixed_t	x;
+    fixed_t	y;
+    fixed_t	dx;
+    fixed_t	dy;
 
     // Bounding box for each child.
-    int	bbox[2][4];
+    fixed_t	bbox[2][4];
 
     // If NF_SUBSECTOR its a subsector.
     unsigned short children[2];
@@ -248,19 +284,19 @@ typedef struct
 // posts are runs of non masked source pixels
 typedef struct
 {
-    unsigned char		topdelta;	// -1 is the last post in a column
-    unsigned char		length; 	// length data unsigned chars follows
+    byte		topdelta;	// -1 is the last post in a column
+    byte		length; 	// length data bytes follows
 } post_t;
 
-// column_t is a list of 0 or more post_t, (unsigned char)-1 terminated
-typedef post_t	column_t;
+// postColumn_t is a list of 0 or more post_t, (byte)-1 terminated
+typedef post_t	postColumn_t;
 
 
 
 // PC direct to screen pointers
 //B UNUSED - keep till detailshift in r_draw.c resolved
-//extern unsigned char*	destview;
-//extern unsigned char*	destscreen;
+//extern byte*	destview;
+//extern byte*	destscreen;
 
 
 
@@ -269,6 +305,16 @@ typedef post_t	column_t;
 //
 // OTHER TYPES
 //
+
+// This could be wider for >8 bit display.
+// Indeed, true color support is posibble
+//  precalculating 24bpp lightmap/colormap LUT.
+//  from darkening PLAYPAL to all black.
+// Could even us emore than 32 levels.
+typedef byte	lighttable_t;	
+
+
+
 
 //
 // ?
@@ -279,18 +325,18 @@ typedef struct drawseg_s
     int			x1;
     int			x2;
 
-    int		scale1;
-    int		scale2;
-    int		scalestep;
+    fixed_t		scale1;
+    fixed_t		scale2;
+    fixed_t		scalestep;
 
     // 0=none, 1=bottom, 2=top, 3=both
     int			silhouette;
 
     // do not clip sprites above this
-    int		bsilheight;
+    fixed_t		bsilheight;
 
     // do not clip sprites below this
-    int		tsilheight;
+    fixed_t		tsilheight;
     
     // Pointers to lists for sprite clipping,
     //  all three adjusted so [x1] is first value.
@@ -307,7 +353,7 @@ typedef struct drawseg_s
 // Patches are used for sprites and all masked pictures,
 // and we compose textures from the TEXTURE1/2 lists
 // of patches.
-typedef struct 
+struct patch_t
 { 
     short		width;		// bounding box size 
     short		height; 
@@ -315,7 +361,7 @@ typedef struct
     short		topoffset;	// pixels below the origin 
     int			columnofs[8];	// only [width] used
     // the [0] is &columnofs[width] 
-} patch_t;
+};
 
 
 
@@ -328,6 +374,8 @@ typedef struct
 // I.e. a sprite object that is partly visible.
 typedef struct vissprite_s
 {
+	int suck; //Compiler opt fix...wtf
+
     // Doubly linked list.
     struct vissprite_s*	prev;
     struct vissprite_s*	next;
@@ -336,30 +384,29 @@ typedef struct vissprite_s
     int			x2;
 
     // for line side calculation
-    int		gx;
-    int		gy;		
+    fixed_t		gx;
+    fixed_t		gy;		
 
     // global bottom / top for silhouette clipping
-    int		gz;
-    int		gzt;
+    fixed_t		gz;
+    fixed_t		gzt;
 
     // horizontal position of x1
-    int		startfrac;
+    fixed_t		startfrac;
     
-    int		scale;
+    fixed_t		scale;
     
     // negative if flipped
-    int		xiscale;	
+    fixed_t		xiscale;	
 
-    int		texturemid;
+    fixed_t		texturemid;
     int			patch;
 
     // for color translation and shadow draw,
     //  maxbright frames as well
-    unsigned char*	colormap;
+    lighttable_t*	colormap;
    
     int			mobjflags;
-    
 } vissprite_t;
 
 
@@ -383,13 +430,13 @@ typedef struct
     // If false use 0 for any position.
     // Note: as eight entries are available,
     //  we might as well insert the same name eight times.
-    bool	rotate;
+    qboolean	rotate;
 
     // Lump to use for view angles 0-7.
     short	lump[8];
 
     // Flip bit (1 = flip) to use for view angles 0-7.
-    unsigned char	flip[8];
+    byte	flip[8];
     
 } spriteframe_t;
 
@@ -413,22 +460,35 @@ typedef struct
 // 
 typedef struct
 {
-  int		height;
+  fixed_t		height;
   int			picnum;
   int			lightlevel;
   int			minx;
   int			maxx;
-  
+ 
   // leave pads for [minx-1]/[maxx+1]
-  
-  unsigned char		pad1;
+  int			nervePad1;
+  int			nervePad2;
+  byte			nervePad3;
+  byte			nervePad4;
+  byte			nervePad5;
+
+  byte		pad1;
   // Here lies the rub for all
   //  dynamic resize/change of resolution.
-  unsigned char		top[SCREENWIDTH];
-  unsigned char		pad2;
-  unsigned char		pad3;
+  //unsigned short		top[65535];			// [SCREENWIDTH];
+  unsigned short		top[SCREENWIDTH];
+  byte		pad2;
+  byte		pad3;
   // See above.
-  unsigned char		bottom[SCREENWIDTH];
-  unsigned char		pad4;
+  //unsigned short		bottom[65535];		// [SCREENWIDTH];
+  unsigned short		bottom[SCREENWIDTH];
+  byte		pad4;
 
 } visplane_t;
+
+
+
+
+#endif
+

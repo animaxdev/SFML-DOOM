@@ -15,12 +15,15 @@ else()
   find_package(SFML REQUIRED graphics audio window system network)
 endif()
 
-file(GLOB INCLUDE "include/*.h" "include/*.hpp" "include/timidity/*.h")
+file(GLOB INCLUDE "include/*.hpp" "include/*.hpp" "include/timidity/*.hpp")
 file(GLOB SOURCE "src/*.cpp" "src/timidity/*.cpp")
 
 if (APPLE AND NOT IOS)
     set(SOURCE ${SOURCE} src/ResourcePath.mm)
 endif()
+
+#Timidity source
+file (GLOB TIMIDITY "timidity/*.hpp" "timidity/*.cpp")
 
 set (CMAKE_CXX_STANDARD 11)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -30,7 +33,7 @@ if(APPLE)
     set_source_files_properties( ${CMAKE_SOURCE_DIR}/apple/sfml-doom.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
     set_source_files_properties( ${CMAKE_SOURCE_DIR}/eawpats PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
     set_source_files_properties( ${CMAKE_SOURCE_DIR}/doom1.wad PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
-    add_executable(SFML-DOOM MACOSX_BUNDLE ${INCLUDE} ${SOURCE} ${CMAKE_SOURCE_DIR}/apple/sfml-doom.icns
+add_executable(SFML-DOOM MACOSX_BUNDLE ${INCLUDE} ${SOURCE} ${TIMIDITY} ${CMAKE_SOURCE_DIR}/apple/sfml-doom.icns
     ${CMAKE_SOURCE_DIR}/doom1.wad
     ${CMAKE_SOURCE_DIR}/eawpats)
     set_target_properties( SFML-DOOM PROPERTIES MACOSX_BUNDLE_ICON_FILE sfml-doom.icns )
@@ -47,15 +50,12 @@ install(TARGETS SFML-DOOM BUNDLE DESTINATION .
 if(APPLE)
 	set(CPACK_PACKAGE_FILE_NAME)
     install(CODE " include(BundleUtilities)
-		 fixup_bundle(${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/SFML-DOOM.app \"\" \"\")
-		 verify_app(${CMAKE_BINARY_DIR}/${CMAKE_BUILD_TYPE}/SFML-DOOM.app)")
+		 fixup_bundle(${CMAKE_INSTALL_PREFIX}/SFML-DOOM.app \"\" \"\")
+		 verify_app(${CMAKE_INSTALL_PREFIX}/SFML-DOOM.app)")
     SET(CPACK_GENERATOR "DragNDrop")
 elseif(UNIX)
-	set(CPACK_GENERATOR "DEB")
-	set(CPACK_PACKAGE_CONTACT Jonny@JonnyPaton.com)
+    set(CPACK_GENERATOR "DEB")
+    set(CPACK_PACKAGE_CONTACT Jonny@JonnyPaton.com)
 endif()
-
-
-
 
 include(CPack)

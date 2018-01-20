@@ -1,3 +1,35 @@
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#include "Precompiled.hpp"
+#include "globaldata.hpp"
+
+
 #include "i_system.hpp"
 #include "r_local.hpp"
 
@@ -5,19 +37,18 @@
 #include "doomdata.hpp"
 
 #include "m_bbox.hpp"
+#include "m_swap.hpp"
 
 #include "v_video.hpp"
 
 
-// Each screen is [SCREENWIDTH*SCREENHEIGHT]; 
-unsigned char*				screens[5];	
+// Each screen is [ORIGINAL_WIDTH*ORIGINALHEIGHT]; 
  
-int				dirtybox[4]; 
 
 
 
 // Now where did these came from?
-unsigned char gammatable[5][256] =
+const byte gammatable[5][256] =
 {
     {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
      17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,
@@ -103,7 +134,6 @@ unsigned char gammatable[5][256] =
 
 
 
-int	usegamma;
 			 
 //
 // V_MarkRect 
@@ -115,8 +145,8 @@ V_MarkRect
   int		width,
   int		height ) 
 { 
-    M_AddToBox (dirtybox, x, y); 
-    M_AddToBox (dirtybox, x+width-1, y+height-1); 
+    M_AddToBox (::g->dirtybox, x, y); 
+    M_AddToBox (::g->dirtybox, x+width-1, y+height-1); 
 } 
  
 
@@ -134,17 +164,17 @@ V_CopyRect
   int		desty,
   int		destscrn ) 
 { 
-    unsigned char*	src;
-    unsigned char*	dest; 
+    byte*	src;
+    byte*	dest; 
 	 
 #ifdef RANGECHECK 
     if (srcx<0
-	||srcx+width >SCREENWIDTH
+	||srcx+width >ORIGINAL_WIDTH
 	|| srcy<0
-	|| srcy+height>SCREENHEIGHT 
-	||destx<0||destx+width >SCREENWIDTH
+	|| srcy+height>ORIGINAL_HEIGHT 
+	||destx<0||destx+width >ORIGINAL_WIDTH
 	|| desty<0
-	|| desty+height>SCREENHEIGHT 
+	|| desty+height>ORIGINAL_HEIGHT
 	|| (unsigned)srcscrn>4
 	|| (unsigned)destscrn>4)
     {
@@ -152,16 +182,23 @@ V_CopyRect
     }
 #endif 
     V_MarkRect (destx, desty, width, height); 
-	 
-    src = screens[srcscrn]+SCREENWIDTH*srcy+srcx; 
-    dest = screens[destscrn]+SCREENWIDTH*desty+destx; 
 
-    for ( ; height>0 ; height--) 
-    { 
-	memcpy (dest, src, width); 
-	src += SCREENWIDTH; 
-	dest += SCREENWIDTH; 
-    } 
+	// SMF - rewritten for scaling
+	srcx *= GLOBAL_IMAGE_SCALER;
+	srcy *= GLOBAL_IMAGE_SCALER;
+	destx *= GLOBAL_IMAGE_SCALER;
+	desty *= GLOBAL_IMAGE_SCALER;
+	width *= GLOBAL_IMAGE_SCALER;
+	height *= GLOBAL_IMAGE_SCALER;
+
+	src = ::g->screens[srcscrn] + srcy * SCREENWIDTH + srcx; 
+	dest = ::g->screens[destscrn] + desty * SCREENWIDTH + destx; 
+
+	for ( ; height>0 ; height--) { 
+		memcpy(dest, src, width); 
+		src += SCREENWIDTH; 
+		dest += SCREENWIDTH; 
+	} 
 } 
  
 
@@ -177,58 +214,67 @@ V_DrawPatch
   patch_t*	patch ) 
 { 
 
-    int		count;
-    int		col; 
-    column_t*	column; 
-    unsigned char*	desttop;
-    unsigned char*	dest;
-    unsigned char*	source; 
-    int		w; 
+    int				count;
+    int				col; 
+    postColumn_t*	column; 
+    byte*			source; 
+    int				w; 
 	 
-    y -= patch->topoffset; 
-    x -= patch->leftoffset; 
+    y -= SHORT(patch->topoffset); 
+    x -= SHORT(patch->leftoffset); 
 #ifdef RANGECHECK 
     if (x<0
-	||x+patch->width >SCREENWIDTH
+	||x+SHORT(patch->width) >ORIGINAL_WIDTH
 	|| y<0
-	|| y+patch->height>SCREENHEIGHT 
+	|| y+SHORT(patch->height)>ORIGINAL_HEIGHT
 	|| (unsigned)scrn>4)
     {
-      fprintf( stderr, "Patch at %d,%d exceeds LFB\n", x,y );
+      I_PrintfE("Patch at %d,%d exceeds LFB\n", x,y );
       // No I_Error abort - what is up with TNT.WAD?
-      fprintf( stderr, "V_DrawPatch: bad patch (ignored)\n");
+      I_PrintfE("V_DrawPatch: bad patch (ignored)\n");
       return;
     }
 #endif 
- 
+
     if (!scrn)
-	V_MarkRect (x, y, patch->width, patch->height); 
+		V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
 
     col = 0; 
-    desttop = screens[scrn]+y*SCREENWIDTH+x; 
+	int destx = x;
+	int desty = y;
 	 
-    w = patch->width; 
+    w = SHORT(patch->width);
 
-    for ( ; col<w ; x++, col++, desttop++)
-    { 
-	column = (column_t *)((unsigned char *)patch + patch->columnofs[col]); 
- 
-	// step through the posts in a column 
-	while (column->topdelta != 0xff ) 
-	{ 
-	    source = (unsigned char *)column + 3; 
-	    dest = desttop + column->topdelta*SCREENWIDTH; 
-	    count = column->length; 
-			 
-	    while (count--) 
-	    { 
-		*dest = *source++; 
-		dest += SCREENWIDTH; 
-	    } 
-	    column = (column_t *)(  (unsigned char *)column + column->length 
-				    + 4 ); 
-	} 
-    }			 
+	// SMF - rewritten for scaling
+	for ( ; col < w ; x++, col++ ) {
+		column = (postColumn_t *)((byte *)patch + LONG(patch->columnofs[col]));
+
+		destx = x;
+
+		// step through the posts in a column
+		while (column->topdelta != 0xff ) {
+			source = (byte *)column + 3;
+			desty = y + column->topdelta;
+			count = column->length;
+
+			while (count--) {
+				int scaledx, scaledy;
+				scaledx = destx * GLOBAL_IMAGE_SCALER;
+				scaledy = desty * GLOBAL_IMAGE_SCALER;
+				byte src = *source++;
+
+				for ( int i = 0; i < GLOBAL_IMAGE_SCALER; i++ ) {
+					for ( int j = 0; j < GLOBAL_IMAGE_SCALER; j++ ) {
+						::g->screens[scrn][( scaledx + j ) + ( scaledy + i ) * SCREENWIDTH] = src;
+					}
+				}
+
+				desty++;
+			}
+
+			column = (postColumn_t *)( (byte *)column + column->length + 4 );
+		}
+	}
 } 
  
 //
@@ -244,55 +290,65 @@ V_DrawPatchFlipped
   patch_t*	patch ) 
 { 
 
-    int		count;
-    int		col; 
-    column_t*	column; 
-    unsigned char*	desttop;
-    unsigned char*	dest;
-    unsigned char*	source; 
-    int		w; 
+    int				count;
+    int				col; 
+    postColumn_t*	column; 
+    byte*			source; 
+    int				w; 
 	 
-    y -= patch->topoffset; 
-    x -= patch->leftoffset; 
+    y -= SHORT(patch->topoffset); 
+    x -= SHORT(patch->leftoffset); 
 #ifdef RANGECHECK 
     if (x<0
-	||x+patch->width >SCREENWIDTH
+	||x+SHORT(patch->width) >ORIGINAL_WIDTH
 	|| y<0
-	|| y+patch->height>SCREENHEIGHT 
+	|| y+SHORT(patch->height)>ORIGINAL_HEIGHT
 	|| (unsigned)scrn>4)
     {
-      fprintf( stderr, "Patch origin %d,%d exceeds LFB\n", x,y );
+      I_PrintfE("Patch origin %d,%d exceeds LFB\n", x,y );
       I_Error ("Bad V_DrawPatch in V_DrawPatchFlipped");
     }
 #endif 
  
     if (!scrn)
-	V_MarkRect (x, y, patch->width, patch->height); 
+	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
 
     col = 0; 
-    desttop = screens[scrn]+y*SCREENWIDTH+x; 
-	 
-    w = patch->width; 
+	int destx = x;
+	int desty = y;
 
-    for ( ; col<w ; x++, col++, desttop++) 
+    w = SHORT(patch->width); 
+
+    for ( ; col<w ; x++, col++ ) 
     { 
-	column = (column_t *)((unsigned char *)patch + patch->columnofs[w-1-col]); 
- 
-	// step through the posts in a column 
-	while (column->topdelta != 0xff ) 
-	{ 
-	    source = (unsigned char *)column + 3; 
-	    dest = desttop + column->topdelta*SCREENWIDTH; 
-	    count = column->length; 
-			 
-	    while (count--) 
-	    { 
-		*dest = *source++; 
-		dest += SCREENWIDTH; 
-	    } 
-	    column = (column_t *)(  (unsigned char *)column + column->length 
-				    + 4 ); 
-	} 
+		column = (postColumn_t *)((byte *)patch + LONG(patch->columnofs[w-1-col])); 
+
+		destx = x;
+	 
+		// step through the posts in a column 
+		while (column->topdelta != 0xff ) 
+		{ 
+			source = (byte *)column + 3; 
+			desty = y + column->topdelta;
+			count = column->length; 
+				 
+			while (count--) 
+			{
+				int scaledx, scaledy;
+				scaledx = destx * GLOBAL_IMAGE_SCALER;
+				scaledy = desty * GLOBAL_IMAGE_SCALER;
+				byte src = *source++;
+
+				for ( int i = 0; i < GLOBAL_IMAGE_SCALER; i++ ) {
+					for ( int j = 0; j < GLOBAL_IMAGE_SCALER; j++ ) {
+						::g->screens[scrn][( scaledx + j ) + ( scaledy + i ) * SCREENWIDTH] = src;
+					}
+				}
+
+				desty++;
+			} 
+			column = (postColumn_t *)(  (byte *)column + column->length + 4 );
+		} 
     }			 
 } 
  
@@ -314,10 +370,10 @@ V_DrawPatchDirect
     /*
     int		count;
     int		col; 
-    column_t*	column; 
-    unsigned char*	desttop;
-    unsigned char*	dest;
-    unsigned char*	source; 
+    postColumn_t*	column; 
+    byte*	desttop;
+    byte*	dest;
+    byte*	source; 
     int		w; 
 	 
     y -= SHORT(patch->topoffset); 
@@ -325,9 +381,9 @@ V_DrawPatchDirect
 
 #ifdef RANGECHECK 
     if (x<0
-	||x+SHORT(patch->width) >SCREENWIDTH
+	||x+SHORT(patch->width) >ORIGINAL_WIDTH
 	|| y<0
-	|| y+SHORT(patch->height)>SCREENHEIGHT 
+	|| y+SHORT(patch->height)>ORIGINAL_HEIGHT
 	|| (unsigned)scrn>4)
     {
 	I_Error ("Bad V_DrawPatchDirect");
@@ -335,32 +391,32 @@ V_DrawPatchDirect
 #endif 
  
     //	V_MarkRect (x, y, SHORT(patch->width), SHORT(patch->height)); 
-    desttop = destscreen + y*SCREENWIDTH/4 + (x>>2); 
+    desttop = destscreen + y*ORIGINAL_WIDTH/4 + (x>>2); 
 	 
     w = SHORT(patch->width); 
     for ( col = 0 ; col<w ; col++) 
     { 
 	outp (SC_INDEX+1,1<<(x&3)); 
-	column = (column_t *)((unsigned char *)patch + LONG(patch->columnofs[col])); 
+	column = (postColumn_t *)((byte *)patch + LONG(patch->columnofs[col])); 
  
 	// step through the posts in a column 
 	 
 	while (column->topdelta != 0xff ) 
 	{ 
-	    source = (unsigned char *)column + 3; 
-	    dest = desttop + column->topdelta*SCREENWIDTH/4; 
+	    source = (byte *)column + 3; 
+	    dest = desttop + column->topdelta*ORIGINAL_WIDTH/4; 
 	    count = column->length; 
  
 	    while (count--) 
 	    { 
 		*dest = *source++; 
-		dest += SCREENWIDTH/4; 
+		dest += ORIGINAL_WIDTH/4; 
 	    } 
-	    column = (column_t *)(  (unsigned char *)column + column->length 
+	    column = (postColumn_t *)(  (byte *)column + column->length 
 				    + 4 ); 
 	} 
 	if ( ((++x)&3) == 0 ) 
-	    desttop++;	// go to next unsigned char, not next plane 
+	    desttop++;	// go to next byte, not next plane 
     }*/ 
 } 
  
@@ -377,15 +433,15 @@ V_DrawBlock
   int		scrn,
   int		width,
   int		height,
-  unsigned char*		src ) 
+  byte*		src ) 
 { 
-    unsigned char*	dest; 
+    byte*	dest; 
 	 
 #ifdef RANGECHECK 
     if (x<0
 	||x+width >SCREENWIDTH
 	|| y<0
-	|| y+height>SCREENHEIGHT 
+	|| y+height>SCREENHEIGHT
 	|| (unsigned)scrn>4 )
     {
 	I_Error ("Bad V_DrawBlock");
@@ -394,11 +450,11 @@ V_DrawBlock
  
     V_MarkRect (x, y, width, height); 
  
-    dest = screens[scrn] + y*SCREENWIDTH+x; 
+    dest = ::g->screens[scrn] + y*SCREENWIDTH+x; 
 
     while (height--) 
     { 
-	memcpy (dest, src, width); 
+	memcpy(dest, src, width); 
 	src += width; 
 	dest += SCREENWIDTH; 
     } 
@@ -417,26 +473,26 @@ V_GetBlock
   int		scrn,
   int		width,
   int		height,
-  unsigned char*		dest ) 
+  byte*		dest ) 
 { 
-    unsigned char*	src; 
+    byte*	src; 
 	 
 #ifdef RANGECHECK 
     if (x<0
 	||x+width >SCREENWIDTH
 	|| y<0
-	|| y+height>SCREENHEIGHT 
+	|| y+height>SCREENHEIGHT
 	|| (unsigned)scrn>4 )
     {
 	I_Error ("Bad V_DrawBlock");
     }
 #endif 
  
-    src = screens[scrn] + y*SCREENWIDTH+x; 
+    src = ::g->screens[scrn] + y*SCREENWIDTH+x; 
 
     while (height--) 
     { 
-	memcpy (dest, src, width); 
+	memcpy(dest, src, width); 
 	src += SCREENWIDTH; 
 	dest += width; 
     } 
@@ -451,12 +507,13 @@ V_GetBlock
 void V_Init (void) 
 { 
     int		i;
-    unsigned char*	base;
-		
+    byte*	base;
+
     // stick these in low dos memory on PCs
 
-    base = I_AllocLow (SCREENWIDTH*SCREENHEIGHT*4);
+    base = (byte*)DoomLib::Z_Malloc(SCREENWIDTH*SCREENHEIGHT*4, PU_STATIC, 0);
 
     for (i=0 ; i<4 ; i++)
-	screens[i] = base + i*SCREENWIDTH*SCREENHEIGHT;
+		::g->screens[i] = base + i*SCREENWIDTH*SCREENHEIGHT;
 }
+

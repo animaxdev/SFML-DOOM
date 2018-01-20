@@ -1,10 +1,40 @@
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#include "Precompiled.hpp"
+#include "globaldata.hpp"
 
 
 //
 // M_Random
 // Returns a 0-255 number
 //
-unsigned char rndtable[256] = {
+const unsigned char rndtable[256] = {
     0,   8, 109, 220, 222, 241, 149, 107,  75, 248, 254, 140,  16,  66 ,
     74,  21, 211,  47,  80, 242, 154,  27, 205, 128, 161,  89,  77,  36 ,
     95, 110,  85,  48, 212, 140, 211, 249,  22,  79, 200,  50,  28, 188 ,
@@ -26,26 +56,25 @@ unsigned char rndtable[256] = {
     120, 163, 236, 249
 };
 
-int	rndindex = 0;
-int	prndindex = 0;
 
 // Which one is deterministic?
 int P_Random (void)
 {
-    prndindex = (prndindex+1)&0xff;
-    return rndtable[prndindex];
+    ::g->prndindex = (::g->prndindex+1)&0xff;
+    return rndtable[::g->prndindex];
 }
 
 int M_Random (void)
 {
-    rndindex = (rndindex+1)&0xff;
-    return rndtable[rndindex];
+    ::g->rndindex = (::g->rndindex+1)&0xff;
+    return rndtable[::g->rndindex];
 }
 
 void M_ClearRandom (void)
 {
-    rndindex = prndindex = 0;
+    ::g->rndindex = ::g->prndindex = 0;
 }
+
 
 
 

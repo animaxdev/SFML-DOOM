@@ -1,10 +1,40 @@
-#pragma once
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#ifndef __TABLES__
+#define __TABLES__
+
 
 
 #ifdef LINUX
 #include <math.h>
 #else
-#define PI				3.141592657
+const float PI = 				3.141592657f;
 #endif
 
 
@@ -18,20 +48,20 @@
 #define ANGLETOFINESHIFT	19		
 
 // Effective size is 10240.
-extern  int		finesine[5*FINEANGLES/4];
+const extern  fixed_t		finesine[5*FINEANGLES/4];
 
 // Re-use data, is just PI/2 pahse shift.
-extern  int*	finecosine;
+const extern  fixed_t*	finecosine;
 
 
 // Effective size is 4096.
-extern int		finetangent[FINEANGLES/2];
+const extern fixed_t		finetangent[FINEANGLES/2];
 
 // Binary Angle Measument, BAM.
-#define ANG45			0x20000000
-#define ANG90			0x40000000
-#define ANG180		0x80000000
-#define ANG270		0xc0000000
+#define ANG45			0x20000000u
+#define ANG90			0x40000000u
+#define ANG180		0x80000000u
+#define ANG270		0xc0000000u
 
 
 #define SLOPERANGE		2048
@@ -44,7 +74,7 @@ typedef unsigned angle_t;
 // Effective size is 2049;
 // The +1 size is to handle the case when x==y
 //  without additional checking.
-extern angle_t		tantoangle[SLOPERANGE+1];
+const extern angle_t		tantoangle[SLOPERANGE+1];
 
 
 // Utility function,
@@ -54,50 +84,6 @@ SlopeDiv
 ( unsigned	num,
   unsigned	den);
 
-/*
 
-TiMidity -- Experimental MIDI to WAVE converter
-Copyright (C) 1995 Tuukka Toivonen <toivonen@clinet.fi>
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-tables.h
-*/
-
-#ifdef LOOKUP_SINE
-extern float sine(int x);
-#else
-#include <math.h>
-#define sine(x) (sin((2*PI/1024.0) * (x)))
 #endif
 
-#include <stdint.h>
-
-#define SINE_CYCLE_LENGTH 1024
-extern  int32_t  freq_table[];
-extern double vol_table[];
-extern double bend_fine[];
-extern double bend_coarse[];
-extern uint8_t *_l2u; /* 13-bit PCM to 8-bit u-law */
-extern uint8_t _l2u_[]; /* used in LOOKUP_HACK */
-#ifdef LOOKUP_HACK
-extern int16_t _u2l[];
-extern  int32_t  *mixup;
-#ifdef LOOKUP_INTERPOLATION
-extern int8_t *iplookup;
-#endif
-#endif
-
-extern void init_tables(void);

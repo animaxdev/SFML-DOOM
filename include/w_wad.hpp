@@ -1,180 +1,93 @@
-#pragma once
+/*
+===========================================================================
 
-#include <vector>
-#include <fstream>
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct filelump_t
-///
-/// \brief A filelump t.
-///
-/// \author Jonny
-/// \date 26/02/2017
-////////////////////////////////////////////////////////////////////////////////////////////////////
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#ifndef __W_WAD__
+#define __W_WAD__
+
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+
+//
+// TYPES
+//
+typedef struct
+{
+    // Should be "IWAD" or "PWAD".
+    char		identification[4];		
+    int			numlumps;
+    int			infotableofs;
+    
+} wadinfo_t;
+
 
 typedef struct
 {
     int			filepos;
     int			size;
     char		name[8];
-
+    
 } filelump_t;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \struct lumpinfo_t
-///
-/// \brief A lumpinfo t.
-///
-/// \author Jonny
-/// \date 26/02/2017
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
+//
+// WADFILE I/O related stuff.
+//
 typedef struct
 {
-    std::string	name = std::string(8, '0');
-    std::vector<char> data;
+    char	name[8];
+    //idFile *	handle;
+    int		position;
     int		size;
 } lumpinfo_t;
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/// \class  WadManager
-///
-/// \brief  Manages the WAD files loaded in the game.
-///
-/// \author Jonny
-/// \date   26/02/2017
-////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class WadManager
-{
-public:
+extern	void**		lumpcache;
+extern	lumpinfo_t*	lumpinfo;
+extern	int		numlumps;
 
-    int W_NumLumps();
+void    W_InitMultipleFiles (const char** filenames);
+void    W_Reload (void);
+void	W_FreeLumps();
+void	W_FreeWadFiles();
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void WadManager::addFile(const std::string& fileName);
-    ///
-    /// \brief  Adds a file.
-    ///         
-    ///          All files are optional, but at least one file must be
-    ///         found (PWAD, if all required lumps are present). Files with a .wad extension are
-    ///         wadlink files with multiple lumps. Other files are single lumps with the base
-    ///         filename for the lump name.
-    ///
-    /// \author Jonny
-    /// \date   26/02/2017
-    ///
-    /// \param  fileName    Filename of the file.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+int	W_CheckNumForName (const char* name);
+int	W_GetNumForName (const char* name);
 
-    static void         addFile(const std::string& fileName);
+int	W_LumpLength (int lump);
+void    W_ReadLump (int lump, void *dest);
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void WadManager::initMultipleFiles(std::vector<std::string> filenames);
-    ///
-    /// \brief  Init multiple files.
-    ///
-    /// \author Jonny
-    /// \date   26/02/2017
-    ///
-    /// \param  filenames   The filenames.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
+void*	W_CacheLumpNum (int lump, int tag);
+void*	W_CacheLumpName (const char* name, int tag);
 
-    static void         initMultipleFiles(std::vector<std::string> filenames);
+void	W_Shutdown( void );
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static int WadManager::checkNumForName(const std::string& name);
-    ///
-    /// \brief  Check number for name.
-    ///
-    /// \author Jonny
-    /// \date   26/02/2017
-    ///
-    /// \param  name    The name.
-    ///
-    /// \return An int.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    static int	        checkNumForName(const std::string& name);
+#endif
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static int WadManager::getNumForName(const std::string& name);
-    ///
-    /// \brief  Gets number for name.
-    ///
-    /// \author Jonny
-    /// \date   26/02/2017
-    ///
-    /// \param  name    The name.
-    ///
-    /// \return The number for name.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static int	        getNumForName(const std::string& name);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static std::string WadManager::getNameForNum(int);
-    ///
-    /// \brief  Gets name for number.
-    ///
-    /// \author Jonny
-    /// \date   26/02/2017
-    ///
-    /// \param  parameter1  The first parameter.
-    ///
-    /// \return The name for number.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static std::string  getNameForNum(int);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static int WadManager::getLumpLength(int lump);
-    ///
-    /// \brief  Gets lump length.
-    ///
-    /// \author Jonny
-    /// \date   26/02/2017
-    ///
-    /// \param  lump    The lump.
-    ///
-    /// \return The lump length.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static int	        getLumpLength(int lump);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void* WadManager::getLump(int lump);
-    ///
-    /// \brief  Gets a lump.
-    ///
-    /// \author Jonny
-    /// \date   26/02/2017
-    ///
-    /// \param  lump    The lump.
-    ///
-    /// \return Null if it fails, else the lump.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static void*        getLump(std::size_t lump);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-    /// \fn static void* WadManager::getLump(const std::string& name);
-    ///
-    /// \brief  Gets a lump.
-    ///
-    /// \author Jonny
-    /// \date   26/02/2017
-    ///
-    /// \param  name    The name.
-    ///
-    /// \return Null if it fails, else the lump.
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    static void*        getLump(const std::string& name);
-
-private: 
-    /// \brief  Number of lumps.
-    static int                      numlumps;
-    /// \brief  The lumps.
-    static std::vector<lumpinfo_t>	lumpinfo;
-};

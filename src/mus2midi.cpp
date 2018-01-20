@@ -26,54 +26,19 @@ If you have questions concerning this license or the applicable additional terms
 ===========================================================================
 */
 
-#include <cassert>
+#include "Precompiled.hpp"
+#include "globaldata.hpp"
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <memory>
-#include <cstring>
+//#include "idlib/sys/sys_defines.hpp"
+// mus header
 
-#include "doomstat.hpp"
-#include "i_sound.hpp"
-#include "r_main.hpp"
-
-//  mus2midi.defs begin // 
-#define MUSEVENT_KEYOFF	0
-#define MUSEVENT_KEYON	1
-#define MUSEVENT_PITCHWHEEL	2
-#define MUSEVENT_CHANNELMODE	3
-#define MUSEVENT_CONTROLLERCHANGE	4
-#define MUSEVENT_END	6
-#define MIDI_MAXCHANNELS	16
-#define MIDIHEADERSIZE 14
-
-//  mus2midi.structs begin // 
-typedef struct tagMUSheader_t {
-    char    ID[4];          // identifier "MUS" 0x1A
-    unsigned short    scoreLen;
-    unsigned short    scoreStart;
-    unsigned short    channels;	// count of primary channels
-    unsigned short    sec_channels;	// count of secondary channels
-    unsigned short    instrCnt;
-    unsigned short    dummy;
-    //// variable-length part starts here
-} MUSheader_t;
-typedef struct tagMidiHeaderChunk_t {
-    char name[4];
-    int  length;
-
-    short format;			// make 0
-    short ntracks;			// make 1
-    short division;			// 0xe250??
-} MidiHeaderChunk_t;
-typedef struct tagMidiTrackChunk_t {
-    char name[4];
-    int	length;
-} MidiTrackChunk_t;
 
 // reads a variable length integer
 unsigned long ReadVarLen( char* buffer ) {
 	unsigned long value;
-	char c;
+	byte c;
 
 	if ((value = *buffer++) & 0x80) {
 		value &= 0x7f;
@@ -85,7 +50,7 @@ unsigned long ReadVarLen( char* buffer ) {
 }
 
 // Writes a variable length integer to a buffer, and returns bytes written
-int WriteVarLen( long value, char* out ) 
+int WriteVarLen( long value, byte* out ) 
 {
 	long buffer, count = 0;
 
@@ -98,7 +63,7 @@ int WriteVarLen( long value, char* out )
 
 	while (1) {
 		++count;
-		*out = (char)buffer;
+		*out = (byte)buffer;
 		++out;
 		if (buffer & 0x80)
 			buffer >>= 8;
@@ -109,20 +74,12 @@ int WriteVarLen( long value, char* out )
 }
 
 // writes a byte, and returns the buffer
-unsigned char* WriteByte(void* buf, char b)
+unsigned char* WriteByte(void* buf, byte b)
 {
 	unsigned char* buffer = (unsigned char*)buf;
 	*buffer++ = b;
 	return buffer;
 }
-
-unsigned char* WriteString(void* buf, const std::string& str)
-{
-	unsigned char* buffer = (unsigned char*)buf;
-	for (auto c : str)
-		*buffer++ = c;
-	return buffer;
-}	
 
 unsigned char* WriteShort(void* b, unsigned short s)
 {
@@ -145,7 +102,7 @@ unsigned char* WriteInt(void* b, unsigned int i)
 // Format - 0(1 track only), 1(1 or more tracks, each play same time), 2(1 or more, each play seperatly)
 void Midi_CreateHeader(MidiHeaderChunk_t* header, short format, short track_count,  short division)
 {
-	WriteString(header->name, "MThd");
+	WriteInt(header->name, 'MThd');
 	WriteInt(&header->length, 6);
 	WriteShort(&header->format, format);
 	WriteShort(&header->ntracks, track_count);
@@ -202,7 +159,7 @@ namespace {
 	}
 }
 
-int I_Sound::Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
+int Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 {
 	// mus header and instruments
 	MUSheader_t header;
@@ -215,7 +172,7 @@ int I_Sound::Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 	// Midi track header, only 1 needed(format 0)
 	MidiTrackChunk_t midiTrackHeader;
 	// Stores the position of the midi track header(to change the size)
-	unsigned char* midiTrackHeaderOut;
+	byte* midiTrackHeaderOut;
 	
 	// Delta time for midi event
 	int delta_time = 0;
@@ -223,9 +180,10 @@ int I_Sound::Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 	int channel_volume[MIDI_MAXCHANNELS] = {0};
 	int bytes_written = 0;
 	int channelMap[MIDI_MAXCHANNELS], currentChannel = 0;
+	byte last_status = 0;
 
 	// read the mus header
-	std::memcpy(&header, cur, sizeof(header));
+	memcpy(&header, cur, sizeof(header));
 	cur += sizeof(header);
 
 	header.scoreLen = LittleToNative( header.scoreLen );
@@ -275,18 +233,18 @@ int I_Sound::Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 	
 	// Main Loop
 	while (cur < end) {
-		uint8_t channel; 
-		char event;
-		unsigned char temp_buffer[32];	// temp buffer for current iterator
-		unsigned char *out_local = temp_buffer;
-		char status, bit1, bit2, bitc = 2;
+		byte channel; 
+		byte event;
+		byte temp_buffer[32];	// temp buffer for current iterator
+		byte *out_local = temp_buffer;
+		byte status, bit1, bit2, bitc = 2;
 		
 		// Read in current bit
 		event		= *cur++;
 		channel		= (event & 15);		// current channel
 		
 		// Write variable length delta time
-		out_local += WriteVarLen(delta_time, (char*)out_local);
+		out_local += WriteVarLen(delta_time, out_local);
 		
 		if (channelMap[channel] < 0) {
 			// Set all channels to 127 volume
@@ -384,7 +342,7 @@ int I_Sound::Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 	}
 
 	// Write out track header
-	WriteString(midiTrackHeader.name, "MTrk");
+	WriteInt(midiTrackHeader.name, 'MTrk');
 	WriteInt(&midiTrackHeader.length, out - midiTrackHeaderOut - sizeof(midiTrackHeader));
 	memcpy(midiTrackHeaderOut, &midiTrackHeader, sizeof(midiTrackHeader));
 	
@@ -397,3 +355,4 @@ int I_Sound::Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 	}*/
 	return 1;
 }
+

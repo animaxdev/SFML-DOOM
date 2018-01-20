@@ -1,11 +1,51 @@
-#pragma once
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#ifndef __DOOMDEF__
+#define __DOOMDEF__
 
 #include <stdio.h>
 #include <string.h>
 
+#include <SFML/Window.hpp>
+
+//#include "../../neo/sys/sys_public.hpp"
+
+//
+// Global parameters/defines.
+//
+// DOOM version
+enum { VERSION =  111 };
+
+
 // Game mode handling - identify IWAD version
 //  to handle IWAD dependend animations etc.
-enum class GameMode_t
+typedef enum
 {
   shareware,	// DOOM 1 shareware, E1, M9
   registered,	// DOOM 1 registered, E3, M27
@@ -14,29 +54,62 @@ enum class GameMode_t
   retail,	// DOOM 1 retail, E4, M36
   indetermined	// Well, no IWAD found.
   
-};
+} GameMode_t;
 
 
 // Mission packs - might be useful for TC stuff?
-enum class GameMission_t
+typedef enum
 {
-    doom,		// DOOM 1
-    doom2,	// DOOM 2
-    pack_tnt,	// TNT mission pack
-    pack_plut,	// Plutonia pack
-    none
+  doom,			// DOOM 1
+  doom2,		// DOOM 2
+  pack_tnt,		// TNT mission pack
+  pack_plut,	// Plutonia pack
+  pack_master,	// Master levels
+  pack_nerve,	// Nerve levels
+ 
+  none
 
-};
+} GameMission_t;
+
+
+// Identify language to use, software localization.
+typedef enum
+{
+  english,
+  german,
+  unknown
+
+} Language_t;
+
 
 // If rangecheck is undefined,
 // most parameter validation debugging code will not be compiled
+#ifdef _DEBUG
 #define RANGECHECK
+#endif
+
+// Do or do not use external soundserver.
+// The sndserver binary to be run separately
+//  has been introduced by Dave Taylor.
+// The integrated sound support is experimental,
+//  and unfinished. Default is synchronous.
+// Experimental asynchronous timer based is
+//  handled by SNDINTR. 
+#define SNDSERV  1
+//#define SNDINTR  1
+
+
+// This one switches between MIT SHM (no proper mouse)
+// and XFree86 DGA (mickey sampling). The original
+// linuxdoom used SHM, which is default.
+//#define X11_DGA		1
+
 
 //
 // For resize of screen, at start of game.
 // It will not work dynamically, see visplanes.
 //
-#define	BASE_WIDTH		320
+//#define	BASE_WIDTH		320
 
 // It is educational but futile to change this
 //  scaling e.g. to 2. Drawing of status bar,
@@ -48,9 +121,9 @@ enum class GameMission_t
 // Defines suck. C sucks.
 // C++ might sucks for OOP, but it sure is a better C.
 // So there.
-#define SCREENWIDTH  320
+//#define SCREENWIDTH  320//320
 //SCREEN_MUL*BASE_WIDTH //320
-#define SCREENHEIGHT 200
+//#define SCREENHEIGHT 200//200
 //(int)(SCREEN_MUL*BASE_WIDTH*INV_ASPECT_RATIO) //200
 
 
@@ -179,3 +252,99 @@ typedef enum
     IRONTICS	= (60*TICRATE)
     
 } powerduration_t;
+
+
+
+
+//
+// DOOM keyboard definition.
+// This is the stuff configured by Setup.Exe.
+// Most key data are simple ascii (uppercased).
+//
+#define KEY_RIGHTARROW	sf::Keyboard::Right
+#define KEY_LEFTARROW	sf::Keyboard::Left
+#define KEY_UPARROW		sf::Keyboard::Up
+#define KEY_DOWNARROW	sf::Keyboard::Down
+#define KEY_ESCAPE		sf::Keyboard::Escape
+#define KEY_ENTER		sf::Keyboard::Return
+#define KEY_TAB			sf::Keyboard::Tab
+#define KEY_F1		sf::Keyboard::F1
+#define KEY_F2		sf::Keyboard::F2
+#define KEY_F3		sf::Keyboard::F3
+#define KEY_F4		sf::Keyboard::F4
+#define KEY_F5		sf::Keyboard::F5
+#define KEY_F6		sf::Keyboard::F6
+#define KEY_F7		sf::Keyboard::F7
+#define KEY_F8		sf::Keyboard::F8
+#define KEY_F9		sf::Keyboard::F9
+#define KEY_F10		sf::Keyboard::F10
+#define KEY_F11		sf::Keyboard::F11
+#define KEY_F12		sf::Keyboard::F12
+
+#define KEY_BACKSPACE	sf::Keyboard::BackSpace
+#define KEY_PAUSE	sf::Keyboard::Pause
+
+#define KEY_EQUALS	sf::Keyboard::Equal
+#define KEY_MINUS	sf::Keyboard::Subtract
+
+#define KEY_RSHIFT	sf::Keyboard::RShift
+#define KEY_RCTRL	sf::Keyboard::RControl
+#define KEY_RALT	sf::Keyboard::RAlt
+#define KEY_LALT	sf::Keyboard::LAlt
+
+// DOOM basic types (qboolean),
+//  and max/min values.
+//#include "doomtype.hpp"
+
+// Fixed point.
+//#include "m_fixed.hpp"
+
+// Endianess handling.
+//#include "m_swap.hpp"
+
+
+// Binary Angles, sine/cosine/atan lookups.
+//#include "tables.hpp"
+
+// Event type.
+//#include "d_event.hpp"
+
+// Game function, skills.
+//#include "g_game.hpp"
+
+// All external data is defined here.
+//#include "doomdata.hpp"
+
+// All important printed strings.
+// Language selection (message strings).
+//#include "dstrings.hpp"
+
+// Player is a special actor.
+//struct player_s;
+
+
+//#include "d_items.hpp"
+//#include "d_player.hpp"
+//#include "p_mobj.hpp"
+//#include "d_net.hpp"
+
+// PLAY
+//#include "p_tick.hpp"
+
+
+
+
+// Header, generated by sound utility.
+// The utility was written by Dave Taylor.
+//#include "sounds.hpp"
+
+// Need to define MAX_PATH if not already done
+#ifndef MAX_PATH
+#define MAX_PATH 1024
+#endif
+
+
+
+
+#endif          // __DOOMDEF__
+

@@ -1,3 +1,36 @@
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#include "Precompiled.hpp"
+#include "globaldata.hpp"
+
+
+#include "z_zone.hpp"
 #include "m_random.hpp"
 
 #include "doomdef.hpp"
@@ -44,7 +77,7 @@ void P_SpawnFireFlicker (sector_t*	sector)
     // Nothing special about it during gameplay.
     sector->special = 0; 
 	
-    flick = (fireflicker_t*)malloc ( sizeof(*flick));
+    flick = (fireflicker_t*)DoomLib::Z_Malloc( sizeof(*flick), PU_LEVEL, 0);
 
     P_AddThinker (&flick->thinker);
 
@@ -99,7 +132,7 @@ void P_SpawnLightFlash (sector_t*	sector)
     // nothing special about it during gameplay
     sector->special = 0;	
 	
-    flash = (lightflash_t*)malloc ( sizeof(*flash));
+    flash = (lightflash_t*)DoomLib::Z_Malloc( sizeof(*flash), PU_LEVEL, 0);
 
     P_AddThinker (&flash->thinker);
 
@@ -156,7 +189,7 @@ P_SpawnStrobeFlash
 {
     strobe_t*	flash;
 	
-    flash = (strobe_t*)malloc ( sizeof(*flash));
+    flash = (strobe_t*)DoomLib::Z_Malloc( sizeof(*flash), PU_LEVEL, 0);
 
     P_AddThinker (&flash->thinker);
 
@@ -191,7 +224,7 @@ void EV_StartLightStrobing(line_t*	line)
     secnum = -1;
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
-	sec = &sectors[secnum];
+	sec = &::g->sectors[secnum];
 	if (sec->specialdata)
 	    continue;
 	
@@ -213,9 +246,9 @@ void EV_TurnTagLightsOff(line_t* line)
     sector_t*		tsec;
     line_t*		templine;
 	
-    sector = sectors;
+    sector = ::g->sectors;
     
-    for (j = 0;j < numsectors; j++, sector++)
+    for (j = 0;j < ::g->numsectors; j++, sector++)
     {
 	if (sector->tag == line->tag)
 	{
@@ -249,9 +282,9 @@ EV_LightTurnOn
     sector_t*	temp;
     line_t*	templine;
 	
-    sector = sectors;
+    sector = ::g->sectors;
 	
-    for (i=0;i<numsectors;i++, sector++)
+    for (i = 0; i < ::g->numsectors; i++, sector++)
     {
 	if (sector->tag == line->tag)
 	{
@@ -313,7 +346,7 @@ void P_SpawnGlowingLight(sector_t*	sector)
 {
     glow_t*	g;
 	
-    g = (glow_t*)malloc( sizeof(*g));
+    g = (glow_t*)DoomLib::Z_Malloc( sizeof(*g), PU_LEVEL, 0);
 
     P_AddThinker(&g->thinker);
 
@@ -325,4 +358,5 @@ void P_SpawnGlowingLight(sector_t*	sector)
 
     sector->special = 0;
 }
+
 

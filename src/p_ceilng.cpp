@@ -1,7 +1,40 @@
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#include "Precompiled.hpp"
+#include "globaldata.hpp"
+
+
+#include "z_zone.hpp"
 #include "doomdef.hpp"
 #include "p_local.hpp"
 
-#include "i_sound.hpp"
+#include "s_sound.hpp"
 
 // State.
 #include "doomstat.hpp"
@@ -15,7 +48,6 @@
 //
 
 
-ceiling_t*	activeceilings[MAXCEILINGS];
 
 
 //
@@ -28,24 +60,24 @@ void T_MoveCeiling (ceiling_t* ceiling)
 	
     switch(ceiling->direction)
     {
-	case Direction::WAITING:
+      case 0:
 	// IN STASIS
 	break;
-	case Direction::UP:
+      case 1:
 	// UP
 	res = T_MovePlane(ceiling->sector,
 			  ceiling->speed,
 			  ceiling->topheight,
 			  false,1,ceiling->direction);
 	
-	if (!(leveltime&7))
+	if (!(::g->leveltime&7))
 	{
 	    switch(ceiling->type)
 	    {
 	      case silentCrushAndRaise:
 		break;
 	      default:
-		I_Sound::startSound((mobj_t *)&ceiling->sector->soundorg,
+		S_StartSound( &ceiling->sector->soundorg,
 			     sfx_stnmov);
 		// ?
 		break;
@@ -61,11 +93,11 @@ void T_MoveCeiling (ceiling_t* ceiling)
 		break;
 		
 	      case silentCrushAndRaise:
-              I_Sound::startSound((mobj_t *)&ceiling->sector->soundorg,
+		S_StartSound( &ceiling->sector->soundorg,
 			     sfx_pstop);
 	      case fastCrushAndRaise:
 	      case crushAndRaise:
-		ceiling->direction = Direction::DOWN;
+		ceiling->direction = -1;
 		break;
 		
 	      default:
@@ -75,20 +107,20 @@ void T_MoveCeiling (ceiling_t* ceiling)
 	}
 	break;
 	
-	case Direction::DOWN:
+      case -1:
 	// DOWN
 	res = T_MovePlane(ceiling->sector,
 			  ceiling->speed,
 			  ceiling->bottomheight,
 			  ceiling->crush,1,ceiling->direction);
 	
-	if (!(leveltime&7))
+	if (!(::g->leveltime&7))
 	{
 	    switch(ceiling->type)
 	    {
 	      case silentCrushAndRaise: break;
 	      default:
-              I_Sound::startSound((mobj_t *)&ceiling->sector->soundorg,
+		S_StartSound( &ceiling->sector->soundorg,
 			     sfx_stnmov);
 	    }
 	}
@@ -98,12 +130,12 @@ void T_MoveCeiling (ceiling_t* ceiling)
 	    switch(ceiling->type)
 	    {
 	      case silentCrushAndRaise:
-              I_Sound::startSound((mobj_t *)&ceiling->sector->soundorg,
+		S_StartSound( &ceiling->sector->soundorg,
 			     sfx_pstop);
 	      case crushAndRaise:
 		ceiling->speed = CEILSPEED;
 	      case fastCrushAndRaise:
-		ceiling->direction = Direction::UP;
+		ceiling->direction = 1;
 		break;
 
 	      case lowerAndCrush:
@@ -133,9 +165,6 @@ void T_MoveCeiling (ceiling_t* ceiling)
 	    }
 	}
 	break;
-
-	default:
-		break;
     }
 }
 
@@ -170,13 +199,13 @@ EV_DoCeiling
 	
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
-	sec = &sectors[secnum];
+	sec = &::g->sectors[secnum];
 	if (sec->specialdata)
 	    continue;
 	
 	// new door thinker
 	rtn = 1;
-	ceiling = (ceiling_t*)malloc (sizeof(*ceiling));
+	ceiling = (ceiling_t*)DoomLib::Z_Malloc(sizeof(*ceiling), PU_LEVEL, 0);
 	P_AddThinker (&ceiling->thinker);
 	sec->specialdata = ceiling;
 	ceiling->thinker.function.acp1 = (actionf_p1)T_MoveCeiling;
@@ -189,7 +218,7 @@ EV_DoCeiling
 	    ceiling->crush = true;
 	    ceiling->topheight = sec->ceilingheight;
 	    ceiling->bottomheight = sec->floorheight + (8*FRACUNIT);
-	    ceiling->direction = Direction::DOWN;
+	    ceiling->direction = -1;
 	    ceiling->speed = CEILSPEED * 2;
 	    break;
 
@@ -202,13 +231,13 @@ EV_DoCeiling
 	    ceiling->bottomheight = sec->floorheight;
 	    if (type != lowerToFloor)
 		ceiling->bottomheight += 8*FRACUNIT;
-	    ceiling->direction = Direction::DOWN;
+	    ceiling->direction = -1;
 	    ceiling->speed = CEILSPEED;
 	    break;
 
 	  case raiseToHighest:
 	    ceiling->topheight = P_FindHighestCeilingSurrounding(sec);
-	    ceiling->direction = Direction::UP;
+	    ceiling->direction = 1;
 	    ceiling->speed = CEILSPEED;
 	    break;
 	}
@@ -230,9 +259,9 @@ void P_AddActiveCeiling(ceiling_t* c)
     
     for (i = 0; i < MAXCEILINGS;i++)
     {
-	if (activeceilings[i] == NULL)
+	if (::g->activeceilings[i] == NULL)
 	{
-	    activeceilings[i] = c;
+	    ::g->activeceilings[i] = c;
 	    return;
 	}
     }
@@ -249,11 +278,11 @@ void P_RemoveActiveCeiling(ceiling_t* c)
 	
     for (i = 0;i < MAXCEILINGS;i++)
     {
-	if (activeceilings[i] == c)
+	if (::g->activeceilings[i] == c)
 	{
-	    activeceilings[i]->sector->specialdata = NULL;
-	    P_RemoveThinker (&activeceilings[i]->thinker);
-	    activeceilings[i] = NULL;
+	    ::g->activeceilings[i]->sector->specialdata = NULL;
+	    P_RemoveThinker (&::g->activeceilings[i]->thinker);
+	    ::g->activeceilings[i] = NULL;
 	    break;
 	}
     }
@@ -270,12 +299,12 @@ void P_ActivateInStasisCeiling(line_t* line)
 	
     for (i = 0;i < MAXCEILINGS;i++)
     {
-	if (activeceilings[i]
-	    && (activeceilings[i]->tag == line->tag)
-	    && (activeceilings[i]->direction == Direction::WAITING))
+	if (::g->activeceilings[i]
+	    && (::g->activeceilings[i]->tag == line->tag)
+	    && (::g->activeceilings[i]->direction == 0))
 	{
-	    activeceilings[i]->direction = activeceilings[i]->olddirection;
-	    activeceilings[i]->thinker.function.acp1
+	    ::g->activeceilings[i]->direction = ::g->activeceilings[i]->olddirection;
+	    ::g->activeceilings[i]->thinker.function.acp1
 	      = (actionf_p1)T_MoveCeiling;
 	}
     }
@@ -295,13 +324,13 @@ int	EV_CeilingCrushStop(line_t	*line)
     rtn = 0;
     for (i = 0;i < MAXCEILINGS;i++)
     {
-	if (activeceilings[i]
-	    && (activeceilings[i]->tag == line->tag)
-	    && (activeceilings[i]->direction != Direction::WAITING))
+	if (::g->activeceilings[i]
+	    && (::g->activeceilings[i]->tag == line->tag)
+	    && (::g->activeceilings[i]->direction != 0))
 	{
-	    activeceilings[i]->olddirection = activeceilings[i]->direction;
-	    activeceilings[i]->thinker.function.acv = (actionf_v)NULL;
-	    activeceilings[i]->direction = Direction::WAITING;		// in-stasis
+	    ::g->activeceilings[i]->olddirection = ::g->activeceilings[i]->direction;
+	    ::g->activeceilings[i]->thinker.function.acv = (actionf_v)NULL;
+	    ::g->activeceilings[i]->direction = 0;		// in-stasis
 	    rtn = 1;
 	}
     }
@@ -309,3 +338,4 @@ int	EV_CeilingCrushStop(line_t	*line)
 
     return rtn;
 }
+

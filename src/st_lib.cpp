@@ -1,9 +1,42 @@
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#include "Precompiled.hpp"
+#include "globaldata.hpp"
+
 #include <ctype.h>
 
 #include "doomdef.hpp"
 
+#include "z_zone.hpp"
 #include "v_video.hpp"
 
+#include "m_swap.hpp"
 
 #include "i_system.hpp"
 
@@ -15,7 +48,6 @@
 
 
 // in AM_map.c
-extern bool		automapactive; 
 
 
 
@@ -24,11 +56,10 @@ extern bool		automapactive;
 // Hack display negative frags.
 //  Loads and store the stminus lump.
 //
-patch_t*		sttminus;
 
 void STlib_init(void)
 {
-    sttminus = (patch_t *) WadManager::getLump("STTMINUS");
+    ::g->sttminus = (patch_t *) W_CacheLumpName("STTMINUS", PU_STATIC_SHARED);
 }
 
 
@@ -40,7 +71,7 @@ STlib_initNum
   int			y,
   patch_t**		pl,
   int*			num,
-  bool*		on,
+  qboolean*		on,
   int			width )
 {
     n->x	= x;
@@ -61,16 +92,14 @@ STlib_initNum
 void
 STlib_drawNum
 ( st_number_t*	n,
-  bool	refresh )
+  qboolean	refresh )
 {
-	//JONNY// Could we do something with sf::Font for this?
-	// Might need to create/find a matching font though
 
     int		numdigits = n->width;
     int		num = *n->num;
     
-    int		w = n->p[0]->width;
-    int		h = n->p[0]->height;
+    int		w = SHORT(n->p[0]->width);
+    int		h = SHORT(n->p[0]->height);
     int		x = n->x;
     
     int		neg;
@@ -117,7 +146,7 @@ STlib_drawNum
 
     // draw a minus sign if necessary
     if (neg)
-	V_DrawPatch(x - 8, n->y, FG, sttminus);
+	V_DrawPatch(x - 8, n->y, FG, ::g->sttminus);
 }
 
 
@@ -125,7 +154,7 @@ STlib_drawNum
 void
 STlib_updateNum
 ( st_number_t*		n,
-  bool		refresh )
+  qboolean		refresh )
 {
     if (*n->on) STlib_drawNum(n, refresh);
 }
@@ -139,7 +168,7 @@ STlib_initPercent
   int			y,
   patch_t**		pl,
   int*			num,
-  bool*		on,
+  qboolean*		on,
   patch_t*		percent )
 {
     STlib_initNum(&p->n, x, y, pl, num, on, 3);
@@ -152,7 +181,7 @@ STlib_initPercent
 void
 STlib_updatePercent
 ( st_percent_t*		per,
-  bool			refresh )
+  int			refresh )
 {
     if (refresh && *per->n.on)
 	V_DrawPatch(per->n.x, per->n.y, FG, per->p);
@@ -169,7 +198,7 @@ STlib_initMultIcon
   int			y,
   patch_t**		il,
   int*			inum,
-  bool*		on )
+  qboolean*		on )
 {
     i->x	= x;
     i->y	= y;
@@ -184,26 +213,26 @@ STlib_initMultIcon
 void
 STlib_updateMultIcon
 ( st_multicon_t*	mi,
-  bool		refresh )
+  qboolean		refresh )
 {
     int			w;
     int			h;
     int			x;
     int			y;
 
-    if (mi->on
+    if (*mi->on
 	&& (mi->oldinum != *mi->inum || refresh)
 	&& (*mi->inum!=-1))
     {
 	if (mi->oldinum != -1)
 	{
-	    x = mi->x - mi->p[mi->oldinum]->leftoffset;
-        y = mi->y - mi->p[mi->oldinum]->topoffset;
-	    w = mi->p[mi->oldinum]->width;
-	    h = mi->p[mi->oldinum]->height;
+	    x = mi->x - SHORT(mi->p[mi->oldinum]->leftoffset);
+	    y = mi->y - SHORT(mi->p[mi->oldinum]->topoffset);
+	    w = SHORT(mi->p[mi->oldinum]->width);
+	    h = SHORT(mi->p[mi->oldinum]->height);
 
 	    if (y - ST_Y < 0)
-		I_Error("updateMultIcon: y - ST_Y < 0");
+			I_Error("updateMultIcon: y - ST_Y < 0");
 
 	    V_CopyRect(x, y-ST_Y, BG, w, h, x, y, FG);
 	}
@@ -220,8 +249,8 @@ STlib_initBinIcon
   int			x,
   int			y,
   patch_t*		i,
-  bool*		val,
-  bool*		on )
+  qboolean*		val,
+  qboolean*		on )
 {
     b->x	= x;
     b->y	= y;
@@ -236,7 +265,7 @@ STlib_initBinIcon
 void
 STlib_updateBinIcon
 ( st_binicon_t*		bi,
-  bool		refresh )
+  qboolean		refresh )
 {
     int			x;
     int			y;
@@ -244,12 +273,12 @@ STlib_updateBinIcon
     int			h;
 
     if (*bi->on
-	&& ((bi->oldval==1) != *bi->val || refresh))
+	&& (bi->oldval != *bi->val || refresh))
     {
-	x = bi->x - bi->p->leftoffset;
-	y = bi->y - bi->p->topoffset;
-	w = bi->p->width;
-	h = bi->p->height;
+	x = bi->x - SHORT(bi->p->leftoffset);
+	y = bi->y - SHORT(bi->p->topoffset);
+	w = SHORT(bi->p->width);
+	h = SHORT(bi->p->height);
 
 	if (y - ST_Y < 0)
 	    I_Error("updateBinIcon: y - ST_Y < 0");
@@ -263,4 +292,5 @@ STlib_updateBinIcon
     }
 
 }
+
 

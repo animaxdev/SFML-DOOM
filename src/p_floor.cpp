@@ -1,7 +1,40 @@
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#include "Precompiled.hpp"
+#include "globaldata.hpp"
+
+
+#include "z_zone.hpp"
 #include "doomdef.hpp"
 #include "p_local.hpp"
 
-#include "i_sound.hpp"
+#include "s_sound.hpp"
 
 // State.
 #include "doomstat.hpp"
@@ -20,14 +53,14 @@
 result_e
 T_MovePlane
 ( sector_t*	sector,
-  int	speed,
-  int	dest,
-  bool	crush,
+  fixed_t	speed,
+  fixed_t	dest,
+  qboolean	crush,
   int		floorOrCeiling,
-  Direction		direction )
+  int		direction )
 {
-    bool	flag;
-    int	lastpos;
+    qboolean	flag;
+    fixed_t	lastpos;
 	
     switch(floorOrCeiling)
     {
@@ -35,7 +68,7 @@ T_MovePlane
 	// FLOOR
 	switch(direction)
 	{
-	case Direction::DOWN:
+	  case -1:
 	    // DOWN
 	    if (sector->floorheight - speed < dest)
 	    {
@@ -64,7 +97,7 @@ T_MovePlane
 	    }
 	    break;
 						
-	case Direction::UP:
+	  case 1:
 	    // UP
 	    if (sector->floorheight + speed > dest)
 	    {
@@ -95,9 +128,6 @@ T_MovePlane
 		}
 	    }
 	    break;
-
-		default:
-			break;
 	}
 	break;
 									
@@ -105,7 +135,7 @@ T_MovePlane
 	// CEILING
 	switch(direction)
 	{
-	case Direction::DOWN:
+	  case -1:
 	    // DOWN
 	    if (sector->ceilingheight - speed < dest)
 	    {
@@ -139,7 +169,7 @@ T_MovePlane
 	    }
 	    break;
 						
-	case Direction::UP:
+	  case 1:
 	    // UP
 	    if (sector->ceilingheight + speed > dest)
 	    {
@@ -170,14 +200,9 @@ T_MovePlane
 #endif
 	    }
 	    break;
-
-		default:
-			break;
 	}
 	break;
-	
-	default:
-		break;
+		
     }
     return ok;
 }
@@ -195,15 +220,15 @@ void T_MoveFloor(floormove_t* floor)
 		      floor->floordestheight,
 		      floor->crush,0,floor->direction);
     
-    if (!(leveltime&7))
-	I_Sound::startSound((mobj_t *)&floor->sector->soundorg,
+    if (!(::g->leveltime&7))
+	S_StartSound( &floor->sector->soundorg,
 		     sfx_stnmov);
     
     if (res == pastdest)
     {
 	floor->sector->specialdata = NULL;
 
-	if (floor->direction == Direction::UP)
+	if (floor->direction == 1)
 	{
 	    switch(floor->type)
 	    {
@@ -214,7 +239,7 @@ void T_MoveFloor(floormove_t* floor)
 		break;
 	    }
 	}
-	else if (floor->direction == Direction::DOWN)
+	else if (floor->direction == -1)
 	{
 	    switch(floor->type)
 	    {
@@ -227,7 +252,7 @@ void T_MoveFloor(floormove_t* floor)
 	}
 	P_RemoveThinker(&floor->thinker);
 
-	I_Sound::startSound((mobj_t *)&floor->sector->soundorg,
+	S_StartSound( &floor->sector->soundorg,
 		     sfx_pstop);
     }
 
@@ -251,7 +276,7 @@ EV_DoFloor
     rtn = 0;
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
-	sec = &sectors[secnum];
+	sec = &::g->sectors[secnum];
 		
 	// ALREADY MOVING?  IF SO, KEEP GOING...
 	if (sec->specialdata)
@@ -259,7 +284,7 @@ EV_DoFloor
 	
 	// new floor thinker
 	rtn = 1;
-	floor = (floormove_t*) malloc(sizeof(*floor));
+	floor = (floormove_t*)DoomLib::Z_Malloc(sizeof(*floor), PU_LEVEL, 0);
 	P_AddThinker (&floor->thinker);
 	sec->specialdata = floor;
 	floor->thinker.function.acp1 = (actionf_p1) T_MoveFloor;
@@ -269,7 +294,7 @@ EV_DoFloor
 	switch(floortype)
 	{
 	  case lowerFloor:
-	    floor->direction = Direction::DOWN;
+	    floor->direction = -1;
 	    floor->sector = sec;
 	    floor->speed = FLOORSPEED;
 	    floor->floordestheight = 
@@ -277,7 +302,7 @@ EV_DoFloor
 	    break;
 
 	  case lowerFloorToLowest:
-	    floor->direction = Direction::DOWN;
+	    floor->direction = -1;
 	    floor->sector = sec;
 	    floor->speed = FLOORSPEED;
 	    floor->floordestheight = 
@@ -285,7 +310,7 @@ EV_DoFloor
 	    break;
 
 	  case turboLower:
-	    floor->direction = Direction::DOWN;
+	    floor->direction = -1;
 	    floor->sector = sec;
 	    floor->speed = FLOORSPEED * 4;
 	    floor->floordestheight = 
@@ -297,7 +322,7 @@ EV_DoFloor
 	  case raiseFloorCrush:
 	    floor->crush = true;
 	  case raiseFloor:
-	    floor->direction = Direction::UP;
+	    floor->direction = 1;
 	    floor->sector = sec;
 	    floor->speed = FLOORSPEED;
 	    floor->floordestheight = 
@@ -309,7 +334,7 @@ EV_DoFloor
 	    break;
 
 	  case raiseFloorTurbo:
-	    floor->direction = Direction::UP;
+	    floor->direction = 1;
 	    floor->sector = sec;
 	    floor->speed = FLOORSPEED*4;
 	    floor->floordestheight = 
@@ -317,7 +342,7 @@ EV_DoFloor
 	    break;
 
 	  case raiseFloorToNearest:
-	    floor->direction = Direction::UP;
+	    floor->direction = 1;
 	    floor->sector = sec;
 	    floor->speed = FLOORSPEED;
 	    floor->floordestheight = 
@@ -325,14 +350,14 @@ EV_DoFloor
 	    break;
 
 	  case raiseFloor24:
-	    floor->direction = Direction::UP;
+	    floor->direction = 1;
 	    floor->sector = sec;
 	    floor->speed = FLOORSPEED;
 	    floor->floordestheight = floor->sector->floorheight +
 		24 * FRACUNIT;
 	    break;
 	  case raiseFloor512:
-	    floor->direction = Direction::UP;
+	    floor->direction = 1;
 	    floor->sector = sec;
 	    floor->speed = FLOORSPEED;
 	    floor->floordestheight = floor->sector->floorheight +
@@ -340,7 +365,7 @@ EV_DoFloor
 	    break;
 
 	  case raiseFloor24AndChange:
-	    floor->direction = Direction::UP;
+	    floor->direction = 1;
 	    floor->sector = sec;
 	    floor->speed = FLOORSPEED;
 	    floor->floordestheight = floor->sector->floorheight +
@@ -351,10 +376,10 @@ EV_DoFloor
 
 	  case raiseToTexture:
 	  {
-	      int	minsize = std::numeric_limits<int>::max();
+          int	minsize = std::numeric_limits<int>::max();
 	      side_t*	side;
 				
-	      floor->direction = Direction::UP;
+	      floor->direction = 1;
 	      floor->sector = sec;
 	      floor->speed = FLOORSPEED;
 	      for (i = 0; i < sec->linecount; i++)
@@ -363,16 +388,16 @@ EV_DoFloor
 		  {
 		      side = getSide(secnum,i,0);
 		      if (side->bottomtexture >= 0)
-			  if (textureheight[side->bottomtexture] < 
+			  if (::g->s_textureheight[side->bottomtexture] < 
 			      minsize)
 			      minsize = 
-				  textureheight[side->bottomtexture];
+				  ::g->s_textureheight[side->bottomtexture];
 		      side = getSide(secnum,i,1);
 		      if (side->bottomtexture >= 0)
-			  if (textureheight[side->bottomtexture] < 
+			  if (::g->s_textureheight[side->bottomtexture] < 
 			      minsize)
 			      minsize = 
-				  textureheight[side->bottomtexture];
+				 ::g->s_textureheight[side->bottomtexture];
 		  }
 	      }
 	      floor->floordestheight =
@@ -381,7 +406,7 @@ EV_DoFloor
 	  break;
 	  
 	  case lowerAndChange:
-	    floor->direction = Direction::DOWN;
+	    floor->direction = -1;
 	    floor->sector = sec;
 	    floor->speed = FLOORSPEED;
 	    floor->floordestheight = 
@@ -392,7 +417,7 @@ EV_DoFloor
 	    {
 		if ( twoSided(secnum, i) )
 		{
-		    if (getSide(secnum,i,0)->sector-sectors == secnum)
+		    if (getSide(secnum,i,0)->sector-::g->sectors == secnum)
 		    {
 			sec = getSector(secnum,i,1);
 
@@ -447,14 +472,14 @@ EV_BuildStairs
 
     floormove_t*	floor;
     
-    int		stairsize;
-    int		speed;
+    fixed_t		stairsize = 0;
+    fixed_t		speed = 0;
 
     secnum = -1;
     rtn = 0;
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
-	sec = &sectors[secnum];
+	sec = &::g->sectors[secnum];
 		
 	// ALREADY MOVING?  IF SO, KEEP GOING...
 	if (sec->specialdata)
@@ -462,11 +487,11 @@ EV_BuildStairs
 	
 	// new floor thinker
 	rtn = 1;
-	floor = (floormove_t*)malloc (sizeof(*floor));
+	floor = (floormove_t*)DoomLib::Z_Malloc(sizeof(*floor), PU_LEVEL, 0);
 	P_AddThinker (&floor->thinker);
 	sec->specialdata = floor;
 	floor->thinker.function.acp1 = (actionf_p1) T_MoveFloor;
-	floor->direction = Direction::UP;
+	floor->direction = 1;
 	floor->sector = sec;
 	switch(type)
 	{
@@ -497,13 +522,13 @@ EV_BuildStairs
 		    continue;
 					
 		tsec = (sec->lines[i])->frontsector;
-		newsecnum = tsec-sectors;
+		newsecnum = tsec-::g->sectors;
 		
 		if (secnum != newsecnum)
 		    continue;
 
 		tsec = (sec->lines[i])->backsector;
-		newsecnum = tsec - sectors;
+		newsecnum = tsec - ::g->sectors;
 
 		if (tsec->floorpic != texture)
 		    continue;
@@ -515,13 +540,13 @@ EV_BuildStairs
 					
 		sec = tsec;
 		secnum = newsecnum;
-		floor = (floormove_t*)malloc (sizeof(*floor));
+		floor = (floormove_t*)DoomLib::Z_Malloc(sizeof(*floor), PU_LEVEL, 0);
 
 		P_AddThinker (&floor->thinker);
 
 		sec->specialdata = floor;
 		floor->thinker.function.acp1 = (actionf_p1) T_MoveFloor;
-		floor->direction = Direction::UP;
+		floor->direction = 1;
 		floor->sector = sec;
 		floor->speed = speed;
 		floor->floordestheight = height;
@@ -532,4 +557,5 @@ EV_BuildStairs
     }
     return rtn;
 }
+
 

@@ -1,10 +1,42 @@
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#include "Precompiled.hpp"
+#include "globaldata.hpp"
+
+
 #include "i_system.hpp"
 #include "doomdef.hpp"
 #include "p_local.hpp"
 
 #include "g_game.hpp"
 
-#include "i_sound.hpp"
+#include "s_sound.hpp"
 
 // Data.
 #include "sounds.hpp"
@@ -17,7 +49,7 @@
 //
 // CHANGE THE TEXTURE OF A WALL SWITCH TO ITS OPPOSITE
 //
-switchlist_t alphSwitchList[] =
+const switchlist_t alphSwitchList[] =
 {
     // Doom shareware episode 1 switches
     {"SW1BRCOM",	"SW2BRCOM",	1},
@@ -68,9 +100,6 @@ switchlist_t alphSwitchList[] =
     {"\0",		"\0",		0}
 };
 
-int		switchlist[MAXSWITCHES * 2];
-int		numswitches;
-button_t        buttonlist[MAXBUTTONS];
 
 //
 // P_InitSwitchList
@@ -84,38 +113,37 @@ void P_InitSwitchList(void)
 	
     episode = 1;
 
-    if (Game::gamemode == GameMode_t::registered)
-	episode = 2;
-    else
-	if (Game::gamemode == GameMode_t::commercial )
+	if (::g->gamemode == registered || ::g->gamemode == retail)
+		episode = 2;
+    else if ( ::g->gamemode == commercial )
 	    episode = 3;
 		
     for (index = 0,i = 0;i < MAXSWITCHES;i++)
     {
-	if (!alphSwitchList[i].episode)
-	{
-	    numswitches = index/2;
-	    switchlist[index] = -1;
-	    break;
-	}
+		if (!alphSwitchList[i].episode)
+		{
+			::g->numswitches = index/2;
+			::g->switchlist[index] = -1;
+			break;
+		}
 		
-	if (alphSwitchList[i].episode <= episode)
-	{
-#if 0	// UNUSED - debug?
-	    int		value;
-			
-	    if (R_CheckTextureNumForName(alphSwitchList[i].name1) < 0)
-	    {
-		I_Error("Can't find switch texture '%s'!",
-			alphSwitchList[i].name1);
-		continue;
-	    }
-	    
-	    value = R_TextureNumForName(alphSwitchList[i].name1);
-#endif
-	    switchlist[index++] = R_TextureNumForName(alphSwitchList[i].name1);
-	    switchlist[index++] = R_TextureNumForName(alphSwitchList[i].name2);
-	}
+		if (alphSwitchList[i].episode <= episode)
+		{
+	#if 0	// UNUSED - debug?
+			int		value;
+				
+			if (R_CheckTextureNumForName(alphSwitchList[i].name1) < 0)
+			{
+			I_Error("Can't find switch texture '%s'!",
+				alphSwitchList[i].name1);
+			continue;
+			}
+		    
+			value = R_TextureNumForName(alphSwitchList[i].name1);
+	#endif
+			::g->switchlist[index++] = R_TextureNumForName(alphSwitchList[i].name1);
+			::g->switchlist[index++] = R_TextureNumForName(alphSwitchList[i].name2);
+		}
     }
 }
 
@@ -135,8 +163,8 @@ P_StartButton
     // See if button is already pressed
     for (i = 0;i < MAXBUTTONS;i++)
     {
-	if (buttonlist[i].btimer
-	    && buttonlist[i].line == line)
+	if (::g->buttonlist[i].btimer
+	    && ::g->buttonlist[i].line == line)
 	{
 	    
 	    return;
@@ -147,13 +175,13 @@ P_StartButton
     
     for (i = 0;i < MAXBUTTONS;i++)
     {
-	if (!buttonlist[i].btimer)
+	if (!::g->buttonlist[i].btimer)
 	{
-	    buttonlist[i].line = line;
-	    buttonlist[i].where = w;
-	    buttonlist[i].btexture = texture;
-	    buttonlist[i].btimer =time;
-	    buttonlist[i].soundorg = (mobj_t *)&line->frontsector->soundorg;
+	    ::g->buttonlist[i].line = line;
+	    ::g->buttonlist[i].where = w;
+	    ::g->buttonlist[i].btexture = texture;
+	    ::g->buttonlist[i].btimer = time;
+	    ::g->buttonlist[i].degensoundorg = &line->frontsector->soundorg;
 	    return;
 	}
     }
@@ -183,9 +211,9 @@ P_ChangeSwitchTexture
     if (!useAgain)
 	line->special = 0;
 
-    texTop = sides[line->sidenum[0]].toptexture;
-    texMid = sides[line->sidenum[0]].midtexture;
-    texBot = sides[line->sidenum[0]].bottomtexture;
+    texTop = ::g->sides[line->sidenum[0]].toptexture;
+    texMid = ::g->sides[line->sidenum[0]].midtexture;
+    texBot = ::g->sides[line->sidenum[0]].bottomtexture;
 	
     sound = sfx_swtchn;
 
@@ -193,39 +221,39 @@ P_ChangeSwitchTexture
     if (line->special == 11)                
 	sound = sfx_swtchx;
 	
-    for (i = 0;i < numswitches*2;i++)
+    for (i = 0;i < ::g->numswitches*2;i++)
     {
-	if (switchlist[i] == texTop)
+	if (::g->switchlist[i] == texTop)
 	{
-	    I_Sound::startSound(buttonlist->soundorg,sound);
-	    sides[line->sidenum[0]].toptexture = switchlist[i^1];
+	    S_StartSound(::g->buttonlist->soundorg,sound);
+	    ::g->sides[line->sidenum[0]].toptexture = ::g->switchlist[i^1];
 
 	    if (useAgain)
-		P_StartButton(line,top,switchlist[i],BUTTONTIME);
+		P_StartButton(line,top,::g->switchlist[i],BUTTONTIME);
 
 	    return;
 	}
 	else
 	{
-	    if (switchlist[i] == texMid)
+	    if (::g->switchlist[i] == texMid)
 	    {
-		I_Sound::startSound(buttonlist->soundorg,sound);
-		sides[line->sidenum[0]].midtexture = switchlist[i^1];
+		S_StartSound(::g->buttonlist->soundorg,sound);
+		::g->sides[line->sidenum[0]].midtexture = ::g->switchlist[i^1];
 
 		if (useAgain)
-		    P_StartButton(line, middle,switchlist[i],BUTTONTIME);
+		    P_StartButton(line, middle,::g->switchlist[i],BUTTONTIME);
 
 		return;
 	    }
 	    else
 	    {
-		if (switchlist[i] == texBot)
+		if (::g->switchlist[i] == texBot)
 		{
-		    I_Sound::startSound(buttonlist->soundorg,sound);
-		    sides[line->sidenum[0]].bottomtexture = switchlist[i^1];
+		    S_StartSound(::g->buttonlist->soundorg,sound);
+		    ::g->sides[line->sidenum[0]].bottomtexture = ::g->switchlist[i^1];
 
 		    if (useAgain)
-			P_StartButton(line, bottom,switchlist[i],BUTTONTIME);
+			P_StartButton(line, bottom,::g->switchlist[i],BUTTONTIME);
 
 		    return;
 		}
@@ -242,9 +270,9 @@ P_ChangeSwitchTexture
 //
 // P_UseSpecialLine
 // Called when a thing uses a special line.
-// Only the front sides of lines are usable.
+// Only the front ::g->sides of ::g->lines are usable.
 //
-bool
+qboolean
 P_UseSpecialLine
 ( mobj_t*	thing,
   line_t*	line,
@@ -252,7 +280,7 @@ P_UseSpecialLine
 {               
 
     // Err...
-    // Use the back sides of VERY SPECIAL lines...
+    // Use the back ::g->sides of VERY SPECIAL ::g->lines...
     if (side)
     {
 	switch(line->special)
@@ -330,8 +358,11 @@ P_UseSpecialLine
 	
       case 11:
 	// Exit level
-	P_ChangeSwitchTexture(line,0);
-	G_ExitLevel ();
+	// DHM - Nerve :: Not in deathmatch, stay in level until timelimit or fraglimit
+	if ( !::g->deathmatch && ::g->gameaction != ga_completed ) {
+		P_ChangeSwitchTexture(line,0);
+		G_ExitLevel ();
+	}
 	break;
 	
       case 14:
@@ -372,7 +403,7 @@ P_UseSpecialLine
 	
       case 29:
 	// Raise Door
-	if (EV_DoDoor(line, vldoor_e::normal))
+	if (EV_DoDoor(line,normal))
 	    P_ChangeSwitchTexture(line,0);
 	break;
 	
@@ -396,14 +427,16 @@ P_UseSpecialLine
 	
       case 50:
 	// Close Door
-	if (EV_DoDoor(line, vldoor_e::close))
+	if (EV_DoDoor(line,closed))
 	    P_ChangeSwitchTexture(line,0);
 	break;
 	
       case 51:
 	// Secret EXIT
-	P_ChangeSwitchTexture(line,0);
-	G_SecretExitLevel ();
+	if ( !::g->deathmatch && ::g->gameaction != ga_completed ) {
+		P_ChangeSwitchTexture(line,0);
+		G_SecretExitLevel ();
+	}
 	break;
 	
       case 55:
@@ -426,25 +459,25 @@ P_UseSpecialLine
 	
       case 103:
 	// Open Door
-	if (EV_DoDoor(line, vldoor_e::open))
+	if (EV_DoDoor(line,opened))
 	    P_ChangeSwitchTexture(line,0);
 	break;
 	
       case 111:
 	// Blazing Door Raise (faster than TURBO!)
-	if (EV_DoDoor (line, vldoor_e::blazeRaise))
+	if (EV_DoDoor (line,blazeRaise))
 	    P_ChangeSwitchTexture(line,0);
 	break;
 	
       case 112:
 	// Blazing Door Open (faster than TURBO!)
-	if (EV_DoDoor (line, vldoor_e::blazeOpen))
+	if (EV_DoDoor (line,blazeOpen))
 	    P_ChangeSwitchTexture(line,0);
 	break;
 	
       case 113:
 	// Blazing Door Close (faster than TURBO!)
-	if (EV_DoDoor (line, vldoor_e::blazeClose))
+	if (EV_DoDoor (line,blazeClose))
 	    P_ChangeSwitchTexture(line,0);
 	break;
 	
@@ -472,7 +505,7 @@ P_UseSpecialLine
 	// BlzOpenDoor RED
       case 137:
 	// BlzOpenDoor YELLOW
-	if (EV_DoLockedDoor (line, vldoor_e::blazeOpen,thing))
+	if (EV_DoLockedDoor (line,blazeOpen,thing))
 	    P_ChangeSwitchTexture(line,0);
 	break;
 	
@@ -485,7 +518,7 @@ P_UseSpecialLine
 	// BUTTONS
       case 42:
 	// Close Door
-	if (EV_DoDoor(line, vldoor_e::close))
+	if (EV_DoDoor(line,closed))
 	    P_ChangeSwitchTexture(line,1);
 	break;
 	
@@ -509,7 +542,7 @@ P_UseSpecialLine
 	
       case 61:
 	// Open Door
-	if (EV_DoDoor(line, vldoor_e::open))
+	if (EV_DoDoor(line,opened))
 	    P_ChangeSwitchTexture(line,1);
 	break;
 	
@@ -521,7 +554,7 @@ P_UseSpecialLine
 	
       case 63:
 	// Raise Door
-	if (EV_DoDoor(line, vldoor_e::normal))
+	if (EV_DoDoor(line,normal))
 	    P_ChangeSwitchTexture(line,1);
 	break;
 	
@@ -569,19 +602,19 @@ P_UseSpecialLine
 	
       case 114:
 	// Blazing Door Raise (faster than TURBO!)
-	if (EV_DoDoor (line, vldoor_e::blazeRaise))
+	if (EV_DoDoor (line,blazeRaise))
 	    P_ChangeSwitchTexture(line,1);
 	break;
 	
       case 115:
 	// Blazing Door Open (faster than TURBO!)
-	if (EV_DoDoor (line, vldoor_e::blazeOpen))
+	if (EV_DoDoor (line,blazeOpen))
 	    P_ChangeSwitchTexture(line,1);
 	break;
 	
       case 116:
 	// Blazing Door Close (faster than TURBO!)
-	if (EV_DoDoor (line, vldoor_e::blazeClose))
+	if (EV_DoDoor (line,blazeClose))
 	    P_ChangeSwitchTexture(line,1);
 	break;
 	
@@ -603,7 +636,7 @@ P_UseSpecialLine
 	// BlzOpenDoor RED
       case 136:
 	// BlzOpenDoor YELLOW
-	if (EV_DoLockedDoor (line, vldoor_e::blazeOpen,thing))
+	if (EV_DoLockedDoor (line,blazeOpen,thing))
 	    P_ChangeSwitchTexture(line,1);
 	break;
 	
@@ -623,4 +656,5 @@ P_UseSpecialLine
 	
     return true;
 }
+
 

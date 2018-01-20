@@ -1,7 +1,33 @@
-#pragma once
+/*
+===========================================================================
 
-#include <array>
-#include <string>
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#ifndef __INFO__
+#define __INFO__
 
 // Needed for action function pointer handling.
 #include "d_think.hpp"
@@ -1129,15 +1155,21 @@ typedef struct
   long			frame;
   long			tics;
   // void		(*action) ();
-  actionf_t			action;
+
+  // GCC 4.1 for PS3 gives the error "braces around scalar initializer"
+  // for these actionf_p2s. So, let's make it not a scalar!
+  // The second value of the struct will be initalized to 0.
+ // struct {
+	  actionf_p2			action;
+	//  int					filler;
+ // };
+
   statenum_t			nextstate;
   long			misc1, misc2;
 } state_t;
 
-extern state_t	states[NUMSTATES];
-extern std::array<std::string,NUMSPRITES+1> sprnames;
-
-
+extern const state_t	tempStates[NUMSTATES];
+extern const char * const sprnames[NUMSPRITES+1];
 
 typedef enum {
     MT_PLAYER,
@@ -1309,4 +1341,7 @@ typedef struct
 
 } mobjinfo_t;
 
-extern mobjinfo_t mobjinfo[NUMMOBJTYPES];
+extern const mobjinfo_t mobjinfo[NUMMOBJTYPES];
+
+#endif
+

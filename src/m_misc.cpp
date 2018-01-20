@@ -1,6 +1,37 @@
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#include "Precompiled.hpp"
+#include "globaldata.hpp"
+
+
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <chrono>
 #include <fcntl.h>
 #include <stdlib.h>
 
@@ -8,7 +39,10 @@
 
 
 #include "doomdef.hpp"
+#include "g_game.hpp"
+#include "z_zone.hpp"
 
+#include "m_swap.hpp"
 #include "m_argv.hpp"
 
 #include "w_wad.hpp"
@@ -26,19 +60,19 @@
 #include "dstrings.hpp"
 
 #include "m_misc.hpp"
+//#include "d3xp/Game_local.hpp"
 
 //
 // M_DrawText
 // Returns the final X coordinate
 // HU_Init must have been called to init the font
 //
-extern patch_t*		hu_font[HU_FONTSIZE];
 
 int
 M_DrawText
 ( int		x,
   int		y,
-  bool	direct,
+  qboolean	direct,
   char*		string )
 {
     int 	c;
@@ -54,102 +88,122 @@ M_DrawText
 	    continue;
 	}
 		
-	w = hu_font[c]->width;
+	w = SHORT (::g->hu_font[c]->width);
 	if (x+w > SCREENWIDTH)
 	    break;
 	if (direct)
-	    V_DrawPatchDirect(x, y, 0, hu_font[c]);
+	    V_DrawPatchDirect(x, y, 0, ::g->hu_font[c]);
 	else
-	    V_DrawPatch(x, y, 0, hu_font[c]);
+	    V_DrawPatch(x, y, 0, ::g->hu_font[c]);
 	x+=w;
     }
 
     return x;
 }
 
+
+//
+// M_WriteFile
+//
+bool M_WriteFile ( char const*	name, void*		source, int		length ) {
+	
+	//idFile *		handle = NULL;
+	int		count;
+
+	//handle = fileSystem->OpenFileWrite( name, "fs_savepath" );
+
+//    if (handle == NULL )
+//        return false;
+//
+//    count = handle->Write( source, length );
+	//fileSystem->CloseFile( handle );
+
+	if (count < length)
+		return false;
+
+	return true;
+}
+
+
+//
+// M_ReadFile
+//
+int M_ReadFile ( char const*	name, byte**	buffer ) {
+	int count, length;
+//    idFile * handle = NULL;
+	byte		*buf;
+
+//    handle = fileSystem->OpenFileRead( name, false );
+
+//    if (handle == NULL ) {
+//        I_Error ("Couldn't read file %s", name);
+//    }
+
+//    length = handle->Length();
+//
+//    buf = ( byte* )Z_Malloc ( handle->Length(), PU_STATIC, NULL);
+//    count = handle->Read( buf, length );
+//
+//    if (count < length ) {
+//        I_Error ("Couldn't read file %s", name);
+//    }
+//
+//    fileSystem->CloseFile( handle );
+
+	*buffer = buf;
+	return length;
+}
+
+//
+// Write a save game to the specified device using the specified game name.
+//
+static qboolean SaveGame( void* source, size_t length )
+{
+	return false;
+}
+
+
+bool M_WriteSaveGame( void* source, size_t length )
+{
+	return SaveGame( source, length );
+}
+
+int M_ReadSaveGame( byte** buffer )
+{
+	return 0;
+}
+
+
 //
 // DEFAULTS
 //
-int		usemouse;
-int		usejoystick;
-
-extern int	key_right;
-extern int	key_left;
-extern int	key_up;
-extern int	key_down;
-
-extern int	key_strafeleft;
-extern int	key_straferight;
-
-extern int	key_fire;
-extern int	key_use;
-extern int	key_strafe;
-extern int	key_speed;
-
-extern int	mousebfire;
-extern int	mousebstrafe;
-extern int	mousebforward;
-
-extern int	joybuse;
-extern int	joybspeed;
-
-extern int	viewwidth;
-extern int	viewheight;
-
-extern int	mouseSensitivity;
-extern int	showMessages;
-
-extern int	detailLevel;
-
-extern int	screenblocks;
-
-extern int	showMessages;
-
-extern const char*	chat_macros[];
 
 
 
-typedef struct
-{
-    const char*	name;
-    int*	location;
-    std::intptr_t	defaultvalue;
-    int		scantranslate;		// PC scan code hack
-    int		untranslated;		// lousy hack
-} default_t;
 
-default_t	defaults[] =
-{
-    {"mouse_sensitivity",&mouseSensitivity, 5},
-    {"show_messages",&showMessages, 1},
 
-    {"use_mouse",&usemouse, 1},
-    {"mouseb_fire",&mousebfire,0},
-    {"mouseb_strafe",&mousebstrafe,1},
-    {"mouseb_forward",&mousebforward,2},
 
-    {"use_joystick",&usejoystick, 0},
 
-    {"screenblocks",&screenblocks, 10},
-    {"detaillevel",&detailLevel, 0},
 
-    {"usegamma",&usegamma, 0},
 
-    {"chatmacro0", (int *) &chat_macros[0], (std::intptr_t) s_ChatMacro0.c_str() },
-    {"chatmacro1", (int *) &chat_macros[1], (std::intptr_t) s_ChatMacro1.c_str() },
-    {"chatmacro2", (int *) &chat_macros[2], (std::intptr_t) s_ChatMacro2.c_str() },
-    {"chatmacro3", (int *) &chat_macros[3], (std::intptr_t) s_ChatMacro3.c_str() },
-    {"chatmacro4", (int *) &chat_macros[4], (std::intptr_t) s_ChatMacro4.c_str() },
-    {"chatmacro5", (int *) &chat_macros[5], (std::intptr_t) s_ChatMacro5.c_str() },
-    {"chatmacro6", (int *) &chat_macros[6], (std::intptr_t) s_ChatMacro6.c_str() },
-    {"chatmacro7", (int *) &chat_macros[7], (std::intptr_t) s_ChatMacro7.c_str() },
-    {"chatmacro8", (int *) &chat_macros[8], (std::intptr_t) s_ChatMacro8.c_str() },
-    {"chatmacro9", (int *) &chat_macros[9], (std::intptr_t) s_ChatMacro9.c_str() }
 
-};
 
-int	numdefaults;
-char*	defaultfile;
+// machine-independent sound params
+
+
+// UNIX hack, to be removed.
+#ifdef SNDSERV
+#endif
+
+#ifdef LINUX
+#endif
+
+extern const char* const temp_chat_macros[];
+
+
+
+
+
 
 
 //
@@ -157,99 +211,102 @@ char*	defaultfile;
 //
 void M_SaveDefaults (void)
 {
+/*
     int		i;
     int		v;
     FILE*	f;
 	
-    f = fopen (defaultfile, "w");
+    f = f o pen (::g->defaultfile, "w");
     if (!f)
 	return; // can't write the file, but don't complain
 		
-    for (i=0 ; i<numdefaults ; i++)
+    for (i=0 ; i<::g->numdefaults ; i++)
     {
-	if (defaults[i].defaultvalue > -0xfff
-	    && defaults[i].defaultvalue < 0xfff)
+	if (::g->defaults[i].defaultvalue > -0xfff
+	    && ::g->defaults[i].defaultvalue < 0xfff)
 	{
-	    v = *defaults[i].location;
-	    fprintf (f,"%s\t\t%i\n",defaults[i].name,v);
+	    v = *::g->defaults[i].location;
+	    fprintf (f,"%s\t\t%i\n",::g->defaults[i].name,v);
 	} else {
-	    fprintf (f,"%s\t\t\"%s\"\n",defaults[i].name,
-		     * (char **) (defaults[i].location));
+	    fprintf (f,"%s\t\t\"%s\"\n",::g->defaults[i].name,
+		     * (char **) (::g->defaults[i].location));
 	}
     }
 	
     fclose (f);
+*/
 }
 
 
 //
 // M_LoadDefaults
 //
-extern unsigned char	scantokey[128];
 
 void M_LoadDefaults (void)
 {
     int		i;
-    int		len;
-    FILE*	f;
-    char	def[80];
-    char	strparm[100];
-    char*	newstring;
-    int		parm;
-    bool	isstring;
+    //int		len;
+    //FILE*	f;
+    //char	def[80];
+    //char	strparm[100];
+    //char*	newstring;
+    //int		parm;
+    //qboolean	isstring;
     
     // set everything to base values
-    numdefaults = sizeof(defaults)/sizeof(defaults[0]);
-    for (i=0 ; i<numdefaults ; i++)
-	*defaults[i].location = defaults[i].defaultvalue;
+    ::g->numdefaults = sizeof(::g->defaults)/sizeof(::g->defaults[0]);
+    for (i=0 ; i < ::g->numdefaults ; i++)
+		*::g->defaults[i].location = ::g->defaults[i].defaultvalue;
     
     // check for a custom default file
-    i = CmdParameters::M_CheckParm ("-config");
-    if (i && i<CmdParameters::myargc-1)
+    i = M_CheckParm ("-config");
+    if (i && i < ::g->myargc-1)
     {
-	defaultfile = const_cast<char*>(CmdParameters::myargv[i+1].c_str());
-	printf ("	default file: %s\n",defaultfile);
+		::g->defaultfile = ::g->myargv[i+1];
+		I_Printf ("	default file: %s\n",::g->defaultfile);
     }
     else
-	defaultfile = basedefault;
-    
-    // read the file in, overriding any set defaults
-    f = fopen (defaultfile, "r");
+		::g->defaultfile = ::g->basedefault;
+
+/*
+    // read the file in, overriding any set ::g->defaults
+    f = f o pen (::g->defaultfile, "r");
     if (f)
     {
-	while (!feof(f))
-	{
-	    isstring = false;
-	    if (fscanf (f, "%79s %[^\n]\n", def, strparm) == 2)
-	    {
-		if (strparm[0] == '"')
+		while (!feof(f))
 		{
-		    // get a string default
-		    isstring = true;
-		    len = strlen(strparm);
-		    newstring = (char *) malloc(len);
-		    strparm[len-1] = 0;
-		    strcpy(newstring, strparm+1);
+			isstring = false;
+			if (fscanf (f, "%79s %[^\n]\n", def, strparm) == 2)
+			{
+				if (strparm[0] == '"')
+				{
+					// get a string default
+					isstring = true;
+					len = strlen(strparm);
+					newstring = (char *)DoomLib::Z_Malloc(len, PU_STATIC, 0);
+					strparm[len-1] = 0;
+					strcpy(newstring, strparm+1);
+				}
+				else if (strparm[0] == '0' && strparm[1] == 'x')
+					sscanf(strparm+2, "%x", &parm);
+				else
+					sscanf(strparm, "%i", &parm);
+				
+				for (i=0 ; i<::g->numdefaults ; i++)
+					if (!strcmp(def, ::g->defaults[i].name))
+					{
+						if (!isstring)
+							*::g->defaults[i].location = parm;
+						else
+							*::g->defaults[i].location = (int) newstring;
+						break;
+					}
+			}
 		}
-		else if (strparm[0] == '0' && strparm[1] == 'x')
-		    sscanf(strparm+2, "%x", &parm);
-		else
-		    sscanf(strparm, "%i", &parm);
-		for (i=0 ; i<numdefaults ; i++)
-		    if (!strcmp(def, defaults[i].name))
-		    {
-			if (!isstring)
-			    *defaults[i].location = parm;
-			else
-			    *defaults[i].location =
-				(std::intptr_t) newstring;
-			break;
-		    }
-	    }
-	}
-		
-	fclose (f);
+			
+		fclose (f);
     }
+*/
 }
 
 
@@ -258,34 +315,21 @@ void M_LoadDefaults (void)
 //
 
 
-typedef struct
+
+
+//
+// WritePCXfile
+//
+void
+WritePCXfile
+( char*		filename,
+  byte*		data,
+  int		width,
+  int		height,
+  byte*		palette )
 {
-    char		manufacturer;
-    char		version;
-    char		encoding;
-    char		bits_per_pixel;
-
-    unsigned short	xmin;
-    unsigned short	ymin;
-    unsigned short	xmax;
-    unsigned short	ymax;
-    
-    unsigned short	hres;
-    unsigned short	vres;
-
-    unsigned char	palette[48];
-    
-    char		reserved;
-    char		color_planes;
-    unsigned short	bytes_per_line;
-    unsigned short	palette_type;
-    
-    char		filler[58];
-    unsigned char	data;		// unbounded
-} pcx_t;
-
-
-
+	I_Error( "depreciated" );
+}
 
 
 //
@@ -293,19 +337,36 @@ typedef struct
 //
 void M_ScreenShot (void)
 {
-    sf::Texture screen;
-    screen.update(*window);
-    auto image = screen.copyToImage();
+/*
+    int		i;
+    byte*	linear;
+    char	lbmname[12];
     
-    // Use the current time for a unique file name
-    std::string fileName = "DOOM-" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".png";
-
-    if (!image.saveToFile(fileName))
+    // munge planar buffer to linear
+    linear = ::g->screens[2];
+    I_ReadScreen (linear);
+    
+    // find a file name to save it to
+    strcpy(lbmname,"DOOM00.pcx");
+		
+    for (i=0 ; i<=99 ; i++)
     {
-        I_Error(("M_ScreenShot: Couldn't save file " + fileName).c_str());
+		lbmname[4] = i/10 + '0';
+		lbmname[5] = i%10 + '0';
+		if (_access(lbmname,0) == -1)
+			break;	// file doesn't exist
     }
+    if (i==100)
+		I_Error ("M_ScreenShot: Couldn't create a PCX");
+    
+    // save the pcx file
+    WritePCXfile (lbmname, linear,
+		  SCREENWIDTH, SCREENHEIGHT,
+		  (byte*)W_CacheLumpName ("PLAYPAL",PU_CACHE_SHARED));
 	
-    players[consoleplayer].message = "Screen shot";
+    ::g->players[::g->consoleplayer].message = "screen shot";
+*/
 }
+
 
 

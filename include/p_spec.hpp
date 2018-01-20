@@ -1,9 +1,39 @@
-#pragma once
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#ifndef __P_SPEC__
+#define __P_SPEC__
+
 
 //
 // End-level timer (-TIMER option)
 //
-extern	bool levelTimer;
+extern	qboolean levelTimer;
 extern	int	levelTimeCount;
 
 
@@ -21,7 +51,7 @@ void    P_SpawnSpecials (void);
 void    P_UpdateSpecials (void);
 
 // when needed
-bool
+qboolean
 P_UseSpecialLine
 ( mobj_t*	thing,
   line_t*	line,
@@ -57,16 +87,16 @@ getSide
   int		line,
   int		side );
 
-int P_FindLowestFloorSurrounding(sector_t* sec);
-int P_FindHighestFloorSurrounding(sector_t* sec);
+fixed_t P_FindLowestFloorSurrounding(sector_t* sec);
+fixed_t P_FindHighestFloorSurrounding(sector_t* sec);
 
-int
+fixed_t
 P_FindNextHighestFloor
 ( sector_t*	sec,
   int		currentheight );
 
-int P_FindLowestCeilingSurrounding(sector_t* sec);
-int P_FindHighestCeilingSurrounding(sector_t* sec);
+fixed_t P_FindLowestCeilingSurrounding(sector_t* sec);
+fixed_t P_FindHighestCeilingSurrounding(sector_t* sec);
 
 int
 P_FindSectorFromLineTag
@@ -151,6 +181,7 @@ typedef struct
 #define FASTDARK			15
 #define SLOWDARK			35
 
+void	T_FireFlicker (fireflicker_t* flick);
 void    P_SpawnFireFlicker (sector_t* sector);
 void    T_LightFlash (lightflash_t* flash);
 void    P_SpawnLightFlash (sector_t* sector);
@@ -203,8 +234,10 @@ typedef struct
     bwhere_e	where;
     int		btexture;
     int		btimer;
-    mobj_t*	soundorg;
-
+	union {
+		mobj_t *		soundorg;
+		degenmobj_t *	degensoundorg;
+	};
 } button_t;
 
 
@@ -217,7 +250,7 @@ typedef struct
 #define MAXBUTTONS		16
 
  // 1 second, in ticks. 
-#define BUTTONTIME      35             
+#define BUTTONTIME      TICRATE             
 
 extern button_t	buttonlist[MAXBUTTONS]; 
 
@@ -259,14 +292,14 @@ typedef struct
 {
     thinker_t	thinker;
     sector_t*	sector;
-    int	speed;
-    int	low;
-    int	high;
+    fixed_t	speed;
+    fixed_t	low;
+    fixed_t	high;
     int		wait;
     int		count;
     plat_e	status;
     plat_e	oldstatus;
-    bool	crush;
+    qboolean	crush;
     int		tag;
     plattype_e	type;
     
@@ -298,37 +331,31 @@ void    P_ActivateInStasis(int tag);
 //
 // P_DOORS
 //
-enum class vldoor_e
+typedef enum
 {
     normal,
     close30ThenOpen,
-    close,
-    open,
+    closed,
+    opened,
     raiseIn5Mins,
     blazeRaise,
     blazeOpen,
     blazeClose
 
-} ;
+} vldoor_e;
 
-enum class Direction
-{
-	UP,
-	DOWN,
-	WAITING,
-	INITIAL_WAIT
-};
+
 
 typedef struct
 {
     thinker_t	thinker;
     vldoor_e	type;
     sector_t*	sector;
-    int	topheight;
-    int	speed;
+    fixed_t	topheight;
+    fixed_t	speed;
 
     // 1 = up, 0 = waiting at top, -1 = down
-    Direction   direction;
+    int             direction;
     
     // tics to wait at the top
     int             topwait;
@@ -367,6 +394,92 @@ P_SpawnDoorRaiseIn5Mins
 ( sector_t*	sec,
   int		secnum );
 
+
+
+#if 0 // UNUSED
+//
+//      Sliding doors...
+//
+typedef enum
+{
+    sd_opening,
+    sd_waiting,
+    sd_closing
+
+} sd_e;
+
+
+
+typedef enum
+{
+    sdt_openOnly,
+    sdt_closeOnly,
+    sdt_openAndClose
+
+} sdt_e;
+
+
+
+
+typedef struct
+{
+    thinker_t	thinker;
+    sdt_e	type;
+    line_t*	line;
+    int		frame;
+    int		whichDoorIndex;
+    int		timer;
+    sector_t*	frontsector;
+    sector_t*	backsector;
+    sd_e	 status;
+
+} slidedoor_t;
+
+
+
+typedef struct
+{
+    char	frontFrame1[9];
+    char	frontFrame2[9];
+    char	frontFrame3[9];
+    char	frontFrame4[9];
+    char	backFrame1[9];
+    char	backFrame2[9];
+    char	backFrame3[9];
+    char	backFrame4[9];
+    
+} slidename_t;
+
+
+
+typedef struct
+{
+    int             frontFrames[4];
+    int             backFrames[4];
+
+} slideframe_t;
+
+
+
+// how many frames of animation
+#define SNUMFRAMES		4
+
+#define SDOORWAIT		TICRATE*3
+#define SWAITTICS		4
+
+// how many diff. types of anims
+#define MAXSLIDEDOORS	5                            
+
+void P_InitSlidingDoorFrames(void);
+
+void
+EV_SlidingDoor
+( line_t*	line,
+  mobj_t*	thing );
+#endif
+
+
+
 //
 // P_CEILNG
 //
@@ -388,17 +501,17 @@ typedef struct
     thinker_t	thinker;
     ceiling_e	type;
     sector_t*	sector;
-    int	bottomheight;
-    int	topheight;
-    int	speed;
-    bool	crush;
+    fixed_t	bottomheight;
+    fixed_t	topheight;
+    fixed_t	speed;
+    qboolean	crush;
 
     // 1 = up, 0 = waiting, -1 = down
-    Direction	direction;
+    int		direction;
 
     // ID
-    int			tag;                   
-    Direction	olddirection;
+    int		tag;                   
+    int		olddirection;
     
 } ceiling_t;
 
@@ -478,13 +591,13 @@ typedef struct
 {
     thinker_t	thinker;
     floor_e	type;
-    bool	crush;
+    qboolean	crush;
     sector_t*	sector;
-    Direction	direction;
+    int		direction;
     int		newspecial;
     short	texture;
-    int	floordestheight;
-    int	speed;
+    fixed_t	floordestheight;
+    fixed_t	speed;
 
 } floormove_t;
 
@@ -503,11 +616,11 @@ typedef enum
 result_e
 T_MovePlane
 ( sector_t*	sector,
-  int	speed,
-  int	dest,
-  bool	crush,
+  fixed_t	speed,
+  fixed_t	dest,
+  qboolean	crush,
   int		floorOrCeiling,
-  Direction		direction );
+  int		direction );
 
 int
 EV_BuildStairs
@@ -529,3 +642,6 @@ EV_Teleport
 ( line_t*	line,
   int		side,
   mobj_t*	thing );
+
+#endif
+

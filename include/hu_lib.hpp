@@ -1,13 +1,36 @@
-#pragma once
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#ifndef __HULIB__
+#define __HULIB__
 
 // We are referring to patches.
 #include "r_defs.hpp"
-
-
-// background and foreground screen numbers
-// different from other modules.
-#define BG			1
-#define FG			0
 
 // font stuff
 #define HU_CHARERASE	KEY_BACKSPACE
@@ -47,9 +70,9 @@ typedef struct
     int			h;		// height in lines
     int			cl;		// current line number
 
-    // pointer to bool stating whether to update window
-    bool*		on;
-    bool		laston;		// last value of *->on.
+    // pointer to qboolean stating whether to update window
+    qboolean*		on;
+    qboolean		laston;		// last value of *->on.
 
 } hu_stext_t;
 
@@ -64,9 +87,9 @@ typedef struct
      // left margin past which I am not to delete characters
     int			lm;
 
-    // pointer to bool stating whether to update window
-    bool*		on; 
-    bool		laston; // last value of *->on;
+    // pointer to qboolean stating whether to update window
+    qboolean*		on; 
+    qboolean		laston; // last value of *->on;
 
 } hu_itext_t;
 
@@ -88,13 +111,13 @@ void	HUlib_clearTextLine(hu_textline_t *t);
 void	HUlib_initTextLine(hu_textline_t *t, int x, int y, patch_t **f, int sc);
 
 // returns success
-bool HUlib_addCharToTextLine(hu_textline_t *t, char ch);
+qboolean HUlib_addCharToTextLine(hu_textline_t *t, char ch);
 
 // returns success
-bool HUlib_delCharFromTextLine(hu_textline_t *t);
+qboolean HUlib_delCharFromTextLine(hu_textline_t *t);
 
 // draws tline
-void	HUlib_drawTextLine(hu_textline_t *l, bool drawcursor);
+void	HUlib_drawTextLine(hu_textline_t *l, qboolean drawcursor);
 
 // erases text line
 void	HUlib_eraseTextLine(hu_textline_t *l); 
@@ -113,7 +136,7 @@ HUlib_initSText
   int		h,
   patch_t**	font,
   int		startchar,
-  bool*	on );
+  qboolean*	on );
 
 // add a new line
 void HUlib_addLineToSText(hu_stext_t* s);  
@@ -139,7 +162,7 @@ HUlib_initIText
   int		y,
   patch_t**	font,
   int		startchar,
-  bool*	on );
+  qboolean*	on );
 
 // enforces left margin
 void HUlib_delCharFromIText(hu_itext_t* it);
@@ -157,7 +180,7 @@ HUlib_addPrefixToIText
   char*		str );
 
 // whether eaten
-bool
+qboolean
 HUlib_keyInIText
 ( hu_itext_t*	it,
   unsigned char ch );
@@ -166,3 +189,6 @@ void HUlib_drawIText(hu_itext_t* it);
 
 // erases all itext lines
 void HUlib_eraseIText(hu_itext_t* it); 
+
+#endif
+

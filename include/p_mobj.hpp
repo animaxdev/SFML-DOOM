@@ -1,4 +1,33 @@
-#pragma once
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#ifndef __P_MOBJ__
+#define __P_MOBJ__
 
 // Basics.
 #include "tables.hpp"
@@ -16,7 +45,14 @@
 // Needs precompiled tables/data structures.
 #include "info.hpp"
 
-class player_t;
+
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+
+
 //
 // NOTES: mobj_t
 //
@@ -174,19 +210,19 @@ typedef enum
 
 
 // Map Object definition.
-typedef struct mobj_s
+struct mobj_t
 {
     // List: thinker links.
     thinker_t		thinker;
 
     // Info for drawing: position.
-    int		x;
-    int		y;
-    int		z;
+    fixed_t		x;
+    fixed_t		y;
+    fixed_t		z;
 
     // More list: links in sector (if needed)
-    struct mobj_s*	snext;
-    struct mobj_s*	sprev;
+    mobj_t*	snext;
+    mobj_t*	sprev;
 
     //More drawing info: to determine current sprite.
     angle_t		angle;	// orientation
@@ -195,32 +231,32 @@ typedef struct mobj_s
 
     // Interaction info, by BLOCKMAP.
     // Links in blocks (if needed).
-    struct mobj_s*	bnext;
-    struct mobj_s*	bprev;
+    mobj_t*	bnext;
+    mobj_t*	bprev;
     
     struct subsector_s*	subsector;
 
     // The closest interval over all contacted Sectors.
-    int		floorz;
-    int		ceilingz;
+    fixed_t		floorz;
+    fixed_t		ceilingz;
 
     // For movement checking.
-    int		radius;
-    int		height;	
+    fixed_t		radius;
+    fixed_t		height;	
 
     // Momentums, used to update position.
-    int		momx;
-    int		momy;
-    int		momz;
+    fixed_t		momx;
+    fixed_t		momy;
+    fixed_t		momz;
 
     // If == validcount, already checked.
     int			validcount;
 
     mobjtype_t		type;
-    mobjinfo_t*		info;	// &mobjinfo[mobj->type]
+    const mobjinfo_t*		info;	// &mobjinfo[mobj->type]
     
     int			tics;	// state tic counter
-    state_t*		state;
+    const state_t*		state;
     int			flags;
     int			health;
 
@@ -230,7 +266,7 @@ typedef struct mobj_s
 
     // Thing being chased/attacked (or NULL),
     // also the originator for missiles.
-    struct mobj_s*	target;
+    mobj_t*	target;
 
     // Reaction time: if non 0, don't attack yet.
     // Used by player to freeze a bit after teleporting.
@@ -242,7 +278,7 @@ typedef struct mobj_s
 
     // Additional info record for player avatars only.
     // Only valid if type == MT_PLAYER
-    player_t*	player;
+    struct player_s*	player;
 
     // Player number last looked for.
     int			lastlook;	
@@ -251,6 +287,11 @@ typedef struct mobj_s
     mapthing_t		spawnpoint;	
 
     // Thing being chased/attacked for tracers.
-    struct mobj_s*	tracer;	
+    mobj_t*	tracer;	
     
-} mobj_t;
+};
+
+
+
+#endif
+

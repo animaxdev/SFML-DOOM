@@ -1,4 +1,34 @@
-#pragma once
+/*
+===========================================================================
+
+Doom 3 BFG Edition GPL Source Code
+Copyright (C) 1993-2012 id Software LLC, a ZeniMax Media company. 
+
+This file is part of the Doom 3 BFG Edition GPL Source Code ("Doom 3 BFG Edition Source Code").  
+
+Doom 3 BFG Edition Source Code is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Doom 3 BFG Edition Source Code is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Doom 3 BFG Edition Source Code.  If not, see <http://www.gnu.org/licenses/>.
+
+In addition, the Doom 3 BFG Edition Source Code is also subject to certain additional terms. You should have received a copy of these additional terms immediately following the terms and conditions of the GNU General Public License which accompanied the Doom 3 BFG Edition Source Code.  If not, please request a copy in writing from id Software at the address below.
+
+If you have questions concerning this license or the applicable additional terms, you may contact in writing id Software LLC, c/o ZeniMax Media Inc., Suite 120, Rockville, Maryland 20850 USA.
+
+===========================================================================
+*/
+
+#ifndef __D_PLAYER__
+#define __D_PLAYER__
+
 
 // The player data structure depends on a number
 // of other structs: items (internal inventory),
@@ -15,6 +45,13 @@
 // is buffered within the player data struct,
 // as commands per game tick.
 #include "d_ticcmd.hpp"
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+
+
 
 //
 // Player states.
@@ -41,25 +78,20 @@ typedef enum
     // No damage, no health loss.
     CF_GODMODE		= 2,
     // Not really a cheat, just a debug aid.
-    CF_NOMOMENTUM	= 4
+    CF_NOMOMENTUM	= 4,
 
+	// Gives kfa at the beginning of the level.
+	CF_GIVEALL		= 8,
+
+	CF_INFAMMO		= 16,
 } cheat_t;
 
-bool
-P_GivePower
-(player_t*	player, int	power);
-
-bool
-P_GiveBody
-(player_t*	player,
-    int		num);
 
 //
 // Extended player object info: player_t
 //
-class player_t
+typedef struct player_s
 {
-public:
     mobj_t*		mo;
     playerstate_t	playerstate;
     ticcmd_t		cmd;
@@ -67,13 +99,13 @@ public:
     // Determine POV,
     //  including viewpoint bobbing during movement.
     // Focal origin above r.z
-    int		viewz;
+    fixed_t		viewz;
     // Base height above floor for viewz.
-    int		viewheight;
+    fixed_t		viewheight;
     // Bob/squat speed.
-   int         	deltaviewheight;
+    fixed_t         	deltaviewheight;
     // bounded/scaled total momentum.
-   int         	bob;	
+    fixed_t         	bob;	
 
     // This is only used between levels,
     // mo->health is used during levels.
@@ -84,8 +116,8 @@ public:
 
     // Power ups. invinc and invis are tic counters.
     int			powers[NUMPOWERS];
-    bool		cards[NUMCARDS];
-    bool		backpack;
+    qboolean		cards[NUMCARDS];
+    qboolean		backpack;
     
     // Frags, kills of other players.
     int			frags[MAXPLAYERS];
@@ -114,6 +146,9 @@ public:
     int			itemcount;
     int			secretcount;
 
+	int			chainsawKills;
+	int			berserkKills;
+
     // Hint messages.
     const char*		message;	
     
@@ -139,9 +174,9 @@ public:
     pspdef_t		psprites[NUMPSPRITES];
 
     // True if secret level has been done.
-    bool		didsecret;	
+    qboolean		didsecret;	
 
-};
+} player_t;
 
 
 //
@@ -150,7 +185,7 @@ public:
 //
 typedef struct
 {
-    bool	in;	// whether the player is in game
+    qboolean	in;	// whether the player is in game
     
     // Player stats, kills, collected items etc.
     int		skills;
@@ -162,12 +197,12 @@ typedef struct
   
 } wbplayerstruct_t;
 
-struct wbstartstruct_t
+typedef struct
 {
     int		epsd;	// episode # (0-2)
 
     // if true, splash the secret level
-    bool	didsecret;
+    qboolean	didsecret;
     
     // previous and next levels, origin 0
     int		last;
@@ -186,4 +221,8 @@ struct wbstartstruct_t
 
     wbplayerstruct_t	plyr[MAXPLAYERS];
 
-};
+} wbstartstruct_t;
+
+
+#endif
+
