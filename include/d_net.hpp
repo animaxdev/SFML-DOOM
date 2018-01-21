@@ -70,13 +70,13 @@ typedef struct
     // High bit is retransmit request.
     unsigned		checksum;
     // Only valid if NCMD_RETRANSMIT.
-    byte		retransmitfrom;
+    unsigned char		retransmitfrom;
 	
-	byte		sourceDest;
+	unsigned char		sourceDest;
     
-    byte		starttic;
-    byte		player;
-    byte		numtics;
+    unsigned char		starttic;
+    unsigned char		player;
+    unsigned char		numtics;
     ticcmd_t		cmds[BACKUPTICS];
 
 } doomdata_t;
@@ -97,7 +97,7 @@ struct doomcom_t
     // Is dest for send, set by get (-1 = no packet).
     short		remotenode;
     
-    // Number of bytes in doomdata to be sent
+    // Number of unsigned chars in doomdata to be sent
     short		datalength;
 
     // Info common to all nodes.
@@ -134,11 +134,8 @@ struct doomcom_t
     
 } ;
 
-
-class idUserCmdMgr;
-
 // Create any new ticcmds and broadcast to other players.
-void NetUpdate ( idUserCmdMgr * userCmdMgr );
+void NetUpdate (  );
 
 // Broadcasts special packets to other players
 //  to notify of game exit

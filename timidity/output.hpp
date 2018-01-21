@@ -49,7 +49,7 @@ extern void s32tou8(void *dp,  int32_t  *lp,  int32_t  c);
 extern void s32tos16(void *dp,  int32_t  *lp,  int32_t  c);
 extern void s32tou16(void *dp,  int32_t  *lp,  int32_t  c);
 
-/* byte-exchanged 16-bit */
+/* unsigned char-exchanged 16-bit */
 extern void s32tos16x(void *dp,  int32_t  *lp,  int32_t  c);
 extern void s32tou16x(void *dp,  int32_t  *lp,  int32_t  c);
 

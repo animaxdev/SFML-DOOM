@@ -54,26 +54,26 @@ extern int PLAYERCOUNT;
 #define NUM_BUTTONS 4
 
 static bool Cheat_God( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
-	::g->plyr->cheats ^= CF_GODMODE;
-	if (::g->plyr->cheats & CF_GODMODE)
+	Globals::g->plyr->cheats ^= CF_GODMODE;
+	if (Globals::g->plyr->cheats & CF_GODMODE)
 	{
-		if (::g->plyr->mo)
-			::g->plyr->mo->health = 100;
+		if (Globals::g->plyr->mo)
+			Globals::g->plyr->mo->health = 100;
 
-		::g->plyr->health = 100;
-		::g->plyr->message = STSTR_DQDON;
+		Globals::g->plyr->health = 100;
+		Globals::g->plyr->message = STSTR_DQDON;
 	}
 	else 
-		::g->plyr->message = STSTR_DQDOFF;
+		Globals::g->plyr->message = STSTR_DQDOFF;
 	return true;
 }
 
 #include "g_game.hpp"
 static bool Cheat_NextLevel( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
 	G_ExitLevel();
@@ -82,69 +82,69 @@ static bool Cheat_NextLevel( void ) {
 }
 
 static bool Cheat_GiveAll( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
 
-	::g->plyr->armorpoints = 200;
-	::g->plyr->armortype = 2;
+	Globals::g->plyr->armorpoints = 200;
+	Globals::g->plyr->armortype = 2;
 
 	int i;
 	for (i=0;i<NUMWEAPONS;i++)
-		::g->plyr->weaponowned[i] = true;
+		Globals::g->plyr->weaponowned[i] = true;
 
 	for (i=0;i<NUMAMMO;i++)
-		::g->plyr->ammo[i] = ::g->plyr->maxammo[i];
+		Globals::g->plyr->ammo[i] = Globals::g->plyr->maxammo[i];
 
 	for (i=0;i<NUMCARDS;i++)
-		::g->plyr->cards[i] = true;
+		Globals::g->plyr->cards[i] = true;
 
-	::g->plyr->message = STSTR_KFAADDED;
+	Globals::g->plyr->message = STSTR_KFAADDED;
 	return true;
 }
 
 static bool Cheat_GiveAmmo( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
-	::g->plyr->armorpoints = 200;
-	::g->plyr->armortype = 2;
+	Globals::g->plyr->armorpoints = 200;
+	Globals::g->plyr->armortype = 2;
 
 	int i;
 	for (i=0;i<NUMWEAPONS;i++)
-		::g->plyr->weaponowned[i] = true;
+		Globals::g->plyr->weaponowned[i] = true;
 
 	for (i=0;i<NUMAMMO;i++)
-		::g->plyr->ammo[i] = ::g->plyr->maxammo[i];
+		Globals::g->plyr->ammo[i] = Globals::g->plyr->maxammo[i];
 
-	::g->plyr->message = STSTR_KFAADDED;
+	Globals::g->plyr->message = STSTR_KFAADDED;
 	return true;
 }
 
 static bool Cheat_Choppers( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
-	::g->plyr->weaponowned[wp_chainsaw] = true;
-	::g->plyr->message = "Chainsaw!";
+	Globals::g->plyr->weaponowned[wp_chainsaw] = true;
+	Globals::g->plyr->message = "Chainsaw!";
 	return true;
 }
 
 extern qboolean P_GivePower ( player_t*	player, int /*powertype_t*/	power );
 
 static void TogglePowerUp( int i ) {
-	if (!::g->plyr->powers[i])
-		P_GivePower( ::g->plyr, i);
+	if (!Globals::g->plyr->powers[i])
+		P_GivePower( Globals::g->plyr, i);
 	else if (i!=pw_strength)
-		::g->plyr->powers[i] = 1;
+		Globals::g->plyr->powers[i] = 1;
 	else
-		::g->plyr->powers[i] = 0;
+		Globals::g->plyr->powers[i] = 0;
 
-	::g->plyr->message = STSTR_BEHOLDX;
+	Globals::g->plyr->message = STSTR_BEHOLDX;
 }
 
 static bool Cheat_GiveInvul( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
 
@@ -153,7 +153,7 @@ static bool Cheat_GiveInvul( void ) {
 }
 
 static bool Cheat_GiveBerserk( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
 
@@ -162,7 +162,7 @@ static bool Cheat_GiveBerserk( void ) {
 }
 
 static bool Cheat_GiveBlur( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
 
@@ -171,7 +171,7 @@ static bool Cheat_GiveBlur( void ) {
 }
 
 static bool Cheat_GiveRad( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
 
@@ -180,7 +180,7 @@ static bool Cheat_GiveRad( void ) {
 }
 
 static bool Cheat_GiveMap( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
 
@@ -189,7 +189,7 @@ static bool Cheat_GiveMap( void ) {
 }
 
 static bool Cheat_GiveLight( void ) {
-	if( PLAYERCOUNT != 1 || ::g->netgame ) {
+	if( PLAYERCOUNT != 1 || Globals::g->netgame ) {
 		return false;
 	}
 
@@ -249,7 +249,7 @@ extern void S_StartSound ( void*		origin, int		sfx_id );
 
 void CheckCheat( int button ) {
 #if ALLOW_CHEATS
-	if( tracking && !::g->netgame ) {
+	if( tracking && !Globals::g->netgame ) {
 
 		currentCode[ currentCheatLength++ ] = button;
 
@@ -307,15 +307,15 @@ int I_ReturnMouseInputEvent( const int n, event_t* e) {
 	e->type = ev_mouse;
 	e->data1 = e->data2 = e->data3 = 0;
 
-	switch(::g->mouseEvents[n].type) {
+	switch(Globals::g->mouseEvents[n].type) {
 	case IETAxis:
-		switch (::g->mouseEvents[n].action)
+		switch (Globals::g->mouseEvents[n].action)
 		{
 		/*case M_DELTAX:
-			e->data2 = ::g->mouseEvents[n].data;
+			e->data2 = Globals::g->mouseEvents[n].data;
 			break;
 		case M_DELTAY:
-			e->data3 = ::g->mouseEvents[n].data;
+			e->data3 = Globals::g->mouseEvents[n].data;
 			break;*/
 		}
 		return 1;
@@ -349,7 +349,7 @@ static int xlatekey(int key)
 		rc = '1';
 		break;
 	case 1:	// B
-		if( ::g->menuactive ) {
+		if( Globals::g->menuactive ) {
 			rc = KEY_BACKSPACE;
 		}
 		else {
@@ -373,7 +373,7 @@ static int xlatekey(int key)
 		rc = KEY_RCTRL;
 		break;
 	case 8:	// Up
-		if( ::g->menuactive ) {
+		if( Globals::g->menuactive ) {
 			rc = KEY_UPARROW;
 		}
 		else {
@@ -382,7 +382,7 @@ static int xlatekey(int key)
 		}
 		break;
 	case 9:
-		if( ::g->menuactive ) {
+		if( Globals::g->menuactive ) {
 			rc = KEY_DOWNARROW;
 		}
 		else {
@@ -391,7 +391,7 @@ static int xlatekey(int key)
 		}
 		break;
 	case 10:
-		if( ::g->menuactive ) {
+		if( Globals::g->menuactive ) {
 			rc = KEY_UPARROW;
 		}
 		else {
@@ -400,7 +400,7 @@ static int xlatekey(int key)
 		}
 		break;
 	case 11:
-		if( ::g->menuactive ) {
+		if( Globals::g->menuactive ) {
 			rc = KEY_DOWNARROW;
 		}
 		else {
@@ -426,34 +426,34 @@ int I_ReturnJoystickInputEvent( const int n, event_t* e) {
 
 	e->data1 = e->data2 = e->data3 = 0;
 
-	switch(::g->joyEvents[n].type)
+	switch(Globals::g->joyEvents[n].type)
 	{
 	case IETAxis:
 		e->type = ev_joystick;//ev_mouse;
-		switch (::g->joyEvents[n].action)
+		switch (Globals::g->joyEvents[n].action)
 		{
 		case J_DELTAX:
 /*
-			if (::g->joyEvents[n].data < 0) 
+			if (Globals::g->joyEvents[n].data < 0) 
 				e->data2 = -1;
-			else if (::g->joyEvents[n].data > 0)
+			else if (Globals::g->joyEvents[n].data > 0)
 				e->data2 = 1;
 */
-			e->data2 = ::g->joyEvents[n].data;
+			e->data2 = Globals::g->joyEvents[n].data;
 			break;
 		case J_DELTAY:
 			e->type = ev_mouse;
-			e->data3 = ::g->joyEvents[n].data;
+			e->data3 = Globals::g->joyEvents[n].data;
 			break;
 		}
 		return 1;
 	case IETButtonAnalog:
 	case IETButtonDigital:
-		if (::g->joyEvents[n].data) 
+		if (Globals::g->joyEvents[n].data) 
 			e->type = ev_keydown;
 		else
 			e->type = ev_keyup;
-		e->data1 = xlatekey(::g->joyEvents[n].action);
+		e->data1 = xlatekey(Globals::g->joyEvents[n].action);
 		return 1;
 
 	case IETNone:
@@ -467,7 +467,7 @@ void I_EndJoystickInputEvents( void ) {
 	int i;
 	for(i = 0; i < 18; i++)
 	{
-		::g->joyEvents[i].type = IETNone;
+		Globals::g->joyEvents[i].type = IETNone;
 	}
 
 }

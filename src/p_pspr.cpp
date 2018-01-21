@@ -122,7 +122,7 @@ P_SetPsprite
 			break;	
 		}
 
-		state = &::g->states[stnum];
+		state = &Globals::g->states[stnum];
 		psp->state = state;
 		psp->tics = state->tics;	// could be 0
 
@@ -165,11 +165,11 @@ void P_CalcSwing (player_t*	player)
 
 	swing = player->bob;
 
-	angle = (FINEANGLES/70*::g->leveltime)&FINEMASK;
-	::g->swingx = FixedMul ( swing, finesine[angle]);
+	angle = (FINEANGLES/70*Globals::g->leveltime)&FINEMASK;
+	Globals::g->swingx = FixedMul ( swing, finesine[angle]);
 
-	angle = (FINEANGLES/70*::g->leveltime+FINEANGLES/2)&FINEMASK;
-	::g->swingy = -FixedMul ( ::g->swingx, finesine[angle]);
+	angle = (FINEANGLES/70*Globals::g->leveltime+FINEANGLES/2)&FINEMASK;
+	Globals::g->swingy = -FixedMul ( Globals::g->swingx, finesine[angle]);
 }
 
 
@@ -187,7 +187,7 @@ void P_BringUpWeapon (player_t* player)
 	if (player->pendingweapon == wp_nochange)
 		player->pendingweapon = player->readyweapon;
 
-	if (player->pendingweapon == wp_chainsaw && (globalNetworking || (player == &::g->players[::g->consoleplayer])) )
+	if (player->pendingweapon == wp_chainsaw && (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer])) )
 		S_StartSound (player->mo, sfx_sawup);
 
 	newstate = (statenum_t)(weaponinfo[player->pendingweapon].upstate);
@@ -229,13 +229,13 @@ qboolean P_CheckAmmo (player_t* player)
 	{
 		if (player->weaponowned[wp_plasma]
 		&& player->ammo[am_cell]
-		&& (::g->gamemode != shareware) )
+		&& (Globals::g->gamemode != shareware) )
 		{
 			player->pendingweapon = wp_plasma;
 		}
 		else if (player->weaponowned[wp_supershotgun] 
 		&& player->ammo[am_shell]>2
-			&& (::g->gamemode == commercial) )
+			&& (Globals::g->gamemode == commercial) )
 		{
 			player->pendingweapon = wp_supershotgun;
 		}
@@ -264,7 +264,7 @@ qboolean P_CheckAmmo (player_t* player)
 		}
 		else if (player->weaponowned[wp_bfg]
 		&& player->ammo[am_cell]>40
-			&& (::g->gamemode != shareware) )
+			&& (Globals::g->gamemode != shareware) )
 		{
 			player->pendingweapon = wp_bfg;
 		}
@@ -302,7 +302,7 @@ void P_FireWeapon (player_t* player)
 
 	if (player->readyweapon == wp_chainsaw )
 	{	
-		if( ::g->plyr == player ) {
+		if( Globals::g->plyr == player ) {
 		}
 	}
 
@@ -340,16 +340,16 @@ A_WeaponReady
 	int		angle;
 
 	// get out of attack state
-	if (player->mo->state == &::g->states[S_PLAY_ATK1]
-	|| player->mo->state == &::g->states[S_PLAY_ATK2] )
+	if (player->mo->state == &Globals::g->states[S_PLAY_ATK1]
+	|| player->mo->state == &Globals::g->states[S_PLAY_ATK2] )
 	{
 		P_SetMobjState (player->mo, S_PLAY);
 	}
 
 	if (player->readyweapon == wp_chainsaw
-		&& psp->state == &::g->states[S_SAW])
+		&& psp->state == &Globals::g->states[S_SAW])
 	{
-		if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+		if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 			S_StartSound (player->mo, sfx_sawidl);
 	}
 
@@ -381,7 +381,7 @@ A_WeaponReady
 		player->attackdown = false;
 
 	// bob the weapon based on movement speed
-	angle = (128*::g->leveltime)&FINEMASK;
+	angle = (128*Globals::g->leveltime)&FINEMASK;
 	psp->sx = FRACUNIT + FixedMul (player->bob, finecosine[angle]);
 	angle &= FINEANGLES/2-1;
 	psp->sy = WEAPONTOP + FixedMul (player->bob, finesine[angle]);
@@ -538,13 +538,13 @@ A_Punch
 	P_LineAttack (player->mo, angle, MELEERANGE, slope, damage);
 
 	// turn to face target
-	if (::g->linetarget)
+	if (Globals::g->linetarget)
 	{
 		S_StartSound (player->mo, sfx_punch);
 		player->mo->angle = R_PointToAngle2 (player->mo->x,
 			player->mo->y,
-			::g->linetarget->x,
-			::g->linetarget->y);
+			Globals::g->linetarget->x,
+			Globals::g->linetarget->y);
 	}
 }
 
@@ -569,18 +569,18 @@ A_Saw
 	slope = P_AimLineAttack (player->mo, angle, MELEERANGE+1);
 	P_LineAttack (player->mo, angle, MELEERANGE+1, slope, damage);
 
-	if (!::g->linetarget)
+	if (!Globals::g->linetarget)
 	{
-		if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+		if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 			S_StartSound (player->mo, sfx_sawful);
 		return;
 	}
-	if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+	if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 		S_StartSound (player->mo, sfx_sawhit);
 
 	// turn to face target
 	angle = R_PointToAngle2 (player->mo->x, player->mo->y,
-		::g->linetarget->x, ::g->linetarget->y);
+		Globals::g->linetarget->x, Globals::g->linetarget->y);
 	if (angle - player->mo->angle > ANG180)
 	{
 		if (angle - player->mo->angle < -ANG90/20)
@@ -613,7 +613,7 @@ A_FireMissile
 	}
 	P_SpawnPlayerMissile (player->mo, MT_ROCKET);
 
-	if( ::g->plyr == player ) {
+	if( Globals::g->plyr == player ) {
 	}
 
 }
@@ -633,7 +633,7 @@ A_FireBFG
 
 	P_SpawnPlayerMissile (player->mo, MT_BFG);
 
-	if( ::g->plyr == player ) {
+	if( Globals::g->plyr == player ) {
 	}
 }
 
@@ -657,7 +657,7 @@ A_FirePlasma
 
 	P_SpawnPlayerMissile (player->mo, MT_PLASMA);
 
-	if( ::g->plyr == player ) {
+	if( Globals::g->plyr == player ) {
 	}
 }
 
@@ -676,16 +676,16 @@ void P_BulletSlope (mobj_t*	mo)
 
 	// see which target is to be aimed at
 	an = mo->angle;
-	::g->bulletslope = P_AimLineAttack (mo, an, 16*64*FRACUNIT);
+	Globals::g->bulletslope = P_AimLineAttack (mo, an, 16*64*FRACUNIT);
 
-	if (!::g->linetarget)
+	if (!Globals::g->linetarget)
 	{
 		an += 1<<26;
-		::g->bulletslope = P_AimLineAttack (mo, an, 16*64*FRACUNIT);
-		if (!::g->linetarget)
+		Globals::g->bulletslope = P_AimLineAttack (mo, an, 16*64*FRACUNIT);
+		if (!Globals::g->linetarget)
 		{
 			an -= 2<<26;
-			::g->bulletslope = P_AimLineAttack (mo, an, 16*64*FRACUNIT);
+			Globals::g->bulletslope = P_AimLineAttack (mo, an, 16*64*FRACUNIT);
 		}
 	}
 }
@@ -708,7 +708,7 @@ P_GunShot
 	if (!accurate)
 		angle += (P_Random()-P_Random())<<18;
 
-	P_LineAttack (mo, angle, MISSILERANGE, ::g->bulletslope, damage);
+	P_LineAttack (mo, angle, MISSILERANGE, Globals::g->bulletslope, damage);
 }
 
 
@@ -720,7 +720,7 @@ A_FirePistol
 ( player_t*	player,
  pspdef_t*	psp ) 
 {
-	if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+	if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 		S_StartSound (player->mo, sfx_pistol);
 
 	P_SetMobjState (player->mo, S_PLAY_ATK2);
@@ -735,7 +735,7 @@ A_FirePistol
 	P_BulletSlope (player->mo);
 	P_GunShot (player->mo, !player->refire);
 
-	if( ::g->plyr == player ) {
+	if( Globals::g->plyr == player ) {
 	}
 }
 
@@ -750,7 +750,7 @@ A_FireShotgun
 {
 	int		i;
 
-	if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+	if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 		S_StartSound (player->mo, sfx_shotgn);
 	P_SetMobjState (player->mo, S_PLAY_ATK2);
 
@@ -767,7 +767,7 @@ A_FireShotgun
 	for (i=0 ; i<7 ; i++)
 		P_GunShot (player->mo, false);
 
-	if( ::g->plyr == player ) {
+	if( Globals::g->plyr == player ) {
 	}
 }
 
@@ -786,7 +786,7 @@ A_FireShotgun2
 	int		damage;
 
 
-	if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+	if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 		S_StartSound (player->mo, sfx_dshtgn);
 	P_SetMobjState (player->mo, S_PLAY_ATK2);
 
@@ -808,10 +808,10 @@ A_FireShotgun2
 		P_LineAttack (player->mo,
 			angle,
 			MISSILERANGE,
-			::g->bulletslope + ((P_Random()-P_Random())<<5), damage);
+			Globals::g->bulletslope + ((P_Random()-P_Random())<<5), damage);
 	}
 
-	if( ::g->plyr == player ) {
+	if( Globals::g->plyr == player ) {
 	}
 }
 
@@ -824,7 +824,7 @@ A_FireCGun
 ( player_t*	player,
  pspdef_t*	psp ) 
 {
-	if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+	if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 		S_StartSound (player->mo, sfx_pistol);
 
 	if (!player->ammo[weaponinfo[player->readyweapon].ammo])
@@ -840,13 +840,13 @@ A_FireCGun
 		(statenum_t)(
 		weaponinfo[player->readyweapon].flashstate
 		+ psp->state
-		- &::g->states[S_CHAIN1] ));
+		- &Globals::g->states[S_CHAIN1] ));
 
 	P_BulletSlope (player->mo);
 
 	P_GunShot (player->mo, !player->refire);
 
-	if( ::g->plyr == player ) {
+	if( Globals::g->plyr == player ) {
 	}
 }
 
@@ -891,19 +891,19 @@ void A_BFGSpray (mobj_t* mo, void * )
 		//  of the missile
 		P_AimLineAttack (mo->target, an, 16*64*FRACUNIT);
 
-		if (!::g->linetarget)
+		if (!Globals::g->linetarget)
 			continue;
 
-		P_SpawnMobj (::g->linetarget->x,
-			::g->linetarget->y,
-			::g->linetarget->z + (::g->linetarget->height>>2),
+		P_SpawnMobj (Globals::g->linetarget->x,
+			Globals::g->linetarget->y,
+			Globals::g->linetarget->z + (Globals::g->linetarget->height>>2),
 			MT_EXTRABFG);
 
 		damage = 0;
 		for (j=0;j<15;j++)
 			damage += (P_Random()&7) + 1;
 
-		P_DamageMobj (::g->linetarget, mo->target,mo->target, damage);
+		P_DamageMobj (Globals::g->linetarget, mo->target,mo->target, damage);
 	}
 }
 

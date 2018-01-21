@@ -128,7 +128,7 @@ P_InterceptVector2
 //
 // P_CrossSubsector
 // Returns true
-//  if ::g->strace crosses the given subsector successfully.
+//  if Globals::g->strace crosses the given subsector successfully.
 //
 qboolean P_CrossSubsector (int num)
 {
@@ -149,32 +149,32 @@ qboolean P_CrossSubsector (int num)
     fixed_t		slope;
 	
 #ifdef RANGECHECK
-    if (num>=::g->numsubsectors)
+    if (num>=Globals::g->numsubsectors)
 	I_Error ("P_CrossSubsector: ss %i with numss = %i",
 		 num,
-		 ::g->numsubsectors);
+		 Globals::g->numsubsectors);
 #endif
 
-    sub = &::g->subsectors[num];
+    sub = &Globals::g->subsectors[num];
     
-    // check ::g->lines
+    // check Globals::g->lines
     count = sub->numlines;
-    seg = &::g->segs[sub->firstline];
+    seg = &Globals::g->segs[sub->firstline];
 
     for ( ; count ; seg++, count--)
     {
 	line = seg->linedef;
 
 	// allready checked other side?
-	if (line->validcount == ::g->validcount)
+	if (line->validcount == Globals::g->validcount)
 	    continue;
 	
-	line->validcount = ::g->validcount;
+	line->validcount = Globals::g->validcount;
 		
 	v1 = line->v1;
 	v2 = line->v2;
-	s1 = P_DivlineSide (v1->x,v1->y, &::g->strace);
-	s2 = P_DivlineSide (v2->x, v2->y, &::g->strace);
+	s1 = P_DivlineSide (v1->x,v1->y, &Globals::g->strace);
+	s2 = P_DivlineSide (v2->x, v2->y, &Globals::g->strace);
 
 	// line isn't crossed?
 	if (s1 == s2)
@@ -184,8 +184,8 @@ qboolean P_CrossSubsector (int num)
 	divl.y = v1->y;
 	divl.dx = v2->x - v1->x;
 	divl.dy = v2->y - v1->y;
-	s1 = P_DivlineSide (::g->strace.x, ::g->strace.y, &divl);
-	s2 = P_DivlineSide (::g->t2x, ::g->t2y, &divl);
+	s1 = P_DivlineSide (Globals::g->strace.x, Globals::g->strace.y, &divl);
+	s2 = P_DivlineSide (Globals::g->t2x, Globals::g->t2y, &divl);
 
 	// line isn't crossed?
 	if (s1 == s2)
@@ -222,23 +222,23 @@ qboolean P_CrossSubsector (int num)
 	if (psight_openbottom >= psight_opentop)	
 	    return false;		// stop
 	
-	frac = P_InterceptVector2 (&::g->strace, &divl);
+	frac = P_InterceptVector2 (&Globals::g->strace, &divl);
 		
 	if (front->floorheight != back->floorheight)
 	{
-	    slope = FixedDiv (psight_openbottom - ::g->sightzstart , frac);
-	    if (slope > ::g->bottomslope)
-		::g->bottomslope = slope;
+	    slope = FixedDiv (psight_openbottom - Globals::g->sightzstart , frac);
+	    if (slope > Globals::g->bottomslope)
+		Globals::g->bottomslope = slope;
 	}
 		
 	if (front->ceilingheight != back->ceilingheight)
 	{
-	    slope = FixedDiv (psight_opentop - ::g->sightzstart , frac);
-	    if (slope < ::g->topslope)
-		::g->topslope = slope;
+	    slope = FixedDiv (psight_opentop - Globals::g->sightzstart , frac);
+	    if (slope < Globals::g->topslope)
+		Globals::g->topslope = slope;
 	}
 		
-	if (::g->topslope <= ::g->bottomslope)
+	if (Globals::g->topslope <= Globals::g->bottomslope)
 	    return false;		// stop				
     }
     // passed the subsector ok
@@ -250,7 +250,7 @@ qboolean P_CrossSubsector (int num)
 //
 // P_CrossBSPNode
 // Returns true
-//  if ::g->strace crosses the given node successfully.
+//  if Globals::g->strace crosses the given node successfully.
 //
 qboolean P_CrossBSPNode (int bspnum)
 {
@@ -265,19 +265,19 @@ qboolean P_CrossBSPNode (int bspnum)
 	    return P_CrossSubsector (bspnum&(~NF_SUBSECTOR));
     }
 		
-    bsp = &::g->nodes[bspnum];
+    bsp = &Globals::g->nodes[bspnum];
     
     // decide which side the start point is on
-    side = P_DivlineSide (::g->strace.x, ::g->strace.y, (divline_t *)bsp);
+    side = P_DivlineSide (Globals::g->strace.x, Globals::g->strace.y, (divline_t *)bsp);
     if (side == 2)
-	side = 0;	// an "on" should cross both ::g->sides
+	side = 0;	// an "on" should cross both Globals::g->sides
 
     // cross the starting side
     if (!P_CrossBSPNode (bsp->children[side]) )
 	return false;
 	
     // the partition plane is crossed here
-    if (side == P_DivlineSide (::g->t2x, ::g->t2y,(divline_t *)bsp))
+    if (side == P_DivlineSide (Globals::g->t2x, Globals::g->t2y,(divline_t *)bsp))
     {
 	// the line doesn't touch the other side
 	return true;
@@ -308,16 +308,16 @@ P_CheckSight
     // First check for trivial rejection.
 
     // Determine subsector entries in REJECT table.
-    s1 = (t1->subsector->sector - ::g->sectors);
-    s2 = (t2->subsector->sector - ::g->sectors);
-    pnum = s1*::g->numsectors + s2;
+    s1 = (t1->subsector->sector - Globals::g->sectors);
+    s2 = (t2->subsector->sector - Globals::g->sectors);
+    pnum = s1*Globals::g->numsectors + s2;
     bytenum = pnum>>3;
     bitnum = 1 << (pnum&7);
 
     // Check in REJECT table.
-    if (::g->rejectmatrix[bytenum]&bitnum)
+    if (Globals::g->rejectmatrix[bytenum]&bitnum)
     {
-	::g->sightcounts[0]++;
+	Globals::g->sightcounts[0]++;
 
 	// can't possibly be connected
 	return false;	
@@ -325,23 +325,23 @@ P_CheckSight
 
     // An unobstructed LOS is possible.
     // Now look from eyes of t1 to any part of t2.
-    ::g->sightcounts[1]++;
+    Globals::g->sightcounts[1]++;
 
-    ::g->validcount++;
+    Globals::g->validcount++;
 	
-    ::g->sightzstart = t1->z + t1->height - (t1->height>>2);
-    ::g->topslope = (t2->z+t2->height) - ::g->sightzstart;
-    ::g->bottomslope = (t2->z) - ::g->sightzstart;
+    Globals::g->sightzstart = t1->z + t1->height - (t1->height>>2);
+    Globals::g->topslope = (t2->z+t2->height) - Globals::g->sightzstart;
+    Globals::g->bottomslope = (t2->z) - Globals::g->sightzstart;
 	
-    ::g->strace.x = t1->x;
-    ::g->strace.y = t1->y;
-    ::g->t2x = t2->x;
-    ::g->t2y = t2->y;
-    ::g->strace.dx = t2->x - t1->x;
-    ::g->strace.dy = t2->y - t1->y;
+    Globals::g->strace.x = t1->x;
+    Globals::g->strace.y = t1->y;
+    Globals::g->t2x = t2->x;
+    Globals::g->t2y = t2->y;
+    Globals::g->strace.dx = t2->x - t1->x;
+    Globals::g->strace.dy = t2->y - t1->y;
 
     // the head node is the last node output
-    return P_CrossBSPNode (::g->numnodes-1);	
+    return P_CrossBSPNode (Globals::g->numnodes-1);	
 }
 
 

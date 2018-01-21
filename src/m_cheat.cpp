@@ -50,26 +50,26 @@ cht_CheckCheat
     int i;
     int rc = 0;
 
-    if (::g->firsttime)
+    if (Globals::g->firsttime)
     {
-	::g->firsttime = 0;
-	for (i=0;i<256;i++) ::g->cheat_xlate_table[i] = SCRAMBLE(i);
+	Globals::g->firsttime = 0;
+	for (i=0;i<256;i++) Globals::g->cheat_xlate_table[i] = SCRAMBLE(i);
     }
 
     if (!cht->p)
     {
-	cht->p = ::g->cheatbuffer + ::g->usedcheatbuffer;
+	cht->p = Globals::g->cheatbuffer + Globals::g->usedcheatbuffer;
 	int isize = 0;
 	while(cht->sequence[isize] != 0xff) cht->p[isize] = cht->sequence[isize];
 	cht->p[isize] = 0xff;
-	::g->usedcheatbuffer += isize;
-	::g->usedcheatbuffer ++;
+	Globals::g->usedcheatbuffer += isize;
+	Globals::g->usedcheatbuffer ++;
     }
 
     if (*cht->p == 0)
 	*(cht->p++) = key;
     else if
-	(::g->cheat_xlate_table[(unsigned char)key] == *cht->p) cht->p++;
+	(Globals::g->cheat_xlate_table[(unsigned char)key] == *cht->p) cht->p++;
     else
     {
 	int isize = 0;

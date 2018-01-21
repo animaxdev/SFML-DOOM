@@ -46,9 +46,9 @@ int M_CheckParm (char *check)
 {
     int		i;
 
-    for (i = 1; i < ::g->myargc; i++)
+    for (i = 1; i < Globals::g->myargc; i++)
     {
-		//if ( !std::string::Icmp(check, ::g->myargv[i]) )
+		//if ( !std::string::Icmp(check, Globals::g->myargv[i]) )
 			return i;
     }
 

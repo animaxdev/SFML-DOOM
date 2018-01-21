@@ -40,9 +40,9 @@ If you have questions concerning this license or the applicable additional terms
 // a pic is an unmasked block of pixels
 typedef struct
 {
-    byte		width;
-    byte		height;
-    byte		data;
+    unsigned char		width;
+    unsigned char		height;
+    unsigned char		data;
 } pic_t;
 
 

@@ -34,8 +34,6 @@ If you have questions concerning this license or the applicable additional terms
 #include <vector>
 #include <string>
 
-class idUserCmdMgr;
-
 class DoomInterface
 {
 public:
@@ -45,7 +43,7 @@ public:
 	typedef int ( *NoParamCallback)();
 	
 	void Startup( int players, bool multiplayer = false );
-	bool Frame( int time, idUserCmdMgr * userCmdMgr );
+    bool Frame( int time );
 	void Shutdown();
 	void QuitCurrentGame();
 	void EndDMGame();

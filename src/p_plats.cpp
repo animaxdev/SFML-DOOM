@@ -68,7 +68,7 @@ void T_PlatRaise(plat_t* plat)
 	if (plat->type == raiseAndChange
 	    || plat->type == raiseToNearestAndChange)
 	{
-	    if (!(::g->leveltime&7))
+	    if (!(Globals::g->leveltime&7))
 		S_StartSound( &plat->sector->soundorg,
 			     sfx_stnmov);
 	}
@@ -167,7 +167,7 @@ EV_DoPlat
 	
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
-	sec = &::g->sectors[secnum];
+	sec = &Globals::g->sectors[secnum];
 
 	if (sec->specialdata)
 	    continue;
@@ -188,7 +188,7 @@ EV_DoPlat
 	{
 	  case raiseToNearestAndChange:
 	    plat->speed = PLATSPEED/2;
-	    sec->floorpic = ::g->sides[line->sidenum[0]].sector->floorpic;
+	    sec->floorpic = Globals::g->sides[line->sidenum[0]].sector->floorpic;
 	    plat->high = P_FindNextHighestFloor(sec,sec->floorheight);
 	    plat->wait = 0;
 	    plat->status = up;
@@ -200,7 +200,7 @@ EV_DoPlat
 	    
 	  case raiseAndChange:
 	    plat->speed = PLATSPEED/2;
-	    sec->floorpic = ::g->sides[line->sidenum[0]].sector->floorpic;
+	    sec->floorpic = Globals::g->sides[line->sidenum[0]].sector->floorpic;
 	    plat->high = sec->floorheight + amount*FRACUNIT;
 	    plat->wait = 0;
 	    plat->status = up;
@@ -264,12 +264,12 @@ void P_ActivateInStasis(int tag)
     int		i;
 	
     for (i = 0;i < MAXPLATS;i++)
-	if (::g->activeplats[i]
-	    && (::g->activeplats[i])->tag == tag
-	    && (::g->activeplats[i])->status == in_stasis)
+	if (Globals::g->activeplats[i]
+	    && (Globals::g->activeplats[i])->tag == tag
+	    && (Globals::g->activeplats[i])->status == in_stasis)
 	{
-	    (::g->activeplats[i])->status = (::g->activeplats[i])->oldstatus;
-	    (::g->activeplats[i])->thinker.function.acp1
+	    (Globals::g->activeplats[i])->status = (Globals::g->activeplats[i])->oldstatus;
+	    (Globals::g->activeplats[i])->thinker.function.acp1
 	      = (actionf_p1) T_PlatRaise;
 	}
 }
@@ -279,13 +279,13 @@ void EV_StopPlat(line_t* line)
     int		j;
 	
     for (j = 0;j < MAXPLATS;j++)
-	if (::g->activeplats[j]
-	    && ((::g->activeplats[j])->status != in_stasis)
-	    && ((::g->activeplats[j])->tag == line->tag))
+	if (Globals::g->activeplats[j]
+	    && ((Globals::g->activeplats[j])->status != in_stasis)
+	    && ((Globals::g->activeplats[j])->tag == line->tag))
 	{
-	    (::g->activeplats[j])->oldstatus = (::g->activeplats[j])->status;
-	    (::g->activeplats[j])->status = in_stasis;
-	    (::g->activeplats[j])->thinker.function.acv = (actionf_v)NULL;
+	    (Globals::g->activeplats[j])->oldstatus = (Globals::g->activeplats[j])->status;
+	    (Globals::g->activeplats[j])->status = in_stasis;
+	    (Globals::g->activeplats[j])->thinker.function.acv = (actionf_v)NULL;
 	}
 }
 
@@ -294,9 +294,9 @@ void P_AddActivePlat(plat_t* plat)
     int		i;
     
     for (i = 0;i < MAXPLATS;i++)
-	if (::g->activeplats[i] == NULL)
+	if (Globals::g->activeplats[i] == NULL)
 	{
-	    ::g->activeplats[i] = plat;
+	    Globals::g->activeplats[i] = plat;
 	    return;
 	}
     I_Error ("P_AddActivePlat: no more plats!");
@@ -306,11 +306,11 @@ void P_RemoveActivePlat(plat_t* plat)
 {
     int		i;
     for (i = 0;i < MAXPLATS;i++)
-	if (plat == ::g->activeplats[i])
+	if (plat == Globals::g->activeplats[i])
 	{
-	    (::g->activeplats[i])->sector->specialdata = NULL;
-	    P_RemoveThinker(&(::g->activeplats[i])->thinker);
-	    ::g->activeplats[i] = NULL;
+	    (Globals::g->activeplats[i])->sector->specialdata = NULL;
+	    P_RemoveThinker(&(Globals::g->activeplats[i])->thinker);
+	    Globals::g->activeplats[i] = NULL;
 	    
 	    return;
 	}

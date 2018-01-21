@@ -43,10 +43,10 @@ M_WriteFile
 int
 	M_ReadFile
 	( char const*	name,
-	byte**	buffer );
+	unsigned char**	buffer );
 
 bool M_WriteSaveGame( void* source, int length );
-int M_ReadSaveGame ( byte** buffer );
+int M_ReadSaveGame ( unsigned char** buffer );
 
 void M_ScreenShot (void);
 

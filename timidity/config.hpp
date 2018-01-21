@@ -89,7 +89,7 @@ option to toggle this as well. */
 /* How many bits to use for the fractional part of sample positions.
 This affects tonal accuracy. The entire position counter must fit
 in 32 bits, so with FRACTION_BITS equal to 12, the maximum size of
-a sample is 1048576 samples (2 megabytes in memory). The GUS gets
+a sample is 1048576 samples (2 megaunsigned chars in memory). The GUS gets
 by with just 9 bits and a little help from its friends...
 "The GUS does not SUCK!!!" -- a happy user :) */
 #define FRACTION_BITS 12

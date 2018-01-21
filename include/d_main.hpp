@@ -51,7 +51,7 @@ void D_AddFile ( const char *file);
 // calls all startup code, parses command line options.
 // If not overrided by user input, calls N_AdvanceDemo.
 //
-int main (void);
+void D_DoomMain (void);
 
 // Called by IO functions when input is detected.
 void D_PostEvent (event_t* ev);

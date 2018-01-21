@@ -51,16 +51,19 @@ If you have questions concerning this license or the applicable additional terms
 #include "w_wad.hpp"
 #include "dstrings.hpp"
 
-#include "typedefs.hpp"
 #include "defs.hpp"
 #include "structs.hpp"
+#include <array>
+#include <fstream>
+#include <iosfwd>
 
-struct Globals {
+struct Globals
+{
 	void InitGlobals();
 #include "vars.hpp"
+    
+    static std::unique_ptr<Globals> g;
 };
-
-extern Globals *g;
 
 #define GLOBAL( type, name ) type name
 #define GLOBAL_ARRAY( type, name, count ) type name[count]

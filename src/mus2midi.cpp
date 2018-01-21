@@ -38,7 +38,7 @@ If you have questions concerning this license or the applicable additional terms
 // reads a variable length integer
 unsigned long ReadVarLen( char* buffer ) {
 	unsigned long value;
-	byte c;
+	unsigned char c;
 
 	if ((value = *buffer++) & 0x80) {
 		value &= 0x7f;
@@ -49,8 +49,8 @@ unsigned long ReadVarLen( char* buffer ) {
 	return value;
 }
 
-// Writes a variable length integer to a buffer, and returns bytes written
-int WriteVarLen( long value, byte* out ) 
+// Writes a variable length integer to a buffer, and returns unsigned chars written
+int WriteVarLen( long value, unsigned char* out ) 
 {
 	long buffer, count = 0;
 
@@ -63,7 +63,7 @@ int WriteVarLen( long value, byte* out )
 
 	while (1) {
 		++count;
-		*out = (byte)buffer;
+		*out = (unsigned char)buffer;
 		++out;
 		if (buffer & 0x80)
 			buffer >>= 8;
@@ -73,8 +73,8 @@ int WriteVarLen( long value, byte* out )
 	return count;
 }
 
-// writes a byte, and returns the buffer
-unsigned char* WriteByte(void* buf, byte b)
+// writes a unsigned char, and returns the buffer
+unsigned char* WriteByte(void* buf, unsigned char b)
 {
 	unsigned char* buffer = (unsigned char*)buf;
 	*buffer++ = b;
@@ -172,7 +172,7 @@ int Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 	// Midi track header, only 1 needed(format 0)
 	MidiTrackChunk_t midiTrackHeader;
 	// Stores the position of the midi track header(to change the size)
-	byte* midiTrackHeaderOut;
+	unsigned char* midiTrackHeaderOut;
 	
 	// Delta time for midi event
 	int delta_time = 0;
@@ -180,7 +180,7 @@ int Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 	int channel_volume[MIDI_MAXCHANNELS] = {0};
 	int bytes_written = 0;
 	int channelMap[MIDI_MAXCHANNELS], currentChannel = 0;
-	byte last_status = 0;
+	unsigned char last_status = 0;
 
 	// read the mus header
 	memcpy(&header, cur, sizeof(header));
@@ -211,7 +211,7 @@ int Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 	// Write out midi header
 	Midi_CreateHeader(&midiHeader, 0, 1, 0x0059);
 	Midi_UpdateBytesWritten(&bytes_written, MIDIHEADERSIZE, *len);
-	memcpy(out, &midiHeader, MIDIHEADERSIZE);	// cannot use sizeof(packs it to 16 bytes)
+	memcpy(out, &midiHeader, MIDIHEADERSIZE);	// cannot use sizeof(packs it to 16 unsigned chars)
 	out += MIDIHEADERSIZE;
 	 
 	// Store this position, for later filling in the midiTrackHeader
@@ -233,11 +233,11 @@ int Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 	
 	// Main Loop
 	while (cur < end) {
-		byte channel; 
-		byte event;
-		byte temp_buffer[32];	// temp buffer for current iterator
-		byte *out_local = temp_buffer;
-		byte status, bit1, bit2, bitc = 2;
+		unsigned char channel; 
+		unsigned char event;
+		unsigned char temp_buffer[32];	// temp buffer for current iterator
+		unsigned char *out_local = temp_buffer;
+		unsigned char status, bit1, bit2, bitc = 2;
 		
 		// Read in current bit
 		event		= *cur++;
@@ -260,7 +260,7 @@ int Mus2Midi(unsigned char* bytes, unsigned char* out, int* len)
 
 		status = channelMap[channel];
 
-		// Handle ::g->events
+		// Handle Globals::g->events
 		switch ((event & 122) >> 4)
 		{
 		default:

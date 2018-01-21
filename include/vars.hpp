@@ -29,7 +29,7 @@ If you have questions concerning this license or the applicable additional terms
 // the all-important zone //
 memzone_t*	mainzone;
 
-//idFile *	wadFileHandles[MAXWADFILES];
+std::array<std::shared_ptr<std::ifstream>,MAXWADFILES>	wadFileHandles;
 int		numWadFiles;
 
 //  am_map.vars begin // 
@@ -44,7 +44,7 @@ int	f_y;
 int 	f_w;
 int	f_h;
 int 	lightlev; 		// used for funky strobing effect
-byte*	fb; 			// pseudo-frame buffer
+unsigned char*	fb; 			// pseudo-frame buffer
 int 	amclock;
 mpoint_t m_paninc; // how far the window pans each tic (map coords)
 fixed_t 	mtof_zoommul; // how far the window zooms in each tic (map coords)
@@ -175,9 +175,9 @@ int	laststage;
 // f_finale.vars end // 
 //  f_wipe.vars begin // 
 qboolean	go ;
-byte*	wipe_scr_start;
-byte*	wipe_scr_end;
-byte*	wipe_scr;
+unsigned char*	wipe_scr_start;
+unsigned char*	wipe_scr_end;
+unsigned char*	wipe_scr;
 void *g_tempPointer;
 int*	wipe_y;
 // f_wipe.vars end // 
@@ -211,14 +211,14 @@ char            demoname[32];
 qboolean        demoplayback;
 qboolean        demorecording;
 qboolean		netdemo; 
-byte*		demobuffer;
-byte*		demo_p;
-byte*		demoend; 
+unsigned char*		demobuffer;
+unsigned char*		demo_p;
+unsigned char*		demoend; 
 qboolean         singledemo;            	// quit after playing a demo from cmdline 
 qboolean         precache ;
 wbstartstruct_t wminfo;               	// parms for world map / intermission 
 short		consistancy[MAXPLAYERS][BACKUPTICS]; 
-byte*		savebuffer;
+unsigned char*		savebuffer;
 int			savebufferSize;
 int             key_right;
 int		key_left;
@@ -304,7 +304,7 @@ InputEvent joyEvents[18];
 int			sendsocket;
 int			insocket;
 // struct	sockaddr	sendaddress[MAXNETNODES];
-struct    sf::IpAddress    sendaddress[MAXNETNODES];
+sf::IpAddress    sendaddress[MAXNETNODES];
 // i_net_xbox.vars end // 
 //  i_system.vars begin // 
 int	mb_used ;
@@ -340,7 +340,8 @@ char*			messageString;
 int			messx;			
 int			messy;
 int			messageLastMenuActive;
-qboolean			messageNeedsInput;     
+qboolean			messageNeedsInput;
+typedef void (*messageRoutine_t)(int response);
 messageRoutine_t messageRoutine;
 int			saveStringEnter;              
 int             	saveSlot;	// which slot to save in
@@ -480,7 +481,7 @@ fixed_t		swingy;
 fixed_t		bulletslope;
 // p_pspr.vars end // 
 //  p_saveg.vars begin // 
-byte*		save_p;
+unsigned char*		save_p;
 // p_saveg.vars end // 
 //  p_setup.vars begin // 
 int		numvertexes;
@@ -571,27 +572,27 @@ int		texturememory;
 int		spritememory;
 // r_data.vars end // 
 //  r_draw.vars begin // 
-byte*		viewimage; 
+unsigned char*		viewimage; 
 int		viewwidth;
 int		scaledviewwidth;
 int		viewheight;
 int		viewwindowx;
 int		viewwindowy; 
-byte*		ylookup[MAXHEIGHT]; 
+unsigned char*		ylookup[MAXHEIGHT]; 
 int		columnofs[MAXWIDTH]; 
-byte		translations[3][256];	
+unsigned char		translations[3][256];	
 lighttable_t*		dc_colormap; 
 int			dc_x; 
 int			dc_yl; 
 int			dc_yh; 
 fixed_t			dc_iscale; 
 fixed_t			dc_texturemid;
-byte*			dc_source;		
+unsigned char*			dc_source;		
 int			dccount;
 int	fuzzoffset[FUZZTABLE];
 int	fuzzpos ;
-byte*	dc_translation;
-byte*	translationtables;
+unsigned char*	dc_translation;
+unsigned char*	translationtables;
 int			ds_y; 
 int			ds_x1; 
 int			ds_x2;
@@ -600,7 +601,7 @@ fixed_t			ds_xfrac;
 fixed_t			ds_yfrac; 
 fixed_t			ds_xstep; 
 fixed_t			ds_ystep;
-byte*			ds_source;	
+unsigned char*			ds_source;	
 int			dscount;
 // r_draw.vars end // 
 //  r_main.vars begin // 
@@ -781,7 +782,7 @@ int			numChannels;
 int		nextcleanup;
 // s_sound.vars end // 
 //  v_video.vars begin // 
-byte*				screens[5];	
+unsigned char*				screens[5];	
 int				dirtybox[4]; 
 int	usegamma;
 // v_video.vars end // 
@@ -828,7 +829,7 @@ int NumAlloc ;
 state_t	states[NUMSTATES];
 // info vars end //
 // p_local begin //
-byte*		rejectmatrix;
+unsigned char*		rejectmatrix;
 // p_local end //
 // r_data begin //
 int		s_numtextures;
@@ -838,7 +839,7 @@ int*			s_texturewidthmask;
 fixed_t*		s_textureheight;
 short**			s_texturecolumnlump;
 unsigned short**	s_texturecolumnofs;
-byte**			s_texturecomposite;
+unsigned char**			s_texturecomposite;
 int*			s_texturecompositesize;
 // r_data end //
 // r_plane begin //

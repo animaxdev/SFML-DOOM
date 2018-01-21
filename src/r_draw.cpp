@@ -59,7 +59,7 @@ If you have questions concerning this license or the applicable additional terms
 
 
 
-// Color tables for different ::g->players,
+// Color tables for different Globals::g->players,
 //  translate a limited part to another
 //  (color ramps used for  suit colors).
 //
@@ -84,35 +84,35 @@ If you have questions concerning this license or the applicable additional terms
 //  be used. It has also been used with Wolfenstein 3D.
 // 
 void R_DrawColumn ( lighttable_t * dc_colormap,
-					byte * dc_source ) 
+					unsigned char * dc_source ) 
 { 
 	int			count; 
-	byte*		dest; 
+	unsigned char*		dest; 
 	fixed_t		frac;
 	fixed_t		fracstep;	 
 
-	count = ::g->dc_yh - ::g->dc_yl; 
+	count = Globals::g->dc_yh - Globals::g->dc_yl; 
 
 	// Zero length, column does not exceed a pixel.
 	if (count >= 0) {
 		//return; 
 
 	#ifdef RANGECHECK 
-		if ((unsigned)::g->dc_x >= SCREENWIDTH
-			|| ::g->dc_yl < 0
-			|| ::g->dc_yh >= SCREENHEIGHT) 
-			I_Error ("R_DrawColumn: %i to %i at %i", ::g->dc_yl, ::g->dc_yh, ::g->dc_x); 
+		if ((unsigned)Globals::g->dc_x >= SCREENWIDTH
+			|| Globals::g->dc_yl < 0
+			|| Globals::g->dc_yh >= SCREENHEIGHT) 
+			I_Error ("R_DrawColumn: %i to %i at %i", Globals::g->dc_yl, Globals::g->dc_yh, Globals::g->dc_x); 
 	#endif 
 
 		// Framebuffer destination address.
-		// Use ::g->ylookup LUT to avoid multiply with ScreenWidth.
-		// Use ::g->columnofs LUT for subwindows? 
-		dest = ::g->ylookup[::g->dc_yl] + ::g->columnofs[::g->dc_x];  
+		// Use Globals::g->ylookup LUT to avoid multiply with ScreenWidth.
+		// Use Globals::g->columnofs LUT for subwindows? 
+		dest = Globals::g->ylookup[Globals::g->dc_yl] + Globals::g->columnofs[Globals::g->dc_x];  
 
 		// Determine scaling,
 		//  which is the only mapping to be done.
-		fracstep = ::g->dc_iscale; 
-		frac = ::g->dc_texturemid + (::g->dc_yl-::g->centery)*fracstep; 
+		fracstep = Globals::g->dc_iscale; 
+		frac = Globals::g->dc_texturemid + (Globals::g->dc_yl-Globals::g->centery)*fracstep; 
 
 		// Inner loop that does the actual texture mapping,
 		//  e.g. a DDA-lile scaling.
@@ -140,9 +140,9 @@ void R_DrawColumn ( lighttable_t * dc_colormap,
 void R_DrawColumn (void) 
 { 
 	int			count; 
-	byte*		source;
-	byte*		dest;
-	byte*		colormap;
+	unsigned char*		source;
+	unsigned char*		dest;
+	unsigned char*		colormap;
 
 	unsigned		frac;
 	unsigned		fracstep;
@@ -150,14 +150,14 @@ void R_DrawColumn (void)
 	unsigned		fracstep3;
 	unsigned		fracstep4;	 
 
-	count = ::g->dc_yh - ::g->dc_yl + 1; 
+	count = Globals::g->dc_yh - Globals::g->dc_yl + 1; 
 
-	source = ::g->dc_source;
-	colormap = ::g->dc_colormap;		 
-	dest = ::g->ylookup[::g->dc_yl] + ::g->columnofs[::g->dc_x];  
+	source = Globals::g->dc_source;
+	colormap = Globals::g->dc_colormap;		 
+	dest = Globals::g->ylookup[Globals::g->dc_yl] + Globals::g->columnofs[Globals::g->dc_x];  
 
-	fracstep = ::g->dc_iscale<<9; 
-	frac = (::g->dc_texturemid + (::g->dc_yl-::g->centery)*::g->dc_iscale)<<9; 
+	fracstep = Globals::g->dc_iscale<<9; 
+	frac = (Globals::g->dc_texturemid + (Globals::g->dc_yl-Globals::g->centery)*Globals::g->dc_iscale)<<9; 
 
 	fracstep2 = fracstep+fracstep;
 	fracstep3 = fracstep2+fracstep;
@@ -194,43 +194,43 @@ void R_DrawColumn (void)
 
 
 void R_DrawColumnLow ( lighttable_t * dc_colormap,
-					   byte * dc_source ) 
+					   unsigned char * dc_source ) 
 { 
 	int			count; 
-	byte*		dest; 
-	byte*		dest2;
+	unsigned char*		dest; 
+	unsigned char*		dest2;
 	fixed_t		frac;
 	fixed_t		fracstep;	 
 
-	count = ::g->dc_yh - ::g->dc_yl; 
+	count = Globals::g->dc_yh - Globals::g->dc_yl; 
 
 	// Zero length.
 	if (count < 0) 
 		return; 
 
 #ifdef RANGECHECK 
-	if ((unsigned)::g->dc_x >= SCREENWIDTH
-		|| ::g->dc_yl < 0
-		|| ::g->dc_yh >= SCREENHEIGHT)
+	if ((unsigned)Globals::g->dc_x >= SCREENWIDTH
+		|| Globals::g->dc_yl < 0
+		|| Globals::g->dc_yh >= SCREENHEIGHT)
 	{
 
-		I_Error ("R_DrawColumn: %i to %i at %i", ::g->dc_yl, ::g->dc_yh, ::g->dc_x);
+		I_Error ("R_DrawColumn: %i to %i at %i", Globals::g->dc_yl, Globals::g->dc_yh, Globals::g->dc_x);
 	}
-	//	::g->dccount++; 
+	//	Globals::g->dccount++; 
 #endif 
 	// Blocky mode, need to multiply by 2.
-	::g->dc_x <<= 1;
+	Globals::g->dc_x <<= 1;
 
-	dest = ::g->ylookup[::g->dc_yl] + ::g->columnofs[::g->dc_x];
-	dest2 = ::g->ylookup[::g->dc_yl] + ::g->columnofs[::g->dc_x+1];
+	dest = Globals::g->ylookup[Globals::g->dc_yl] + Globals::g->columnofs[Globals::g->dc_x];
+	dest2 = Globals::g->ylookup[Globals::g->dc_yl] + Globals::g->columnofs[Globals::g->dc_x+1];
 
-	fracstep = ::g->dc_iscale; 
-	frac = ::g->dc_texturemid + (::g->dc_yl-::g->centery)*fracstep;
+	fracstep = Globals::g->dc_iscale; 
+	frac = Globals::g->dc_texturemid + (Globals::g->dc_yl-Globals::g->centery)*fracstep;
 
 	do 
 	{
 		// Hack. Does not work corretly.
-		*dest2 = *dest = ::g->dc_colormap[::g->dc_source[(frac>>FRACBITS)&127]];
+		*dest2 = *dest = Globals::g->dc_colormap[Globals::g->dc_source[(frac>>FRACBITS)&127]];
 		dest += SCREENWIDTH;
 		dest2 += SCREENWIDTH;
 		frac += fracstep; 
@@ -253,25 +253,25 @@ void R_DrawColumnLow ( lighttable_t * dc_colormap,
 //  from adjacent ones to left and right.
 // Used with an all black colormap, this
 //  could create the SHADOW effect,
-//  i.e. spectres and invisible ::g->players.
+//  i.e. spectres and invisible Globals::g->players.
 //
 void R_DrawFuzzColumn ( lighttable_t * dc_colormap,
-						  byte * dc_source ) 
+						  unsigned char * dc_source ) 
 { 
 	int			count; 
-	byte*		dest; 
+	unsigned char*		dest; 
 	fixed_t		frac;
 	fixed_t		fracstep;	 
 
 	// Adjust borders. Low... 
-	if (!::g->dc_yl) 
-		::g->dc_yl = 1;
+	if (!Globals::g->dc_yl) 
+		Globals::g->dc_yl = 1;
 
 	// .. and high.
-	if (::g->dc_yh == ::g->viewheight-1) 
-		::g->dc_yh = ::g->viewheight - 2; 
+	if (Globals::g->dc_yh == Globals::g->viewheight-1) 
+		Globals::g->dc_yh = Globals::g->viewheight - 2; 
 
-	count = ::g->dc_yh - ::g->dc_yl; 
+	count = Globals::g->dc_yh - Globals::g->dc_yl; 
 
 	// Zero length.
 	if (count < 0) 
@@ -279,21 +279,21 @@ void R_DrawFuzzColumn ( lighttable_t * dc_colormap,
 
 
 #ifdef RANGECHECK 
-	if ((unsigned)::g->dc_x >= SCREENWIDTH
-		|| ::g->dc_yl < 0 || ::g->dc_yh >= SCREENHEIGHT)
+	if ((unsigned)Globals::g->dc_x >= SCREENWIDTH
+		|| Globals::g->dc_yl < 0 || Globals::g->dc_yh >= SCREENHEIGHT)
 	{
 		I_Error ("R_DrawFuzzColumn: %i to %i at %i",
-			::g->dc_yl, ::g->dc_yh, ::g->dc_x);
+			Globals::g->dc_yl, Globals::g->dc_yh, Globals::g->dc_x);
 	}
 #endif
 
 
-	// Keep till ::g->detailshift bug in blocky mode fixed,
+	// Keep till Globals::g->detailshift bug in blocky mode fixed,
 	//  or blocky mode removed.
 	/* WATCOM code 
-	if (::g->detailshift)
+	if (Globals::g->detailshift)
 	{
-	if (::g->dc_x & 1)
+	if (Globals::g->dc_x & 1)
 	{
 	outpw (GC_INDEX,GC_READMAP+(2<<8) ); 
 	outp (SC_INDEX+1,12); 
@@ -303,22 +303,22 @@ void R_DrawFuzzColumn ( lighttable_t * dc_colormap,
 	outpw (GC_INDEX,GC_READMAP); 
 	outp (SC_INDEX+1,3); 
 	}
-	dest = destview + ::g->dc_yl*80 + (::g->dc_x>>1); 
+	dest = destview + Globals::g->dc_yl*80 + (Globals::g->dc_x>>1); 
 	}
 	else
 	{
-	outpw (GC_INDEX,GC_READMAP+((::g->dc_x&3)<<8) ); 
-	outp (SC_INDEX+1,1<<(::g->dc_x&3)); 
-	dest = destview + ::g->dc_yl*80 + (::g->dc_x>>2); 
+	outpw (GC_INDEX,GC_READMAP+((Globals::g->dc_x&3)<<8) ); 
+	outp (SC_INDEX+1,1<<(Globals::g->dc_x&3)); 
+	dest = destview + Globals::g->dc_yl*80 + (Globals::g->dc_x>>2); 
 	}*/
 
 
 	// Does not work with blocky mode.
-	dest = ::g->ylookup[::g->dc_yl] + ::g->columnofs[::g->dc_x];
+	dest = Globals::g->ylookup[Globals::g->dc_yl] + Globals::g->columnofs[Globals::g->dc_x];
 
 	// Looks familiar.
-	fracstep = ::g->dc_iscale; 
-	frac = ::g->dc_texturemid + (::g->dc_yl-::g->centery)*fracstep; 
+	fracstep = Globals::g->dc_iscale; 
+	frac = Globals::g->dc_texturemid + (Globals::g->dc_yl-Globals::g->centery)*fracstep; 
 
 	// Looks like an attempt at dithering,
 	//  using the colormap #6 (of 0-31, a bit
@@ -329,11 +329,11 @@ void R_DrawFuzzColumn ( lighttable_t * dc_colormap,
 		//  a pixel that is either one column
 		//  left or right of the current one.
 		// Add index from colormap to index.
-		*dest = ::g->colormaps[6*256+dest[::g->fuzzoffset[::g->fuzzpos]]]; 
+		*dest = Globals::g->colormaps[6*256+dest[Globals::g->fuzzoffset[Globals::g->fuzzpos]]]; 
 
 		// Clamp table lookup index.
-		if (++::g->fuzzpos == FUZZTABLE) 
-			::g->fuzzpos = 0;
+		if (++Globals::g->fuzzpos == FUZZTABLE) 
+			Globals::g->fuzzpos = 0;
 
 		dest += SCREENWIDTH;
 
@@ -346,33 +346,33 @@ void R_DrawFuzzColumn ( lighttable_t * dc_colormap,
 
 //
 // R_DrawTranslatedColumn
-// Used to draw player ::g->sprites
+// Used to draw player Globals::g->sprites
 //  with the green colorramp mapped to others.
 // Could be used with different translation
 //  tables, e.g. the lighter colored version
 //  of the BaronOfHell, the HellKnight, uses
-//  identical ::g->sprites, kinda brightened up.
+//  identical Globals::g->sprites, kinda brightened up.
 //
 
 void R_DrawTranslatedColumn ( lighttable_t * dc_colormap,
-						  byte * dc_source ) 
+						  unsigned char * dc_source ) 
 { 
 	int			count; 
-	byte*		dest; 
+	unsigned char*		dest; 
 	fixed_t		frac;
 	fixed_t		fracstep;	 
 
-	count = ::g->dc_yh - ::g->dc_yl; 
+	count = Globals::g->dc_yh - Globals::g->dc_yl; 
 	if (count < 0) 
 		return; 
 
 #ifdef RANGECHECK 
-	if ((unsigned)::g->dc_x >= SCREENWIDTH
-		|| ::g->dc_yl < 0
-		|| ::g->dc_yh >= SCREENHEIGHT)
+	if ((unsigned)Globals::g->dc_x >= SCREENWIDTH
+		|| Globals::g->dc_yl < 0
+		|| Globals::g->dc_yh >= SCREENHEIGHT)
 	{
 		I_Error ( "R_DrawColumn: %i to %i at %i",
-			::g->dc_yl, ::g->dc_yh, ::g->dc_x);
+			Globals::g->dc_yl, Globals::g->dc_yh, Globals::g->dc_x);
 	}
 
 #endif 
@@ -380,39 +380,39 @@ void R_DrawTranslatedColumn ( lighttable_t * dc_colormap,
 
 	// WATCOM VGA specific.
 	/* Keep for fixing.
-	if (::g->detailshift)
+	if (Globals::g->detailshift)
 	{
-	if (::g->dc_x & 1)
+	if (Globals::g->dc_x & 1)
 	outp (SC_INDEX+1,12); 
 	else
 	outp (SC_INDEX+1,3);
 
-	dest = destview + ::g->dc_yl*80 + (::g->dc_x>>1); 
+	dest = destview + Globals::g->dc_yl*80 + (Globals::g->dc_x>>1); 
 	}
 	else
 	{
-	outp (SC_INDEX+1,1<<(::g->dc_x&3)); 
+	outp (SC_INDEX+1,1<<(Globals::g->dc_x&3)); 
 
-	dest = destview + ::g->dc_yl*80 + (::g->dc_x>>2); 
+	dest = destview + Globals::g->dc_yl*80 + (Globals::g->dc_x>>2); 
 	}*/
 
 
 	// FIXME. As above.
-	dest = ::g->ylookup[::g->dc_yl] + ::g->columnofs[::g->dc_x]; 
+	dest = Globals::g->ylookup[Globals::g->dc_yl] + Globals::g->columnofs[Globals::g->dc_x]; 
 
 	// Looks familiar.
-	fracstep = ::g->dc_iscale; 
-	frac = ::g->dc_texturemid + (::g->dc_yl-::g->centery)*fracstep; 
+	fracstep = Globals::g->dc_iscale; 
+	frac = Globals::g->dc_texturemid + (Globals::g->dc_yl-Globals::g->centery)*fracstep; 
 
 	// Here we do an additional index re-mapping.
 	do 
 	{
 		// Translation tables are used
 		//  to map certain colorramps to other ones,
-		//  used with PLAY ::g->sprites.
+		//  used with PLAY Globals::g->sprites.
 		// Thus the "green" ramp of the player 0 sprite
 		//  is mapped to gray, red, black/indigo. 
-		*dest = dc_colormap[::g->dc_translation[dc_source[frac>>FRACBITS]]];
+		*dest = dc_colormap[Globals::g->dc_translation[dc_source[frac>>FRACBITS]]];
 		dest += SCREENWIDTH;
 
 		frac += fracstep; 
@@ -433,8 +433,8 @@ void R_InitTranslationTables (void)
 {
 	int		i;
 
-	::g->translationtables = (byte*)DoomLib::Z_Malloc (256*3+255, PU_STATIC, 0);
-//    ::g->translationtables = (byte *)(( (int)::g->translationtables + 255 )& ~255);
+	Globals::g->translationtables = (unsigned char*)DoomLib::Z_Malloc (256*3+255, PU_STATIC, 0);
+//    Globals::g->translationtables = (unsigned char *)(( (int)Globals::g->translationtables + 255 )& ~255);
 
 	// translate just the 16 green colors
 	for (i=0 ; i<256 ; i++)
@@ -442,15 +442,15 @@ void R_InitTranslationTables (void)
 		if (i >= 0x70 && i<= 0x7f)
 		{
 			// map green ramp to gray, brown, red
-			::g->translationtables[i] = 0x60 + (i&0xf);
-			::g->translationtables [i+256] = 0x40 + (i&0xf);
-			::g->translationtables [i+512] = 0x20 + (i&0xf);
+			Globals::g->translationtables[i] = 0x60 + (i&0xf);
+			Globals::g->translationtables [i+256] = 0x40 + (i&0xf);
+			Globals::g->translationtables [i+512] = 0x20 + (i&0xf);
 		}
 		else
 		{
 			// Keep all other colors as is.
-			::g->translationtables[i] = ::g->translationtables[i+256] 
-			= ::g->translationtables[i+512] = i;
+			Globals::g->translationtables[i] = Globals::g->translationtables[i+256] 
+			= Globals::g->translationtables[i+512] = i;
 		}
 	}
 }
@@ -488,28 +488,28 @@ void R_DrawSpan ( fixed_t xfrac,
 				  fixed_t ds_xstep,
 				  fixed_t ds_ystep,
 				  lighttable_t * ds_colormap,
-				  byte * ds_source ) 
+				  unsigned char * ds_source ) 
 { 
-	byte*		dest; 
+	unsigned char*		dest; 
 	int			count;
 	int			spot; 
 
 #ifdef RANGECHECK
-	if (::g->ds_x2 < ::g->ds_x1
-		|| ::g->ds_x1<0
-		|| ::g->ds_x2>=SCREENWIDTH  
-		|| (unsigned)::g->ds_y>SCREENHEIGHT)
+	if (Globals::g->ds_x2 < Globals::g->ds_x1
+		|| Globals::g->ds_x1<0
+		|| Globals::g->ds_x2>=SCREENWIDTH  
+		|| (unsigned)Globals::g->ds_y>SCREENHEIGHT)
 	{
 		I_Error( "R_DrawSpan: %i to %i at %i",
-			::g->ds_x1,::g->ds_x2,::g->ds_y);
+			Globals::g->ds_x1,Globals::g->ds_x2,Globals::g->ds_y);
 	}
-	//	::g->dscount++; 
+	//	Globals::g->dscount++; 
 #endif 
 
-	dest = ::g->ylookup[::g->ds_y] + ::g->columnofs[::g->ds_x1];
+	dest = Globals::g->ylookup[Globals::g->ds_y] + Globals::g->columnofs[Globals::g->ds_x1];
 
 	// We do not check for zero spans here?
-	count = ds_x2 - g->ds_x1; 
+	count = ds_x2 - Globals::g->ds_x1; 
 
 	if ( ds_x2 < ds_x1 ) {
 		return;						// SMF - think this is the sky
@@ -540,9 +540,9 @@ void R_DrawSpan (void)
 { 
 	unsigned	position, step;
 
-	byte*	source;
-	byte*	colormap;
-	byte*	dest;
+	unsigned char*	source;
+	unsigned char*	colormap;
+	unsigned char*	dest;
 
 	unsigned	count;
 	usingned	spot; 
@@ -551,13 +551,13 @@ void R_DrawSpan (void)
 	unsigned	xtemp;
 	unsigned	ytemp;
 
-	position = ((::g->ds_xfrac<<10)&0xffff0000) | ((::g->ds_yfrac>>6)&0xffff);
-	step = ((::g->ds_xstep<<10)&0xffff0000) | ((::g->ds_ystep>>6)&0xffff);
+	position = ((Globals::g->ds_xfrac<<10)&0xffff0000) | ((Globals::g->ds_yfrac>>6)&0xffff);
+	step = ((Globals::g->ds_xstep<<10)&0xffff0000) | ((Globals::g->ds_ystep>>6)&0xffff);
 
-	source = ::g->ds_source;
-	colormap = ::g->ds_colormap;
-	dest = ::g->ylookup[::g->ds_y] + ::g->columnofs[::g->ds_x1];	 
-	count = ::g->ds_x2 - ::g->ds_x1 + 1; 
+	source = Globals::g->ds_source;
+	colormap = Globals::g->ds_colormap;
+	dest = Globals::g->ylookup[Globals::g->ds_y] + Globals::g->columnofs[Globals::g->ds_x1];	 
+	count = Globals::g->ds_x2 - Globals::g->ds_x1 + 1; 
 
 	while (count >= 4) 
 	{ 
@@ -617,42 +617,42 @@ void R_DrawSpanLow ( fixed_t xfrac,
 				  fixed_t ds_xstep,
 				  fixed_t ds_ystep,
 				  lighttable_t * ds_colormap,
-				  byte * ds_source ) 
+				  unsigned char * ds_source ) 
 {
-	byte*		dest; 
+	unsigned char*		dest; 
 	int			count;
 	int			spot; 
 
 #ifdef RANGECHECK 
-	if (::g->ds_x2 < ::g->ds_x1
-		|| ::g->ds_x1<0
-		|| ::g->ds_x2>=SCREENWIDTH  
-		|| (unsigned)::g->ds_y>SCREENHEIGHT)
+	if (Globals::g->ds_x2 < Globals::g->ds_x1
+		|| Globals::g->ds_x1<0
+		|| Globals::g->ds_x2>=SCREENWIDTH  
+		|| (unsigned)Globals::g->ds_y>SCREENHEIGHT)
 	{
 		I_Error( "R_DrawSpan: %i to %i at %i",
-			::g->ds_x1,::g->ds_x2,::g->ds_y);
+			Globals::g->ds_x1,Globals::g->ds_x2,Globals::g->ds_y);
 	}
-	//	::g->dscount++; 
+	//	Globals::g->dscount++; 
 #endif 
 
 	// Blocky mode, need to multiply by 2.
-	::g->ds_x1 <<= 1;
-	::g->ds_x2 <<= 1;
+	Globals::g->ds_x1 <<= 1;
+	Globals::g->ds_x2 <<= 1;
 
-	dest = ::g->ylookup[::g->ds_y] + ::g->columnofs[::g->ds_x1];
+	dest = Globals::g->ylookup[Globals::g->ds_y] + Globals::g->columnofs[Globals::g->ds_x1];
 
 
-	count = ::g->ds_x2 - ::g->ds_x1; 
+	count = Globals::g->ds_x2 - Globals::g->ds_x1; 
 	do 
 	{ 
 		spot = ((yfrac>>(16-6))&(63*64)) + ((xfrac>>16)&63);
 		// Lowres/blocky mode does it twice,
 		//  while scale is adjusted appropriately.
-		*dest++ = ::g->ds_colormap[::g->ds_source[spot]]; 
-		*dest++ = ::g->ds_colormap[::g->ds_source[spot]];
+		*dest++ = Globals::g->ds_colormap[Globals::g->ds_source[spot]]; 
+		*dest++ = Globals::g->ds_colormap[Globals::g->ds_source[spot]];
 
-		xfrac += ::g->ds_xstep; 
-		yfrac += ::g->ds_ystep; 
+		xfrac += Globals::g->ds_xstep; 
+		yfrac += Globals::g->ds_ystep; 
 
 	} while (count--); 
 }
@@ -674,21 +674,21 @@ R_InitBuffer
 	// Handle resize,
 	//  e.g. smaller view windows
 	//  with border and/or status bar.
-	::g->viewwindowx = (SCREENWIDTH-width) >> 1; 
+	Globals::g->viewwindowx = (SCREENWIDTH-width) >> 1; 
 
 	// Column offset. For windows.
 	for (i=0 ; i<width ; i++) 
-		::g->columnofs[i] = ::g->viewwindowx + i;
+		Globals::g->columnofs[i] = Globals::g->viewwindowx + i;
 
 	// Samw with base row offset.
 	if (width == SCREENWIDTH) 
-		::g->viewwindowy = 0; 
+		Globals::g->viewwindowy = 0; 
 	else 
-		::g->viewwindowy = (SCREENHEIGHT-SBARHEIGHT-height) >> 1; 
+		Globals::g->viewwindowy = (SCREENHEIGHT-SBARHEIGHT-height) >> 1; 
 
 	// Preclaculate all row offsets.
 	for (i=0 ; i<height ; i++) 
-		::g->ylookup[i] = ::g->screens[0] + (i+::g->viewwindowy)*SCREENWIDTH; 
+		Globals::g->ylookup[i] = Globals::g->screens[0] + (i+Globals::g->viewwindowy)*SCREENWIDTH; 
 } 
 
 
@@ -702,8 +702,8 @@ R_InitBuffer
 //
 void R_FillBackScreen (void) 
 { 
-	byte*		src;
-	byte*		dest; 
+	unsigned char*		src;
+	unsigned char*		dest; 
 	int			x;
 	int			y; 
 	int			width, height, windowx, windowy;
@@ -716,16 +716,16 @@ void R_FillBackScreen (void)
 
 	char*	name;
 
-	if (::g->scaledviewwidth == SCREENWIDTH)
+	if (Globals::g->scaledviewwidth == SCREENWIDTH)
 		return;
 
-	if ( ::g->gamemode == commercial)
+	if ( Globals::g->gamemode == commercial)
 		name = name2;
 	else
 		name = name1;
 
-	src = (byte*)W_CacheLumpName (name, PU_CACHE_SHARED); 
-	dest = ::g->screens[1]; 
+	src = (unsigned char*)W_CacheLumpName (name, PU_CACHE_SHARED); 
+	dest = Globals::g->screens[1]; 
 
 	for (y=0 ; y<SCREENHEIGHT-SBARHEIGHT ; y++) { 
 		for (x=0 ; x<SCREENWIDTH/64 ; x++) 	{ 
@@ -739,10 +739,10 @@ void R_FillBackScreen (void)
 		} 
 	} 
 
-	width = ::g->scaledviewwidth / GLOBAL_IMAGE_SCALER;
-	height = ::g->viewheight / GLOBAL_IMAGE_SCALER;
-	windowx = ::g->viewwindowx / GLOBAL_IMAGE_SCALER;
-	windowy = ::g->viewwindowy / GLOBAL_IMAGE_SCALER;
+	width = Globals::g->scaledviewwidth / GLOBAL_IMAGE_SCALER;
+	height = Globals::g->viewheight / GLOBAL_IMAGE_SCALER;
+	windowx = Globals::g->viewwindowx / GLOBAL_IMAGE_SCALER;
+	windowy = Globals::g->viewwindowy / GLOBAL_IMAGE_SCALER;
 
 	patch = (patch_t*)W_CacheLumpName ("brdr_t",PU_CACHE_SHARED);
 	for (x=0 ; x<width ; x+=8) {
@@ -782,10 +782,10 @@ R_VideoErase
 { 
 	// LFB copy.
 	// This might not be a good idea if memcpy
-	//  is not optiomal, e.g. byte by byte on
+	//  is not optiomal, e.g. unsigned char by unsigned char on
 	//  a 32bit CPU, as GNU GCC/Linux libc did
 	//  at one point.
-	memcpy(::g->screens[0]+ofs, ::g->screens[1]+ofs, count); 
+	memcpy(Globals::g->screens[0]+ofs, Globals::g->screens[1]+ofs, count); 
 } 
 
 
@@ -808,24 +808,24 @@ void R_DrawViewBorder (void)
 	int		ofs;
 	int		i; 
 
-	if (::g->scaledviewwidth == SCREENWIDTH) 
+	if (Globals::g->scaledviewwidth == SCREENWIDTH) 
 		return; 
 
-	top = ((SCREENHEIGHT-SBARHEIGHT)-::g->viewheight)/2; 
-	side = (SCREENWIDTH-::g->scaledviewwidth)/2; 
+	top = ((SCREENHEIGHT-SBARHEIGHT)-Globals::g->viewheight)/2; 
+	side = (SCREENWIDTH-Globals::g->scaledviewwidth)/2; 
 
 	// copy top and one line of left side 
 	R_VideoErase (0, top*SCREENWIDTH+side); 
 
 	// copy one line of right side and bottom 
-	ofs = (::g->viewheight+top)*SCREENWIDTH-side; 
+	ofs = (Globals::g->viewheight+top)*SCREENWIDTH-side; 
 	R_VideoErase (ofs, top*SCREENWIDTH+side); 
 
-	// copy ::g->sides using wraparound 
+	// copy Globals::g->sides using wraparound 
 	ofs = top*SCREENWIDTH + SCREENWIDTH-side; 
 	side <<= 1;
 
-	for (i=1 ; i < ::g->viewheight ; i++) 
+	for (i=1 ; i < Globals::g->viewheight ; i++) 
 	{ 
 		R_VideoErase (ofs, side); 
 		ofs += SCREENWIDTH; 

@@ -88,13 +88,13 @@ M_DrawText
 	    continue;
 	}
 		
-	w = SHORT (::g->hu_font[c]->width);
+	w = SHORT (Globals::g->hu_font[c]->width);
 	if (x+w > SCREENWIDTH)
 	    break;
 	if (direct)
-	    V_DrawPatchDirect(x, y, 0, ::g->hu_font[c]);
+	    V_DrawPatchDirect(x, y, 0, Globals::g->hu_font[c]);
 	else
-	    V_DrawPatch(x, y, 0, ::g->hu_font[c]);
+	    V_DrawPatch(x, y, 0, Globals::g->hu_font[c]);
 	x+=w;
     }
 
@@ -128,10 +128,10 @@ bool M_WriteFile ( char const*	name, void*		source, int		length ) {
 //
 // M_ReadFile
 //
-int M_ReadFile ( char const*	name, byte**	buffer ) {
+int M_ReadFile ( char const*	name, unsigned char**	buffer ) {
 	int count, length;
 //    idFile * handle = NULL;
-	byte		*buf;
+	unsigned char		*buf;
 
 //    handle = fileSystem->OpenFileRead( name, false );
 
@@ -141,7 +141,7 @@ int M_ReadFile ( char const*	name, byte**	buffer ) {
 
 //    length = handle->Length();
 //
-//    buf = ( byte* )Z_Malloc ( handle->Length(), PU_STATIC, NULL);
+//    buf = ( unsigned char* )Z_Malloc ( handle->Length(), PU_STATIC, NULL);
 //    count = handle->Read( buf, length );
 //
 //    if (count < length ) {
@@ -168,7 +168,7 @@ bool M_WriteSaveGame( void* source, size_t length )
 	return SaveGame( source, length );
 }
 
-int M_ReadSaveGame( byte** buffer )
+int M_ReadSaveGame( unsigned char** buffer )
 {
 	return 0;
 }
@@ -216,20 +216,20 @@ void M_SaveDefaults (void)
     int		v;
     FILE*	f;
 	
-    f = f o pen (::g->defaultfile, "w");
+    f = f o pen (Globals::g->defaultfile, "w");
     if (!f)
 	return; // can't write the file, but don't complain
 		
-    for (i=0 ; i<::g->numdefaults ; i++)
+    for (i=0 ; i<Globals::g->numdefaults ; i++)
     {
-	if (::g->defaults[i].defaultvalue > -0xfff
-	    && ::g->defaults[i].defaultvalue < 0xfff)
+	if (Globals::g->defaults[i].defaultvalue > -0xfff
+	    && Globals::g->defaults[i].defaultvalue < 0xfff)
 	{
-	    v = *::g->defaults[i].location;
-	    fprintf (f,"%s\t\t%i\n",::g->defaults[i].name,v);
+	    v = *Globals::g->defaults[i].location;
+	    fprintf (f,"%s\t\t%i\n",Globals::g->defaults[i].name,v);
 	} else {
-	    fprintf (f,"%s\t\t\"%s\"\n",::g->defaults[i].name,
-		     * (char **) (::g->defaults[i].location));
+	    fprintf (f,"%s\t\t\"%s\"\n",Globals::g->defaults[i].name,
+		     * (char **) (Globals::g->defaults[i].location));
 	}
     }
 	
@@ -254,23 +254,23 @@ void M_LoadDefaults (void)
     //qboolean	isstring;
     
     // set everything to base values
-    ::g->numdefaults = sizeof(::g->defaults)/sizeof(::g->defaults[0]);
-    for (i=0 ; i < ::g->numdefaults ; i++)
-		*::g->defaults[i].location = ::g->defaults[i].defaultvalue;
+    Globals::g->numdefaults = sizeof(Globals::g->defaults)/sizeof(Globals::g->defaults[0]);
+    for (i=0 ; i < Globals::g->numdefaults ; i++)
+		*Globals::g->defaults[i].location = Globals::g->defaults[i].defaultvalue;
     
     // check for a custom default file
     i = M_CheckParm ("-config");
-    if (i && i < ::g->myargc-1)
+    if (i && i < Globals::g->myargc-1)
     {
-		::g->defaultfile = ::g->myargv[i+1];
-		I_Printf ("	default file: %s\n",::g->defaultfile);
+		Globals::g->defaultfile = Globals::g->myargv[i+1];
+		I_Printf ("	default file: %s\n",Globals::g->defaultfile);
     }
     else
-		::g->defaultfile = ::g->basedefault;
+		Globals::g->defaultfile = Globals::g->basedefault;
 
 /*
-    // read the file in, overriding any set ::g->defaults
-    f = f o pen (::g->defaultfile, "r");
+    // read the file in, overriding any set Globals::g->defaults
+    f = f o pen (Globals::g->defaultfile, "r");
     if (f)
     {
 		while (!feof(f))
@@ -292,13 +292,13 @@ void M_LoadDefaults (void)
 				else
 					sscanf(strparm, "%i", &parm);
 				
-				for (i=0 ; i<::g->numdefaults ; i++)
-					if (!strcmp(def, ::g->defaults[i].name))
+				for (i=0 ; i<Globals::g->numdefaults ; i++)
+					if (!strcmp(def, Globals::g->defaults[i].name))
 					{
 						if (!isstring)
-							*::g->defaults[i].location = parm;
+							*Globals::g->defaults[i].location = parm;
 						else
-							*::g->defaults[i].location = (int) newstring;
+							*Globals::g->defaults[i].location = (int) newstring;
 						break;
 					}
 			}
@@ -323,10 +323,10 @@ void M_LoadDefaults (void)
 void
 WritePCXfile
 ( char*		filename,
-  byte*		data,
+  unsigned char*		data,
   int		width,
   int		height,
-  byte*		palette )
+  unsigned char*		palette )
 {
 	I_Error( "depreciated" );
 }
@@ -339,11 +339,11 @@ void M_ScreenShot (void)
 {
 /*
     int		i;
-    byte*	linear;
+    unsigned char*	linear;
     char	lbmname[12];
     
     // munge planar buffer to linear
-    linear = ::g->screens[2];
+    linear = Globals::g->screens[2];
     I_ReadScreen (linear);
     
     // find a file name to save it to
@@ -362,9 +362,9 @@ void M_ScreenShot (void)
     // save the pcx file
     WritePCXfile (lbmname, linear,
 		  SCREENWIDTH, SCREENHEIGHT,
-		  (byte*)W_CacheLumpName ("PLAYPAL",PU_CACHE_SHARED));
+		  (unsigned char*)W_CacheLumpName ("PLAYPAL",PU_CACHE_SHARED));
 	
-    ::g->players[::g->consoleplayer].message = "screen shot";
+    Globals::g->players[Globals::g->consoleplayer].message = "screen shot";
 */
 }
 

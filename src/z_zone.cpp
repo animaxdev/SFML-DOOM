@@ -58,7 +58,7 @@ void Z_ClearZone (memzone_t* zone)
     // set the entire zone to one free block
     zone->blocklist.next =
 	zone->blocklist.prev =
-	block = (memblock_t *)( (byte *)zone + sizeof(memzone_t) );
+	block = (memblock_t *)( (unsigned char *)zone + sizeof(memzone_t) );
     
     zone->blocklist.user = (void **)zone;
     zone->blocklist.tag = PU_STATIC;
@@ -90,26 +90,26 @@ void Z_Init (void)
     memblock_t*	block;
     int		size;
 
-    ::g->mainzone = (memzone_t *)I_ZoneBase (&size);
+    Globals::g->mainzone = (memzone_t *)I_ZoneBase (&size);
 
-	memset( ::g->mainzone, 0, size );
-	::g->mainzone->size = size;
+	memset( Globals::g->mainzone, 0, size );
+	Globals::g->mainzone->size = size;
 
     // set the entire zone to one free block
-    ::g->mainzone->blocklist.next =
-	::g->mainzone->blocklist.prev =
-	block = (memblock_t *)( (byte *)::g->mainzone + sizeof(memzone_t) );
+    Globals::g->mainzone->blocklist.next =
+	Globals::g->mainzone->blocklist.prev =
+	block = (memblock_t *)( (unsigned char *)Globals::g->mainzone + sizeof(memzone_t) );
 
-    ::g->mainzone->blocklist.user = (void **)::g->mainzone;
-    ::g->mainzone->blocklist.tag = PU_STATIC;
-    ::g->mainzone->rover = block;
+    Globals::g->mainzone->blocklist.user = (void **)Globals::g->mainzone;
+    Globals::g->mainzone->blocklist.tag = PU_STATIC;
+    Globals::g->mainzone->rover = block;
 	
-    block->prev = block->next = &::g->mainzone->blocklist;
+    block->prev = block->next = &Globals::g->mainzone->blocklist;
 
     // NULL indicates a free block.
     block->user = NULL;
     
-    block->size = ::g->mainzone->size - sizeof(memzone_t);
+    block->size = Globals::g->mainzone->size - sizeof(memzone_t);
 }
 
 int NumAlloc = 0;
@@ -122,7 +122,7 @@ void Z_Free (void* ptr)
     memblock_t*		block;
     memblock_t*		other;
 
-	block = (memblock_t *) ( (byte *)ptr - sizeof(memblock_t));
+	block = (memblock_t *) ( (unsigned char *)ptr - sizeof(memblock_t));
 
 	NumAlloc -= block->size;
 
@@ -152,8 +152,8 @@ void Z_Free (void* ptr)
 	other->next = block->next;
 	other->next->prev = other;
 
-	if (block == ::g->mainzone->rover)
-	    ::g->mainzone->rover = other;
+	if (block == Globals::g->mainzone->rover)
+	    Globals::g->mainzone->rover = other;
 
 	block = other;
     }
@@ -166,8 +166,8 @@ void Z_Free (void* ptr)
 	block->next = other->next;
 	block->next->prev = block;
 
-	if (other == ::g->mainzone->rover)
-	    ::g->mainzone->rover = block;
+	if (other == Globals::g->mainzone->rover)
+	    Globals::g->mainzone->rover = block;
     }
 }
 
@@ -205,7 +205,7 @@ Z_Malloc
     
     // if there is a free block behind the rover,
     //  back up over them
-    base = ::g->mainzone->rover;
+    base = Globals::g->mainzone->rover;
     
     if (!base->prev->user)
 		base = base->prev;
@@ -218,7 +218,7 @@ Z_Malloc
 		if (rover == start)
 		{
 			// scanned all the way around the list
-			I_Error ("Z_Malloc: failed on allocation of %i bytes", size);
+			I_Error ("Z_Malloc: failed on allocation of %i unsigned chars", size);
 		}
 	
 		if (rover->user)
@@ -235,7 +235,7 @@ Z_Malloc
 
 				// the rover can be the base block
 				base = base->prev;
-				Z_Free ((byte *)rover+sizeof(memblock_t));
+				Z_Free ((unsigned char *)rover+sizeof(memblock_t));
 				base = base->next;
 				rover = base->next;
 			}
@@ -251,7 +251,7 @@ Z_Malloc
     if (extra >  MINFRAGMENT)
     {
 		// there will be a free fragment after the allocated block
-		newblock = (memblock_t *) ((byte *)base + size );
+		newblock = (memblock_t *) ((unsigned char *)base + size );
 		newblock->size = extra;
 		
 		// NULL indicates free block.
@@ -269,7 +269,7 @@ Z_Malloc
     {
 		// mark as an in use block
 		base->user = (void**)user;			
-		*(void **)user = (void *) ((byte *)base + sizeof(memblock_t));
+		*(void **)user = (void *) ((unsigned char *)base + sizeof(memblock_t));
     }
     else
     {
@@ -282,11 +282,11 @@ Z_Malloc
     base->tag = tag;
 
     // next allocation will start looking here
-    ::g->mainzone->rover = base->next;	
+    Globals::g->mainzone->rover = base->next;	
 	
     base->id = ZONEID;
     
-    return (void *) ((byte *)base + sizeof(memblock_t));
+    return (void *) ((unsigned char *)base + sizeof(memblock_t));
 }
 
 
@@ -302,8 +302,8 @@ Z_FreeTags
     memblock_t*	block;
     memblock_t*	next;
 	
-    for (block = ::g->mainzone->blocklist.next ;
-	 block != &::g->mainzone->blocklist ;
+    for (block = Globals::g->mainzone->blocklist.next ;
+	 block != &Globals::g->mainzone->blocklist ;
 	 block = next)
     {
 	// get link before freeing
@@ -314,7 +314,7 @@ Z_FreeTags
 	    continue;
 	
 	if (block->tag >= lowtag && block->tag <= hightag)
-	    Z_Free ( (byte *)block+sizeof(memblock_t));
+	    Z_Free ( (unsigned char *)block+sizeof(memblock_t));
     }
 }
 
@@ -332,24 +332,24 @@ Z_DumpHeap
     memblock_t*	block;
 	
     I_Printf ("zone size: %i  location: %p\n",
-	    ::g->mainzone->size,::g->mainzone);
+	    Globals::g->mainzone->size,Globals::g->mainzone);
     
     I_Printf ("tag range: %i to %i\n",
 	    lowtag, hightag);
 	
-    for (block = ::g->mainzone->blocklist.next ; ; block = block->next)
+    for (block = Globals::g->mainzone->blocklist.next ; ; block = block->next)
     {
 	if (block->tag >= lowtag && block->tag <= hightag)
 	    I_Printf ("block:%p    size:%7i    user:%p    tag:%3i\n",
 		    block, block->size, block->user, block->tag);
 		
-	if (block->next == &::g->mainzone->blocklist)
+	if (block->next == &Globals::g->mainzone->blocklist)
 	{
 	    // all blocks have been hit
 	    break;
 	}
 	
-	if ( (byte *)block + block->size != (byte *)block->next)
+	if ( (unsigned char *)block + block->size != (unsigned char *)block->next)
 	    I_Printf ("ERROR: block size does not touch the next block\n");
 
 	if ( block->next->prev != block)
@@ -368,20 +368,20 @@ void Z_FileDumpHeap (FILE* f)
 {
     memblock_t*	block;
 	
-    fprintf (f,"zone size: %i  location: %p\n",::g->mainzone->size,::g->mainzone);
+    fprintf (f,"zone size: %i  location: %p\n",Globals::g->mainzone->size,Globals::g->mainzone);
 	
-    for (block = ::g->mainzone->blocklist.next ; ; block = block->next)
+    for (block = Globals::g->mainzone->blocklist.next ; ; block = block->next)
     {
 	fprintf (f,"block:%p    size:%7i    user:%p    tag:%3i\n",
 		 block, block->size, block->user, block->tag);
 		
-	if (block->next == &::g->mainzone->blocklist)
+	if (block->next == &Globals::g->mainzone->blocklist)
 	{
 	    // all blocks have been hit
 	    break;
 	}
 	
-	if ( (byte *)block + block->size != (byte *)block->next)
+	if ( (unsigned char *)block + block->size != (unsigned char *)block->next)
 	    fprintf (f,"ERROR: block size does not touch the next block\n");
 
 	if ( block->next->prev != block)
@@ -401,15 +401,15 @@ void Z_CheckHeap (void)
 {
     memblock_t*	block;
 	
-    for (block = ::g->mainzone->blocklist.next ; ; block = block->next)
+    for (block = Globals::g->mainzone->blocklist.next ; ; block = block->next)
     {
-	if (block->next == &::g->mainzone->blocklist)
+	if (block->next == &Globals::g->mainzone->blocklist)
 	{
 	    // all blocks have been hit
 	    break;
 	}
 	
-	if ( (byte *)block + block->size != (byte *)block->next)
+	if ( (unsigned char *)block + block->size != (unsigned char *)block->next)
 	    I_Error ("Z_CheckHeap: block size does not touch the next block\n");
 
 	if ( block->next->prev != block)
@@ -433,7 +433,7 @@ Z_ChangeTag2
 {
     memblock_t*	block;
 	
-    block = (memblock_t *) ( (byte *)ptr - sizeof(memblock_t));
+    block = (memblock_t *) ( (unsigned char *)ptr - sizeof(memblock_t));
 
     if (block->id != ZONEID)
 	I_Error ("Z_ChangeTag: freed a pointer without ZONEID");
@@ -457,8 +457,8 @@ int Z_FreeMemory (void)
 	
     free = 0;
     
-    for (block = ::g->mainzone->blocklist.next ;
-	 block != &::g->mainzone->blocklist;
+    for (block = Globals::g->mainzone->blocklist.next ;
+	 block != &Globals::g->mainzone->blocklist;
 	 block = block->next)
     {
 	if (!block->user || block->tag >= PU_PURGELEVEL)

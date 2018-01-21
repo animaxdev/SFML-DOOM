@@ -284,19 +284,19 @@ typedef struct
 // posts are runs of non masked source pixels
 typedef struct
 {
-    byte		topdelta;	// -1 is the last post in a column
-    byte		length; 	// length data bytes follows
+    unsigned char		topdelta;	// -1 is the last post in a column
+    unsigned char		length; 	// length data unsigned chars follows
 } post_t;
 
-// postColumn_t is a list of 0 or more post_t, (byte)-1 terminated
+// postColumn_t is a list of 0 or more post_t, (unsigned char)-1 terminated
 typedef post_t	postColumn_t;
 
 
 
 // PC direct to screen pointers
 //B UNUSED - keep till detailshift in r_draw.c resolved
-//extern byte*	destview;
-//extern byte*	destscreen;
+//extern unsigned char*	destview;
+//extern unsigned char*	destscreen;
 
 
 
@@ -311,7 +311,7 @@ typedef post_t	postColumn_t;
 //  precalculating 24bpp lightmap/colormap LUT.
 //  from darkening PLAYPAL to all black.
 // Could even us emore than 32 levels.
-typedef byte	lighttable_t;	
+typedef unsigned char	lighttable_t;	
 
 
 
@@ -436,7 +436,7 @@ typedef struct
     short	lump[8];
 
     // Flip bit (1 = flip) to use for view angles 0-7.
-    byte	flip[8];
+    unsigned char	flip[8];
     
 } spriteframe_t;
 
@@ -469,21 +469,21 @@ typedef struct
   // leave pads for [minx-1]/[maxx+1]
   int			nervePad1;
   int			nervePad2;
-  byte			nervePad3;
-  byte			nervePad4;
-  byte			nervePad5;
+  unsigned char			nervePad3;
+  unsigned char			nervePad4;
+  unsigned char			nervePad5;
 
-  byte		pad1;
+  unsigned char		pad1;
   // Here lies the rub for all
   //  dynamic resize/change of resolution.
   //unsigned short		top[65535];			// [SCREENWIDTH];
   unsigned short		top[SCREENWIDTH];
-  byte		pad2;
-  byte		pad3;
+  unsigned char		pad2;
+  unsigned char		pad3;
   // See above.
   //unsigned short		bottom[65535];		// [SCREENWIDTH];
   unsigned short		bottom[SCREENWIDTH];
-  byte		pad4;
+  unsigned char		pad4;
 
 } visplane_t;
 

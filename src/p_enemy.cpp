@@ -75,15 +75,15 @@ extern "C" void A_Fall (mobj_t *actor, void *);
 // ENEMY THINKING
 // Enemies are allways spawned
 // with targetplayer = -1, threshold = 0
-// Most monsters are spawned unaware of all ::g->players,
+// Most monsters are spawned unaware of all Globals::g->players,
 // but some can be made preaware
 //
 
 
 //
 // Called by P_NoiseAlert.
-// Recursively traverse adjacent ::g->sectors,
-// sound blocking ::g->lines cut off traversal.
+// Recursively traverse adjacent Globals::g->sectors,
+// sound blocking Globals::g->lines cut off traversal.
 //
 
 
@@ -97,15 +97,15 @@ P_RecursiveSound
     sector_t*	other;
 	
     // wake up all monsters in this sector
-    if (sec->validcount == ::g->validcount
+    if (sec->validcount == Globals::g->validcount
 	&& sec->soundtraversed <= soundblocks+1)
     {
 	return;		// already flooded
     }
     
-    sec->validcount = ::g->validcount;
+    sec->validcount = Globals::g->validcount;
     sec->soundtraversed = soundblocks+1;
-    sec->soundtarget = ::g->soundtarget;
+    sec->soundtarget = Globals::g->soundtarget;
 	
     for (i=0 ;i<sec->linecount ; i++)
     {
@@ -115,13 +115,13 @@ P_RecursiveSound
 	
 	P_LineOpening (check);
 
-	if (::g->openrange <= 0)
+	if (Globals::g->openrange <= 0)
 	    continue;	// closed door
 	
-	if ( ::g->sides[ check->sidenum[0] ].sector == sec)
-	    other = ::g->sides[ check->sidenum[1] ] .sector;
+	if ( Globals::g->sides[ check->sidenum[0] ].sector == sec)
+	    other = Globals::g->sides[ check->sidenum[1] ] .sector;
 	else
-	    other = ::g->sides[ check->sidenum[0] ].sector;
+	    other = Globals::g->sides[ check->sidenum[0] ].sector;
 	
 	if (check->flags & ML_SOUNDBLOCK)
 	{
@@ -145,8 +145,8 @@ P_NoiseAlert
 ( mobj_t*	target,
   mobj_t*	emmiter )
 {
-    ::g->soundtarget = target;
-    ::g->validcount++;
+    Globals::g->soundtarget = target;
+    Globals::g->validcount++;
     P_RecursiveSound (emmiter->subsector->sector, 0);
 }
 
@@ -277,10 +277,10 @@ qboolean P_Move (mobj_t*	actor)
     if (!try_ok)
     {
 	// open any specials
-	if (actor->flags & MF_FLOAT && ::g->floatok)
+	if (actor->flags & MF_FLOAT && Globals::g->floatok)
 	{
 	    // must adjust height
-	    if (actor->z < ::g->tmfloorz)
+	    if (actor->z < Globals::g->tmfloorz)
 		actor->z += FLOATSPEED;
 	    else
 		actor->z -= FLOATSPEED;
@@ -289,14 +289,14 @@ qboolean P_Move (mobj_t*	actor)
 	    return true;
 	}
 		
-	if (!::g->numspechit)
+	if (!Globals::g->numspechit)
 	    return false;
 			
 	actor->movedir = DI_NODIR;
 	good = false;
-	while (::g->numspechit--)
+	while (Globals::g->numspechit--)
 	{
-	    ld = ::g->spechit[::g->numspechit];
+	    ld = Globals::g->spechit[Globals::g->numspechit];
 	    // if the special is not a door
 	    // that can be opened,
 	    // return false
@@ -496,7 +496,7 @@ P_LookForPlayers
 	
     for ( ; ; actor->lastlook = (actor->lastlook+1)&3 )
     {
-	if (!::g->playeringame[actor->lastlook])
+	if (!Globals::g->playeringame[actor->lastlook])
 	    continue;
 			
 	if (c++ == 2
@@ -506,7 +506,7 @@ P_LookForPlayers
 	    return false;	
 	}
 	
-	player = &::g->players[actor->lastlook];
+	player = &Globals::g->players[actor->lastlook];
 
 	if (player->health <= 0)
 	    continue;		// dead
@@ -556,7 +556,7 @@ void A_KeenDie (mobj_t* mo, void * )
     
     // scan the remaining thinkers
     // to see if all Keens are dead
-    for (th = ::g->thinkercap.next ; th != &::g->thinkercap ; th=th->next)
+    for (th = Globals::g->thinkercap.next ; th != &Globals::g->thinkercap ; th=th->next)
     {
 	if (th->function.acp1 != (actionf_p1)P_MobjThinker)
 	    continue;
@@ -699,7 +699,7 @@ void A_Chase (mobj_t*	actor, void * )
     if (actor->flags & MF_JUSTATTACKED)
     {
 	actor->flags &= ~MF_JUSTATTACKED;
-	if (::g->gameskill != sk_nightmare && !::g->fastparm)
+	if (Globals::g->gameskill != sk_nightmare && !Globals::g->fastparm)
 	    P_NewChaseDir (actor);
 	return;
     }
@@ -717,8 +717,8 @@ void A_Chase (mobj_t*	actor, void * )
     // check for missile attack
     if (actor->info->missilestate)
     {
-	if (::g->gameskill < sk_nightmare
-	    && !::g->fastparm && actor->movecount)
+	if (Globals::g->gameskill < sk_nightmare
+	    && !Globals::g->fastparm && actor->movecount)
 	{
 	    goto nomissile;
 	}
@@ -734,7 +734,7 @@ void A_Chase (mobj_t*	actor, void * )
     // ?
   nomissile:
     // possibly choose another target
-    if (::g->netgame
+    if (Globals::g->netgame
 	&& !actor->threshold
 	&& !P_CheckSight (actor, actor->target) )
     {
@@ -1006,11 +1006,11 @@ void A_Tracer (mobj_t* actor, void * )
     mobj_t*	dest;
     mobj_t*	th;
 		
-    //if (::g->gametic & 3)
+    //if (Globals::g->gametic & 3)
 		//return;
 
 	// DHM - Nerve :: Demo fix - Keep the game state deterministic!!!
-	if ( ::g->leveltime & 3 ) {
+	if ( Globals::g->leveltime & 3 ) {
 		return;
 	}
 
@@ -1042,13 +1042,13 @@ void A_Tracer (mobj_t* actor, void * )
     {
 	if (exact - actor->angle > 0x80000000)
 	{
-	    actor->angle -= ::g->TRACEANGLE;
+	    actor->angle -= Globals::g->TRACEANGLE;
 	    if (exact - actor->angle < 0x80000000)
 		actor->angle = exact;
 	}
 	else
 	{
-	    actor->angle += ::g->TRACEANGLE;
+	    actor->angle += Globals::g->TRACEANGLE;
 	    if (exact - actor->angle > 0x80000000)
 		actor->angle = exact;
 	}
@@ -1123,15 +1123,15 @@ qboolean PIT_VileCheck (mobj_t*	thing )
     
     maxdist = thing->info->radius + mobjinfo[MT_VILE].radius;
 	
-    if ( abs(thing->x - ::g->viletryx) > maxdist
-	 || abs(thing->y - ::g->viletryy) > maxdist )
+    if ( abs(thing->x - Globals::g->viletryx) > maxdist
+	 || abs(thing->y - Globals::g->viletryy) > maxdist )
 	return true;		// not actually touching
 		
-    ::g->corpsehit = thing;
-    ::g->corpsehit->momx = ::g->corpsehit->momy = 0;
-    ::g->corpsehit->height <<= 2;
-    check = P_CheckPosition (::g->corpsehit, ::g->corpsehit->x, ::g->corpsehit->y);
-    ::g->corpsehit->height >>= 2;
+    Globals::g->corpsehit = thing;
+    Globals::g->corpsehit->momx = Globals::g->corpsehit->momy = 0;
+    Globals::g->corpsehit->height <<= 2;
+    check = P_CheckPosition (Globals::g->corpsehit, Globals::g->corpsehit->x, Globals::g->corpsehit->y);
+    Globals::g->corpsehit->height >>= 2;
 
     if (!check)
 	return true;		// doesn't fit here
@@ -1161,17 +1161,17 @@ void A_VileChase (mobj_t* actor, void * )
     if (actor->movedir != DI_NODIR)
     {
 	// check for corpses to raise
-	::g->viletryx =
+	Globals::g->viletryx =
 	    actor->x + actor->info->speed*xspeed[actor->movedir];
-	::g->viletryy =
+	Globals::g->viletryy =
 	    actor->y + actor->info->speed*yspeed[actor->movedir];
 
-	xl = (::g->viletryx - ::g->bmaporgx - MAXRADIUS*2)>>MAPBLOCKSHIFT;
-	xh = (::g->viletryx - ::g->bmaporgx + MAXRADIUS*2)>>MAPBLOCKSHIFT;
-	yl = (::g->viletryy - ::g->bmaporgy - MAXRADIUS*2)>>MAPBLOCKSHIFT;
-	yh = (::g->viletryy - ::g->bmaporgy + MAXRADIUS*2)>>MAPBLOCKSHIFT;
+	xl = (Globals::g->viletryx - Globals::g->bmaporgx - MAXRADIUS*2)>>MAPBLOCKSHIFT;
+	xh = (Globals::g->viletryx - Globals::g->bmaporgx + MAXRADIUS*2)>>MAPBLOCKSHIFT;
+	yl = (Globals::g->viletryy - Globals::g->bmaporgy - MAXRADIUS*2)>>MAPBLOCKSHIFT;
+	yh = (Globals::g->viletryy - Globals::g->bmaporgy + MAXRADIUS*2)>>MAPBLOCKSHIFT;
 	
-	::g->vileobj = actor;
+	Globals::g->vileobj = actor;
 	for (bx=xl ; bx<=xh ; bx++)
 	{
 	    for (by=yl ; by<=yh ; by++)
@@ -1183,19 +1183,19 @@ void A_VileChase (mobj_t* actor, void * )
 		{
 		    // got one!
 		    temp = actor->target;
-		    actor->target = ::g->corpsehit;
+		    actor->target = Globals::g->corpsehit;
 		    A_FaceTarget (actor, 0);
 		    actor->target = temp;
 					
 		    P_SetMobjState (actor, S_VILE_HEAL1);
-		    S_StartSound (::g->corpsehit, sfx_slop);
-		    info = ::g->corpsehit->info;
+		    S_StartSound (Globals::g->corpsehit, sfx_slop);
+		    info = Globals::g->corpsehit->info;
 		    
-		    P_SetMobjState (::g->corpsehit,(statenum_t)info->raisestate);
-		    ::g->corpsehit->height <<= 2;
-		    ::g->corpsehit->flags = info->flags;
-		    ::g->corpsehit->health = info->spawnhealth;
-		    ::g->corpsehit->target = NULL;
+		    P_SetMobjState (Globals::g->corpsehit,(statenum_t)info->raisestate);
+		    Globals::g->corpsehit->height <<= 2;
+		    Globals::g->corpsehit->flags = info->flags;
+		    Globals::g->corpsehit->health = info->spawnhealth;
+		    Globals::g->corpsehit->target = NULL;
 
 		    return;
 		}
@@ -1443,8 +1443,8 @@ A_PainShootSkull
     // count total number of skull currently on the level
     count = 0;
 
-    currentthinker = ::g->thinkercap.next;
-    while (currentthinker != &::g->thinkercap)
+    currentthinker = Globals::g->thinkercap.next;
+    while (currentthinker != &Globals::g->thinkercap)
     {
 	if (   (currentthinker->function.acp1 == (actionf_p1)P_MobjThinker)
 	    && ((mobj_t *)currentthinker)->type == MT_SKULL)
@@ -1592,9 +1592,9 @@ void A_BossDeath (mobj_t* mo, void * )
     line_t	junk;
     int		i;
 		
-    if ( ::g->gamemode == commercial)
+    if ( Globals::g->gamemode == commercial)
     {
-	if (::g->gamemap != 7)
+	if (Globals::g->gamemap != 7)
 	    return;
 		
 	if ((mo->type != MT_FATSO)
@@ -1603,10 +1603,10 @@ void A_BossDeath (mobj_t* mo, void * )
     }
     else
     {
-	switch(::g->gameepisode)
+	switch(Globals::g->gameepisode)
 	{
 	  case 1:
-	    if (::g->gamemap != 8)
+	    if (Globals::g->gamemap != 8)
 		return;
 
 	    if (mo->type != MT_BRUISER)
@@ -1614,7 +1614,7 @@ void A_BossDeath (mobj_t* mo, void * )
 	    break;
 	    
 	  case 2:
-	    if (::g->gamemap != 8)
+	    if (Globals::g->gamemap != 8)
 		return;
 
 	    if (mo->type != MT_CYBORG)
@@ -1622,7 +1622,7 @@ void A_BossDeath (mobj_t* mo, void * )
 	    break;
 	    
 	  case 3:
-	    if (::g->gamemap != 8)
+	    if (Globals::g->gamemap != 8)
 		return;
 	    
 	    if (mo->type != MT_SPIDER)
@@ -1631,7 +1631,7 @@ void A_BossDeath (mobj_t* mo, void * )
 	    break;
 	    
 	  case 4:
-	    switch(::g->gamemap)
+	    switch(Globals::g->gamemap)
 	    {
 	      case 6:
 		if (mo->type != MT_CYBORG)
@@ -1650,7 +1650,7 @@ void A_BossDeath (mobj_t* mo, void * )
 	    break;
 	    
 	  default:
-	    if (::g->gamemap != 8)
+	    if (Globals::g->gamemap != 8)
 		return;
 	    break;
 	}
@@ -1660,7 +1660,7 @@ void A_BossDeath (mobj_t* mo, void * )
     
     // make sure there is a player alive for victory
     for (i=0 ; i<MAXPLAYERS ; i++)
-	if (::g->playeringame[i] && ::g->players[i].health > 0)
+	if (Globals::g->playeringame[i] && Globals::g->players[i].health > 0)
 	    break;
     
     if (i==MAXPLAYERS)
@@ -1668,7 +1668,7 @@ void A_BossDeath (mobj_t* mo, void * )
     
     // scan the remaining thinkers to see
     // if all bosses are dead
-    for (th = ::g->thinkercap.next ; th != &::g->thinkercap ; th=th->next)
+    for (th = Globals::g->thinkercap.next ; th != &Globals::g->thinkercap ; th=th->next)
     {
 	if (th->function.acp1 != (actionf_p1)P_MobjThinker)
 	    continue;
@@ -1684,9 +1684,9 @@ void A_BossDeath (mobj_t* mo, void * )
     }
 	
     // victory!
-    if ( ::g->gamemode == commercial)
+    if ( Globals::g->gamemode == commercial)
     {
-	if (::g->gamemap == 7)
+	if (Globals::g->gamemap == 7)
 	{
 	    if (mo->type == MT_FATSO)
 	    {
@@ -1705,7 +1705,7 @@ void A_BossDeath (mobj_t* mo, void * )
     }
     else
     {
-	switch(::g->gameepisode)
+	switch(Globals::g->gameepisode)
 	{
 	  case 1:
 	    junk.tag = 666;
@@ -1714,7 +1714,7 @@ void A_BossDeath (mobj_t* mo, void * )
 	    break;
 	    
 	  case 4:
-	    switch(::g->gamemap)
+	    switch(Globals::g->gamemap)
 	    {
 	      case 6:
 		junk.tag = 666;
@@ -1758,7 +1758,7 @@ A_OpenShotgun2
 ( player_t*	player,
   pspdef_t*	psp )
 {
-	if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+	if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 		S_StartSound (player->mo, sfx_dbopn);
 }
 
@@ -1767,7 +1767,7 @@ A_LoadShotgun2
 ( player_t*	player,
   pspdef_t*	psp )
 {
-	if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+	if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 		S_StartSound (player->mo, sfx_dbload);
 }
 
@@ -1781,7 +1781,7 @@ A_CloseShotgun2
 ( player_t*	player,
   pspdef_t*	psp )
 {
-	if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+	if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 		S_StartSound (player->mo, sfx_dbcls);
     A_ReFire(player,psp);
 }
@@ -1795,13 +1795,13 @@ void A_BrainAwake (mobj_t* mo, void * )
     mobj_t*	m;
 	
     // find all the target spots
-	::g->easy = 0;
-    ::g->numbraintargets = 0;
-    ::g->braintargeton = 0;
+	Globals::g->easy = 0;
+    Globals::g->numbraintargets = 0;
+    Globals::g->braintargeton = 0;
 	
-    thinker = ::g->thinkercap.next;
-    for (thinker = ::g->thinkercap.next ;
-	 thinker != &::g->thinkercap ;
+    thinker = Globals::g->thinkercap.next;
+    for (thinker = Globals::g->thinkercap.next ;
+	 thinker != &Globals::g->thinkercap ;
 	 thinker = thinker->next)
     {
 	if (thinker->function.acp1 != (actionf_p1)P_MobjThinker)
@@ -1811,8 +1811,8 @@ void A_BrainAwake (mobj_t* mo, void * )
 
 	if (m->type == MT_BOSSTARGET )
 	{
-	    ::g->braintargets[::g->numbraintargets] = m;
-	    ::g->numbraintargets++;
+	    Globals::g->braintargets[Globals::g->numbraintargets] = m;
+	    Globals::g->numbraintargets++;
 	}
     }
 	
@@ -1883,8 +1883,8 @@ void A_BrainSpit (mobj_t*	mo, void * )
 	mobj_t*	targ;
 	mobj_t*	newmobj;
 
-	::g->easy ^= 1;
-	if (::g->gameskill <= sk_easy && (!::g->easy))
+	Globals::g->easy ^= 1;
+	if (Globals::g->gameskill <= sk_easy && (!Globals::g->easy))
 		return;
 
 	if ( 1 ) {
@@ -1892,7 +1892,7 @@ void A_BrainSpit (mobj_t*	mo, void * )
 		int numCorpse = 0;
 		int numEnemies = 0;
 
-		for ( thinker_t* th = ::g->thinkercap.next; th != &::g->thinkercap; th = th->next ) {
+		for ( thinker_t* th = Globals::g->thinkercap.next; th != &Globals::g->thinkercap; th = th->next ) {
 			if ( th->function.acp1 == (actionf_p1)P_MobjThinker ) {
 				mobj_t* obj = (mobj_t*)th;
 
@@ -1907,7 +1907,7 @@ void A_BrainSpit (mobj_t*	mo, void * )
 
 		if ( numCorpse > 48 ) {
 			for ( int i = 0; i < 12; i++ ) {
-				for ( thinker_t* th = ::g->thinkercap.next; th != &::g->thinkercap; th = th->next ) {
+				for ( thinker_t* th = Globals::g->thinkercap.next; th != &Globals::g->thinkercap; th = th->next ) {
 					if ( th->function.acp1 == (actionf_p1)P_MobjThinker ) {
 						mobj_t* obj = (mobj_t*)th;
 
@@ -1926,8 +1926,8 @@ void A_BrainSpit (mobj_t*	mo, void * )
 	}
 
 	// shoot a cube at current target
-	targ = ::g->braintargets[::g->braintargeton];
-	::g->braintargeton = (::g->braintargeton+1) % ::g->numbraintargets;
+	targ = Globals::g->braintargets[Globals::g->braintargeton];
+	Globals::g->braintargeton = (Globals::g->braintargeton+1) % Globals::g->numbraintargets;
 
 	// spawn brain missile
 	newmobj = P_SpawnMissile (mo, targ, MT_SPAWNSHOT);
@@ -2012,7 +2012,7 @@ void A_PlayerScream (mobj_t* mo, void * )
     // Default death sound.
     int		sound = sfx_pldeth;
 	
-    if ( (::g->gamemode == commercial)
+    if ( (Globals::g->gamemode == commercial)
 	&& 	(mo->health < -50))
     {
 	// IF THE PLAYER DIES
@@ -2020,7 +2020,7 @@ void A_PlayerScream (mobj_t* mo, void * )
 	sound = sfx_pdiehi;
     }
     
-	if ( ::g->demoplayback || globalNetworking || (mo == ::g->players[::g->consoleplayer].mo))
+	if ( Globals::g->demoplayback || globalNetworking || (mo == Globals::g->players[Globals::g->consoleplayer].mo))
 		S_StartSound (mo, sound);
 }
 

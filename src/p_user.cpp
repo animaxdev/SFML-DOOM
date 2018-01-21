@@ -95,7 +95,7 @@ void P_CalcHeight (player_t* player)
 	if (player->bob>MAXBOB)
 		player->bob = MAXBOB;
 
-	if ((player->cheats & CF_NOMOMENTUM) || !::g->onground)
+	if ((player->cheats & CF_NOMOMENTUM) || !Globals::g->onground)
 	{
 		player->viewz = player->mo->z + VIEWHEIGHT;
 
@@ -106,11 +106,11 @@ void P_CalcHeight (player_t* player)
 		return;
 	}
 
-	angle = (FINEANGLES/20*::g->leveltime)&FINEMASK;
+	angle = (FINEANGLES/20*Globals::g->leveltime)&FINEMASK;
 	bob = FixedMul ( player->bob/2, finesine[angle]);
 
 
-	// move ::g->viewheight
+	// move Globals::g->viewheight
 	if (player->playerstate == PST_LIVE)
 	{
 		player->viewheight += player->deltaviewheight;
@@ -155,17 +155,17 @@ void P_MovePlayer (player_t* player)
 	player->mo->angle += (cmd->angleturn<<16);
 
 	// Do not let the player control movement
-	//  if not ::g->onground.
-	::g->onground = (player->mo->z <= player->mo->floorz);
+	//  if not Globals::g->onground.
+	Globals::g->onground = (player->mo->z <= player->mo->floorz);
 
-	if (cmd->forwardmove && ::g->onground)
+	if (cmd->forwardmove && Globals::g->onground)
 		P_Thrust (player, player->mo->angle, cmd->forwardmove*2048);
 
-	if (cmd->sidemove && ::g->onground)
+	if (cmd->sidemove && Globals::g->onground)
 		P_Thrust (player, player->mo->angle-ANG90, cmd->sidemove*2048);
 
 	if ( (cmd->forwardmove || cmd->sidemove) 
-		&& player->mo->state == &::g->states[S_PLAY] )
+		&& player->mo->state == &Globals::g->states[S_PLAY] )
 	{
 		P_SetMobjState (player->mo, S_PLAY_RUN1);
 	}
@@ -178,7 +178,7 @@ void P_MovePlayer (player_t* player)
 // Fall on your face when dying.
 // Decrease POV height to floor height.
 //
-extern byte demoversion;
+extern unsigned char demoversion;
 
 void P_DeathThink (player_t* player)
 {
@@ -195,7 +195,7 @@ void P_DeathThink (player_t* player)
 		player->viewheight = 6*FRACUNIT;
 
 	player->deltaviewheight = 0;
-	::g->onground = (player->mo->z <= player->mo->floorz);
+	Globals::g->onground = (player->mo->z <= player->mo->floorz);
 	P_CalcHeight (player);
 
 	if (player->attacker && player->attacker != player->mo)
@@ -281,7 +281,7 @@ void P_PlayerThink (player_t* player)
 	if (cmd->buttons & BT_SPECIAL)
 		cmd->buttons = 0;			
 
-	if (::g->demoplayback && demoversion < VERSION )
+	if (Globals::g->demoplayback && demoversion < VERSION )
 	{
 		if ( cmd->buttons & BT_CHANGE)
 		{
@@ -298,7 +298,7 @@ void P_PlayerThink (player_t* player)
 				newweapon = wp_chainsaw;
 			}
 
-			if ( (::g->gamemode == commercial)
+			if ( (Globals::g->gamemode == commercial)
 				&& newweapon == wp_shotgun 
 				&& player->weaponowned[wp_supershotgun]
 			&& player->readyweapon != wp_supershotgun)
@@ -314,7 +314,7 @@ void P_PlayerThink (player_t* player)
 				//  even if cheated.
 				if ((newweapon != wp_plasma
 					&& newweapon != wp_bfg)
-					|| (::g->gamemode != shareware) )
+					|| (Globals::g->gamemode != shareware) )
 				{
 					player->pendingweapon = newweapon;
 				}
@@ -339,7 +339,7 @@ void P_PlayerThink (player_t* player)
 				if (newweapon == wp_nochange)
 					continue;
 
-				weapontype_t maxweapon = (::g->gamemode == retail) ? wp_chainsaw : wp_supershotgun;
+				weapontype_t maxweapon = (Globals::g->gamemode == retail) ? wp_chainsaw : wp_supershotgun;
 
 				if (newweapon < 0)
 					newweapon = maxweapon;
@@ -367,7 +367,7 @@ void P_PlayerThink (player_t* player)
 				newweapon = wp_chainsaw;
 			}
 
-			if ( (::g->gamemode == commercial)
+			if ( (Globals::g->gamemode == commercial)
 				&& newweapon == wp_shotgun 
 				&& player->weaponowned[wp_supershotgun]
 			&& player->readyweapon != wp_supershotgun)
@@ -422,7 +422,7 @@ void P_PlayerThink (player_t* player)
 		player->bonuscount--;
 
 
-	// Handling ::g->colormaps.
+	// Handling Globals::g->colormaps.
 	if (player->powers[pw_invulnerability])
 	{
 		if (player->powers[pw_invulnerability] > 4*32

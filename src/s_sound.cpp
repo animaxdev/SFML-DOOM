@@ -80,7 +80,7 @@ const char snd_prefixen[]
 
 
 
-// the set of ::g->channels available
+// the set of Globals::g->channels available
 
 // These are not used, but should be (menu).
 // Maximum volume of a sound effect.
@@ -90,13 +90,13 @@ const char snd_prefixen[]
 
 
 
-// whether songs are ::g->mus_paused
+// whether songs are Globals::g->mus_paused
 
 // music currently being played
 
 // following is set
 //  by the defaults code in M_misc:
-// number of ::g->channels available
+// number of Globals::g->channels available
 
 
 
@@ -124,7 +124,7 @@ void S_StopChannel(int cnum);
 
 //
 // Initializes sound stuff, including volume
-// Sets ::g->channels, SFX and music volume,
+// Sets Globals::g->channels, SFX and music volume,
 //  allocates channel buffer, sets S_sfx lookup.
 //
 void S_Init
@@ -139,19 +139,19 @@ void S_Init
 	S_SetSfxVolume(sfxVolume);
 	S_SetMusicVolume(musicVolume);
 
-	// Allocating the internal ::g->channels for mixing
+	// Allocating the internal Globals::g->channels for mixing
 	// (the maximum numer of sounds rendered
 	// simultaneously) within zone memory.
-	::g->channels =
-		(channel_t *) DoomLib::Z_Malloc(::g->numChannels*sizeof(channel_t), PU_STATIC, 0);
+	Globals::g->channels =
+		(channel_t *) DoomLib::Z_Malloc(Globals::g->numChannels*sizeof(channel_t), PU_STATIC, 0);
 
-	// Free all ::g->channels for use
-	for (i=0 ; i < ::g->numChannels ; i++)
-		::g->channels[i].sfxinfo = 0;
+	// Free all Globals::g->channels for use
+	for (i=0 ; i < Globals::g->numChannels ; i++)
+		Globals::g->channels[i].sfxinfo = 0;
 
-	// no sounds are playing, and they are not ::g->mus_paused
-	::g->mus_paused = 0;
-	::g->mus_looping = 0;
+	// no sounds are playing, and they are not Globals::g->mus_paused
+	Globals::g->mus_paused = 0;
+	Globals::g->mus_looping = 0;
 
 	// Note that sounds have not been cached (yet).
 	for (i=1 ; i<NUMSFX ; i++)
@@ -173,27 +173,27 @@ void S_Start(void)
 
 	// kill all playing sounds at start of level
 	//  (trust me - a good idea)
-	if( ::g->channels ) {
-		for (cnum=0 ; cnum < ::g->numChannels ; cnum++)
-			if (::g->channels[cnum].sfxinfo)
+	if( Globals::g->channels ) {
+		for (cnum=0 ; cnum < Globals::g->numChannels ; cnum++)
+			if (Globals::g->channels[cnum].sfxinfo)
 				S_StopChannel(cnum);
 	}
 
 	// start new music for the level
-	::g->mus_paused = 0;
+	Globals::g->mus_paused = 0;
 
-	if (::g->gamemode == commercial) {
+	if (Globals::g->gamemode == commercial) {
 		
-		mnum = mus_runnin + ::g->gamemap - 1;
+		mnum = mus_runnin + Globals::g->gamemap - 1;
 		
 		/*
 		Is this necessary?
 		
-		if ( ::g->gamemission == 0 ) {
-			mnum = mus_runnin + ::g->gamemap - 1;
+		if ( Globals::g->gamemission == 0 ) {
+			mnum = mus_runnin + Globals::g->gamemap - 1;
 		}
 		else {
-			mnum = mus_runnin + ( gameLocal->GetMissionData( ::g->gamemission )->mapMusic[ ::g->gamemap-1 ] - 1 );
+			mnum = mus_runnin + ( gameLocal->GetMissionData( Globals::g->gamemission )->mapMusic[ Globals::g->gamemap-1 ] - 1 );
 		}
 		*/
 	}
@@ -212,16 +212,16 @@ void S_Start(void)
 			mus_e1m9	// Tim			e4m9
 		};
 
-		if (::g->gameepisode < 4)
-			mnum = mus_e1m1 + (::g->gameepisode-1)*9 + ::g->gamemap-1;
+		if (Globals::g->gameepisode < 4)
+			mnum = mus_e1m1 + (Globals::g->gameepisode-1)*9 + Globals::g->gamemap-1;
 		else
-			mnum = spmus[::g->gamemap-1];
+			mnum = spmus[Globals::g->gamemap-1];
 	}	
 
 	S_StopMusic();
 	S_ChangeMusic(mnum, true);
 
-	::g->nextcleanup = 15;
+	Globals::g->nextcleanup = 15;
 }	
 
 
@@ -286,16 +286,16 @@ S_StartSoundAtVolume
 	// Check to see if it is audible,
 	//  and if not, modify the params
 	// DHM - Nerve :: chainsaw!!!
-	if (origin && ::g->players[::g->consoleplayer].mo && origin != ::g->players[::g->consoleplayer].mo)
+	if (origin && Globals::g->players[Globals::g->consoleplayer].mo && origin != Globals::g->players[Globals::g->consoleplayer].mo)
 	{
-		rc = S_AdjustSoundParams(::g->players[::g->consoleplayer].mo,
+		rc = S_AdjustSoundParams(Globals::g->players[Globals::g->consoleplayer].mo,
 			origin,
 			&volume,
 			&sep,
 			&pitch);
 
-		if ( origin->x == ::g->players[::g->consoleplayer].mo->x
-			&& origin->y == ::g->players[::g->consoleplayer].mo->y)
+		if ( origin->x == Globals::g->players[Globals::g->consoleplayer].mo->x
+			&& origin->y == Globals::g->players[Globals::g->consoleplayer].mo->y)
 		{	
 			sep 	= NORM_SEP;
 		}
@@ -340,9 +340,9 @@ S_StartSoundAtVolume
 	if (sfx->usefulness++ < 0)
 		sfx->usefulness = 1;
 
-	// Assigns the handle to one of the ::g->channels in the
+	// Assigns the handle to one of the Globals::g->channels in the
 	//  mix/output buffer.
-	::g->channels[cnum].handle = I_StartSound(sfx_id, origin, ::g->players[::g->consoleplayer].mo, volume, pitch, priority);
+	Globals::g->channels[cnum].handle = I_StartSound(sfx_id, origin, Globals::g->players[Globals::g->consoleplayer].mo, volume, pitch, priority);
 }	
 
 void S_StartSound ( void*		origin, int		sfx_id )
@@ -358,9 +358,9 @@ void S_StopSound(void *origin)
 
 	int cnum;
 
-	for (cnum=0 ; cnum < ::g->numChannels ; cnum++)
+	for (cnum=0 ; cnum < Globals::g->numChannels ; cnum++)
 	{
-		if (::g->channels[cnum].sfxinfo && ::g->channels[cnum].origin == origin)
+		if (Globals::g->channels[cnum].sfxinfo && Globals::g->channels[cnum].origin == origin)
 		{
 			S_StopChannel(cnum);
 			break;
@@ -377,19 +377,19 @@ void S_StopSound(void *origin)
 //
 void S_PauseSound(void)
 {
-	if (::g->mus_playing && !::g->mus_paused)
+	if (Globals::g->mus_playing && !Globals::g->mus_paused)
 	{
-		I_PauseSong(::g->mus_playing->handle);
-		::g->mus_paused = true;
+		I_PauseSong(Globals::g->mus_playing->handle);
+		Globals::g->mus_paused = true;
 	}
 }
 
 void S_ResumeSound(void)
 {
-	if (::g->mus_playing && ::g->mus_paused)
+	if (Globals::g->mus_playing && Globals::g->mus_paused)
 	{
-		I_ResumeSong(::g->mus_playing->handle);
-		::g->mus_paused = false;
+		I_ResumeSong(Globals::g->mus_playing->handle);
+		Globals::g->mus_paused = false;
 	}
 }
 
@@ -409,9 +409,9 @@ void S_UpdateSounds(void* listener_p)
 
 	mobj_t*	listener = (mobj_t*)listener_p;
 
-	for (cnum=0 ; cnum < ::g->numChannels ; cnum++)
+	for (cnum=0 ; cnum < Globals::g->numChannels ; cnum++)
 	{
-		c = &::g->channels[cnum];
+		c = &Globals::g->channels[cnum];
 		sfx = c->sfxinfo;
 
 		if(sfx)
@@ -496,38 +496,38 @@ void S_ChangeMusic ( int			musicnum, int			looping )
 		I_Error("Bad music number %d", musicnum);
 	}
 	else
-		music = &::g->S_music[musicnum];
+		music = &Globals::g->S_music[musicnum];
 
-	if (::g->mus_playing == music)
+	if (Globals::g->mus_playing == music)
 		return;
 
 	//I_Printf("S_ChangeMusic: Playing new track: '%s'\n", music->name);
 
 	I_PlaySong( music->name, looping );
 
-	::g->mus_playing = music;
+	Globals::g->mus_playing = music;
 }
 
 
 void S_StopMusic(void)
 {
-	if (::g->doomcom.consoleplayer)
+	if (Globals::g->doomcom.consoleplayer)
 	{
 		// we aren't the key player... we have no control over music
 		return;
 	}
 	
-	if (::g->mus_playing)
+	if (Globals::g->mus_playing)
 	{
-		if (::g->mus_paused)
-			I_ResumeSong(::g->mus_playing->handle);
+		if (Globals::g->mus_paused)
+			I_ResumeSong(Globals::g->mus_playing->handle);
 
-		I_StopSong(::g->mus_playing->handle);
-		I_UnRegisterSong(::g->mus_playing->handle);
+		I_StopSong(Globals::g->mus_playing->handle);
+		I_UnRegisterSong(Globals::g->mus_playing->handle);
 		//Z_FreeTags( PU_MUSIC_SHARED, PU_MUSIC_SHARED );
 
-		::g->mus_playing->data = 0;
-		::g->mus_playing = 0;
+		Globals::g->mus_playing->data = 0;
+		Globals::g->mus_playing = 0;
 	}
 }
 
@@ -538,7 +538,7 @@ void S_StopChannel(int cnum)
 {
 
 	int		i;
-	channel_t*	c = &::g->channels[cnum];
+	channel_t*	c = &Globals::g->channels[cnum];
 
 	if (c->sfxinfo)
 	{
@@ -553,11 +553,11 @@ void S_StopChannel(int cnum)
 		}
 
 		// check to see
-		//  if other ::g->channels are playing the sound
-		for (i=0 ; i < ::g->numChannels ; i++)
+		//  if other Globals::g->channels are playing the sound
+		for (i=0 ; i < Globals::g->numChannels ; i++)
 		{
 			if (cnum != i
-				&& c->sfxinfo == ::g->channels[i].sfxinfo)
+				&& c->sfxinfo == Globals::g->channels[i].sfxinfo)
 			{
 				break;
 			}
@@ -635,12 +635,12 @@ S_getChannel
 	channel_t*	c;
 
 	// Find an open channel
-	for (cnum=0 ; cnum < ::g->numChannels ; cnum++)
+	for (cnum=0 ; cnum < Globals::g->numChannels ; cnum++)
 	{
-		if (!::g->channels[cnum].sfxinfo)
+		if (!Globals::g->channels[cnum].sfxinfo)
 			break;
-		else if ( origin && ::g->channels[cnum].origin == origin && 
-				(::g->channels[cnum].handle == sfx_sawidl || ::g->channels[cnum].handle == sfx_sawful) )
+		else if ( origin && Globals::g->channels[cnum].origin == origin && 
+				(Globals::g->channels[cnum].handle == sfx_sawidl || Globals::g->channels[cnum].handle == sfx_sawful) )
 		{
 			S_StopChannel(cnum);
 			break;
@@ -648,13 +648,13 @@ S_getChannel
 	}
 
 	// None available
-	if (cnum == ::g->numChannels)
+	if (cnum == Globals::g->numChannels)
 	{
 		// Look for lower priority
-		for (cnum=0 ; cnum < ::g->numChannels ; cnum++)
-			if (::g->channels[cnum].sfxinfo->priority >= sfxinfo->priority) break;
+		for (cnum=0 ; cnum < Globals::g->numChannels ; cnum++)
+			if (Globals::g->channels[cnum].sfxinfo->priority >= sfxinfo->priority) break;
 
-		if (cnum == ::g->numChannels)
+		if (cnum == Globals::g->numChannels)
 		{
 			// FUCK!  No lower priority.  Sorry, Charlie.    
 			return -1;
@@ -666,7 +666,7 @@ S_getChannel
 		}
 	}
 
-	c = &::g->channels[cnum];
+	c = &Globals::g->channels[cnum];
 
 	// channel is decided to be cnum.
 	c->sfxinfo = sfxinfo;

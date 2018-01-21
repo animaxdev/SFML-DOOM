@@ -57,13 +57,13 @@ If you have questions concerning this license or the applicable additional terms
 
 ticcmd_t*	I_BaseTiccmd(void)
 {
-    return &::g->emptycmd;
+    return &Globals::g->emptycmd;
 }
 
 
 int  I_GetHeapSize (void)
 {
-    return ::g->mb_used*1024*1024;
+    return Globals::g->mb_used*1024*1024;
 }
 
 
@@ -73,12 +73,12 @@ int  I_GetHeapSize (void)
 //
 int  I_GetTime (void)
 {
-	return ::g->current_time;
+	return Globals::g->current_time;
 }
 
 void I_SetTime( int time_in )
 {
-	::g->current_time = time_in;
+	Globals::g->current_time = time_in;
 }
 
 
@@ -169,7 +169,7 @@ void I_Error(char *error, ...)
     // Message first.
 	if( debugOutput ) {
 		va_start (argptr,error);
-		//std::string::vsnPrintf (error_msg, ERROR_MSG_SIZE, error, argptr);
+		vsnprintf (error_msg, ERROR_MSG_SIZE, error, argptr);
 
 		safeOutputDebug("Error: ");
 		safeOutputDebug(error_msg);
@@ -181,8 +181,8 @@ void I_Error(char *error, ...)
 	// CRASH DUMP - enable this to get extra info on error from crash dumps
 	//*(int*)0x0 = 21;
 	DoomLib::Interface.QuitCurrentGame();
+    exit(-1);
 //    idLib::Printf( "DOOM Classic error: %s", error_msg );
-//    common->SwitchToGame( DOOM3_BFG );
 }
 
 #endif

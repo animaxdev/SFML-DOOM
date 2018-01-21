@@ -56,7 +56,7 @@ If you have questions concerning this license or the applicable additional terms
 // keep track of the line that lowers the ceiling,
 // so missiles don't explode against sky hack walls
 
-// keep track of special ::g->lines as they are hit,
+// keep track of special Globals::g->lines as they are hit,
 // but don't process them until the move is proven valid
 
 
@@ -76,24 +76,24 @@ qboolean PIT_StompThing (mobj_t* thing)
     if (!(thing->flags & MF_SHOOTABLE) )
 	return true;
 		
-    blockdist = thing->radius + ::g->tmthing->radius;
+    blockdist = thing->radius + Globals::g->tmthing->radius;
     
-    if ( abs(thing->x - ::g->tmx) >= blockdist
-	 || abs(thing->y - ::g->tmy) >= blockdist )
+    if ( abs(thing->x - Globals::g->tmx) >= blockdist
+	 || abs(thing->y - Globals::g->tmy) >= blockdist )
     {
 	// didn't hit it
 	return true;
     }
     
     // don't clip against self
-    if (thing == ::g->tmthing)
+    if (thing == Globals::g->tmthing)
 	return true;
     
     // monsters don't stomp things except on boss level
-    if ( !::g->tmthing->player && ::g->gamemap != 30)
+    if ( !Globals::g->tmthing->player && Globals::g->gamemap != 30)
 	return false;	
 		
-    P_DamageMobj (thing, ::g->tmthing, ::g->tmthing, 10000);
+    P_DamageMobj (thing, Globals::g->tmthing, Globals::g->tmthing, 10000);
 	
     return true;
 }
@@ -118,35 +118,35 @@ P_TeleportMove
     subsector_t*	newsubsec;
     
     // kill anything occupying the position
-    ::g->tmthing = thing;
-    ::g->tmflags = thing->flags;
+    Globals::g->tmthing = thing;
+    Globals::g->tmflags = thing->flags;
 	
-    ::g->tmx = x;
-    ::g->tmy = y;
+    Globals::g->tmx = x;
+    Globals::g->tmy = y;
 	
-    ::g->tmbbox[BOXTOP] = y + ::g->tmthing->radius;
-    ::g->tmbbox[BOXBOTTOM] = y - ::g->tmthing->radius;
-    ::g->tmbbox[BOXRIGHT] = x + ::g->tmthing->radius;
-    ::g->tmbbox[BOXLEFT] = x - ::g->tmthing->radius;
+    Globals::g->tmbbox[BOXTOP] = y + Globals::g->tmthing->radius;
+    Globals::g->tmbbox[BOXBOTTOM] = y - Globals::g->tmthing->radius;
+    Globals::g->tmbbox[BOXRIGHT] = x + Globals::g->tmthing->radius;
+    Globals::g->tmbbox[BOXLEFT] = x - Globals::g->tmthing->radius;
 
     newsubsec = R_PointInSubsector (x,y);
-    ::g->ceilingline = NULL;
+    Globals::g->ceilingline = NULL;
     
     // The base floor/ceiling is from the subsector
     // that contains the point.
-    // Any contacted ::g->lines the step closer together
+    // Any contacted Globals::g->lines the step closer together
     // will adjust them.
-    ::g->tmfloorz = ::g->tmdropoffz = newsubsec->sector->floorheight;
-    ::g->tmceilingz = newsubsec->sector->ceilingheight;
+    Globals::g->tmfloorz = Globals::g->tmdropoffz = newsubsec->sector->floorheight;
+    Globals::g->tmceilingz = newsubsec->sector->ceilingheight;
 			
-    ::g->validcount++;
-    ::g->numspechit = 0;
+    Globals::g->validcount++;
+    Globals::g->numspechit = 0;
     
     // stomp on any things contacted
-    xl = (::g->tmbbox[BOXLEFT] - ::g->bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT;
-    xh = (::g->tmbbox[BOXRIGHT] - ::g->bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT;
-    yl = (::g->tmbbox[BOXBOTTOM] - ::g->bmaporgy - MAXRADIUS)>>MAPBLOCKSHIFT;
-    yh = (::g->tmbbox[BOXTOP] - ::g->bmaporgy + MAXRADIUS)>>MAPBLOCKSHIFT;
+    xl = (Globals::g->tmbbox[BOXLEFT] - Globals::g->bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT;
+    xh = (Globals::g->tmbbox[BOXRIGHT] - Globals::g->bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT;
+    yl = (Globals::g->tmbbox[BOXBOTTOM] - Globals::g->bmaporgy - MAXRADIUS)>>MAPBLOCKSHIFT;
+    yh = (Globals::g->tmbbox[BOXTOP] - Globals::g->bmaporgy + MAXRADIUS)>>MAPBLOCKSHIFT;
 
     for (bx=xl ; bx<=xh ; bx++)
 	for (by=yl ; by<=yh ; by++)
@@ -157,8 +157,8 @@ P_TeleportMove
     // so link the thing into its new position
     P_UnsetThingPosition (thing);
 
-    thing->floorz = ::g->tmfloorz;
-    thing->ceilingz = ::g->tmceilingz;	
+    thing->floorz = Globals::g->tmfloorz;
+    thing->ceilingz = Globals::g->tmceilingz;	
     thing->x = x;
     thing->y = y;
 
@@ -175,17 +175,17 @@ P_TeleportMove
 
 //
 // PIT_CheckLine
-// Adjusts ::g->tmfloorz and ::g->tmceilingz as ::g->lines are contacted
+// Adjusts Globals::g->tmfloorz and Globals::g->tmceilingz as Globals::g->lines are contacted
 //
 qboolean PIT_CheckLine (line_t* ld)
 {
-    if (::g->tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT]
-	|| ::g->tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT]
-	|| ::g->tmbbox[BOXTOP] <= ld->bbox[BOXBOTTOM]
-	|| ::g->tmbbox[BOXBOTTOM] >= ld->bbox[BOXTOP] )
+    if (Globals::g->tmbbox[BOXRIGHT] <= ld->bbox[BOXLEFT]
+	|| Globals::g->tmbbox[BOXLEFT] >= ld->bbox[BOXRIGHT]
+	|| Globals::g->tmbbox[BOXTOP] <= ld->bbox[BOXBOTTOM]
+	|| Globals::g->tmbbox[BOXBOTTOM] >= ld->bbox[BOXTOP] )
 	return true;
 
-    if (P_BoxOnLineSide (::g->tmbbox, ld) != -1)
+    if (P_BoxOnLineSide (Globals::g->tmbbox, ld) != -1)
 	return true;
 		
     // A line has been hit
@@ -196,42 +196,42 @@ qboolean PIT_CheckLine (line_t* ld)
     // If the line is special, keep track of it
     // to process later if the move is proven ok.
     // NOTE: specials are NOT sorted by order,
-    // so two special ::g->lines that are only 8 pixels apart
+    // so two special Globals::g->lines that are only 8 pixels apart
     // could be crossed in either order.
     
     if (!ld->backsector)
 	return false;		// one sided line
 		
-    if (!(::g->tmthing->flags & MF_MISSILE) )
+    if (!(Globals::g->tmthing->flags & MF_MISSILE) )
     {
 	if ( ld->flags & ML_BLOCKING )
 	    return false;	// explicitly blocking everything
 
-	if ( !::g->tmthing->player && ld->flags & ML_BLOCKMONSTERS )
+	if ( !Globals::g->tmthing->player && ld->flags & ML_BLOCKMONSTERS )
 	    return false;	// block monsters only
     }
 
-    // set ::g->openrange, ::g->opentop, ::g->openbottom
+    // set Globals::g->openrange, Globals::g->opentop, Globals::g->openbottom
     P_LineOpening (ld);	
 	
     // adjust floor / ceiling heights
-    if (::g->opentop < ::g->tmceilingz)
+    if (Globals::g->opentop < Globals::g->tmceilingz)
     {
-	::g->tmceilingz = ::g->opentop;
-	::g->ceilingline = ld;
+	Globals::g->tmceilingz = Globals::g->opentop;
+	Globals::g->ceilingline = ld;
     }
 
-    if (::g->openbottom > ::g->tmfloorz)
-	::g->tmfloorz = ::g->openbottom;	
+    if (Globals::g->openbottom > Globals::g->tmfloorz)
+	Globals::g->tmfloorz = Globals::g->openbottom;	
 
-    if (::g->lowfloor < ::g->tmdropoffz)
-	::g->tmdropoffz = ::g->lowfloor;
+    if (Globals::g->lowfloor < Globals::g->tmdropoffz)
+	Globals::g->tmdropoffz = Globals::g->lowfloor;
 
     // if contacted a special line, add it to the list
-    if (ld->special && ::g->numspechit < MAXSPECIALCROSS )
+    if (ld->special && Globals::g->numspechit < MAXSPECIALCROSS )
     {
-	::g->spechit[::g->numspechit] = ld;
-	::g->numspechit++;
+	Globals::g->spechit[Globals::g->numspechit] = ld;
+	Globals::g->numspechit++;
     }
 
     return true;
@@ -249,57 +249,57 @@ qboolean PIT_CheckThing (mobj_t* thing)
     if (!(thing->flags & (MF_SOLID|MF_SPECIAL|MF_SHOOTABLE) ))
 	return true;
     
-    blockdist = thing->radius + ::g->tmthing->radius;
+    blockdist = thing->radius + Globals::g->tmthing->radius;
 
-    if ( abs(thing->x - ::g->tmx) >= blockdist
-	 || abs(thing->y - ::g->tmy) >= blockdist )
+    if ( abs(thing->x - Globals::g->tmx) >= blockdist
+	 || abs(thing->y - Globals::g->tmy) >= blockdist )
     {
 	// didn't hit it
 	return true;	
     }
     
     // don't clip against self
-    if (thing == ::g->tmthing)
+    if (thing == Globals::g->tmthing)
 	return true;
     
     // check for skulls slamming into things
-    if (::g->tmthing->flags & MF_SKULLFLY)
+    if (Globals::g->tmthing->flags & MF_SKULLFLY)
     {
-	damage = ((P_Random()%8)+1)*::g->tmthing->info->damage;
+	damage = ((P_Random()%8)+1)*Globals::g->tmthing->info->damage;
 	
-	P_DamageMobj (thing, ::g->tmthing, ::g->tmthing, damage);
+	P_DamageMobj (thing, Globals::g->tmthing, Globals::g->tmthing, damage);
 	
-	::g->tmthing->flags &= ~MF_SKULLFLY;
-	::g->tmthing->momx = ::g->tmthing->momy = ::g->tmthing->momz = 0;
+	Globals::g->tmthing->flags &= ~MF_SKULLFLY;
+	Globals::g->tmthing->momx = Globals::g->tmthing->momy = Globals::g->tmthing->momz = 0;
 	
-	P_SetMobjState (::g->tmthing, (statenum_t)::g->tmthing->info->spawnstate);
+	P_SetMobjState (Globals::g->tmthing, (statenum_t)Globals::g->tmthing->info->spawnstate);
 	
 	return false;		// stop moving
     }
 
     
     // missiles can hit other things
-    if (::g->tmthing->flags & MF_MISSILE)
+    if (Globals::g->tmthing->flags & MF_MISSILE)
     {
 	// see if it went over / under
-	if (::g->tmthing->z > thing->z + thing->height)
+	if (Globals::g->tmthing->z > thing->z + thing->height)
 	    return true;		// overhead
-	if (::g->tmthing->z+::g->tmthing->height < thing->z)
+	if (Globals::g->tmthing->z+Globals::g->tmthing->height < thing->z)
 	    return true;		// underneath
 		
-	if (::g->tmthing->target && (
-	    ::g->tmthing->target->type == thing->type || 
-	    (::g->tmthing->target->type == MT_KNIGHT && thing->type == MT_BRUISER)||
-	    (::g->tmthing->target->type == MT_BRUISER && thing->type == MT_KNIGHT) ) )
+	if (Globals::g->tmthing->target && (
+	    Globals::g->tmthing->target->type == thing->type || 
+	    (Globals::g->tmthing->target->type == MT_KNIGHT && thing->type == MT_BRUISER)||
+	    (Globals::g->tmthing->target->type == MT_BRUISER && thing->type == MT_KNIGHT) ) )
 	{
 	    // Don't hit same species as originator.
-	    if (thing == ::g->tmthing->target)
+	    if (thing == Globals::g->tmthing->target)
 		return true;
 
 	    if (thing->type != MT_PLAYER)
 	    {
 		// Explode, but do no damage.
-		// Let ::g->players missile other ::g->players.
+		// Let Globals::g->players missile other Globals::g->players.
 		return false;
 	    }
 	}
@@ -311,8 +311,8 @@ qboolean PIT_CheckThing (mobj_t* thing)
 	}
 	
 	// damage / explode
-	damage = ((P_Random()%8)+1)*::g->tmthing->info->damage;
-	P_DamageMobj (thing, ::g->tmthing, ::g->tmthing->target, damage);
+	damage = ((P_Random()%8)+1)*Globals::g->tmthing->info->damage;
+	P_DamageMobj (thing, Globals::g->tmthing, Globals::g->tmthing->target, damage);
 
 	// don't traverse any more
 	return false;				
@@ -322,10 +322,10 @@ qboolean PIT_CheckThing (mobj_t* thing)
     if (thing->flags & MF_SPECIAL)
     {
 	solid = thing->flags&MF_SOLID;
-	if (::g->tmflags&MF_PICKUP)
+	if (Globals::g->tmflags&MF_PICKUP)
 	{
 	    // can remove thing
-	    P_TouchSpecialThing (thing, ::g->tmthing);
+	    P_TouchSpecialThing (thing, Globals::g->tmthing);
 	}
 	return !solid;
     }
@@ -356,7 +356,7 @@ qboolean PIT_CheckThing (mobj_t* thing)
 //  newsubsec
 //  floorz
 //  ceilingz
-//  ::g->tmdropoffz
+//  Globals::g->tmdropoffz
 //   the lowest point contacted
 //   (monsters won't move to a dropoff)
 //  speciallines[]
@@ -376,31 +376,31 @@ P_CheckPosition
     int			by;
     subsector_t*	newsubsec;
 
-    ::g->tmthing = thing;
-    ::g->tmflags = thing->flags;
+    Globals::g->tmthing = thing;
+    Globals::g->tmflags = thing->flags;
 	
-    ::g->tmx = x;
-    ::g->tmy = y;
+    Globals::g->tmx = x;
+    Globals::g->tmy = y;
 	
-    ::g->tmbbox[BOXTOP] = y + ::g->tmthing->radius;
-    ::g->tmbbox[BOXBOTTOM] = y - ::g->tmthing->radius;
-    ::g->tmbbox[BOXRIGHT] = x + ::g->tmthing->radius;
-    ::g->tmbbox[BOXLEFT] = x - ::g->tmthing->radius;
+    Globals::g->tmbbox[BOXTOP] = y + Globals::g->tmthing->radius;
+    Globals::g->tmbbox[BOXBOTTOM] = y - Globals::g->tmthing->radius;
+    Globals::g->tmbbox[BOXRIGHT] = x + Globals::g->tmthing->radius;
+    Globals::g->tmbbox[BOXLEFT] = x - Globals::g->tmthing->radius;
 
     newsubsec = R_PointInSubsector (x,y);
-    ::g->ceilingline = NULL;
+    Globals::g->ceilingline = NULL;
     
     // The base floor / ceiling is from the subsector
     // that contains the point.
-    // Any contacted ::g->lines the step closer together
+    // Any contacted Globals::g->lines the step closer together
     // will adjust them.
-    ::g->tmfloorz = ::g->tmdropoffz = newsubsec->sector->floorheight;
-    ::g->tmceilingz = newsubsec->sector->ceilingheight;
+    Globals::g->tmfloorz = Globals::g->tmdropoffz = newsubsec->sector->floorheight;
+    Globals::g->tmceilingz = newsubsec->sector->ceilingheight;
 			
-    ::g->validcount++;
-    ::g->numspechit = 0;
+    Globals::g->validcount++;
+    Globals::g->numspechit = 0;
 
-    if ( ::g->tmflags & MF_NOCLIP )
+    if ( Globals::g->tmflags & MF_NOCLIP )
 	return true;
     
     // Check things first, possibly picking things up.
@@ -408,21 +408,21 @@ P_CheckPosition
     // because mobj_ts are grouped into mapblocks
     // based on their origin point, and can overlap
     // into adjacent blocks by up to MAXRADIUS units.
-    xl = (::g->tmbbox[BOXLEFT] - ::g->bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT;
-    xh = (::g->tmbbox[BOXRIGHT] - ::g->bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT;
-    yl = (::g->tmbbox[BOXBOTTOM] - ::g->bmaporgy - MAXRADIUS)>>MAPBLOCKSHIFT;
-    yh = (::g->tmbbox[BOXTOP] - ::g->bmaporgy + MAXRADIUS)>>MAPBLOCKSHIFT;
+    xl = (Globals::g->tmbbox[BOXLEFT] - Globals::g->bmaporgx - MAXRADIUS)>>MAPBLOCKSHIFT;
+    xh = (Globals::g->tmbbox[BOXRIGHT] - Globals::g->bmaporgx + MAXRADIUS)>>MAPBLOCKSHIFT;
+    yl = (Globals::g->tmbbox[BOXBOTTOM] - Globals::g->bmaporgy - MAXRADIUS)>>MAPBLOCKSHIFT;
+    yh = (Globals::g->tmbbox[BOXTOP] - Globals::g->bmaporgy + MAXRADIUS)>>MAPBLOCKSHIFT;
 
     for (bx=xl ; bx<=xh ; bx++)
 	for (by=yl ; by<=yh ; by++)
 	    if (!P_BlockThingsIterator(bx,by,PIT_CheckThing))
 		return false;
     
-    // check ::g->lines
-    xl = (::g->tmbbox[BOXLEFT] - ::g->bmaporgx)>>MAPBLOCKSHIFT;
-    xh = (::g->tmbbox[BOXRIGHT] - ::g->bmaporgx)>>MAPBLOCKSHIFT;
-    yl = (::g->tmbbox[BOXBOTTOM] - ::g->bmaporgy)>>MAPBLOCKSHIFT;
-    yh = (::g->tmbbox[BOXTOP] - ::g->bmaporgy)>>MAPBLOCKSHIFT;
+    // check Globals::g->lines
+    xl = (Globals::g->tmbbox[BOXLEFT] - Globals::g->bmaporgx)>>MAPBLOCKSHIFT;
+    xh = (Globals::g->tmbbox[BOXRIGHT] - Globals::g->bmaporgx)>>MAPBLOCKSHIFT;
+    yl = (Globals::g->tmbbox[BOXBOTTOM] - Globals::g->bmaporgy)>>MAPBLOCKSHIFT;
+    yh = (Globals::g->tmbbox[BOXTOP] - Globals::g->bmaporgy)>>MAPBLOCKSHIFT;
 
     for (bx=xl ; bx<=xh ; bx++)
 	for (by=yl ; by<=yh ; by++)
@@ -436,7 +436,7 @@ P_CheckPosition
 //
 // P_TryMove
 // Attempt to move to a new position,
-// crossing special ::g->lines unless MF_TELEPORT is set.
+// crossing special Globals::g->lines unless MF_TELEPORT is set.
 //
 qboolean
 P_TryMove
@@ -450,27 +450,27 @@ P_TryMove
     int		oldside;
     line_t*	ld;
 
-    ::g->floatok = false;
+    Globals::g->floatok = false;
     if (!P_CheckPosition (thing, x, y))
 	return false;		// solid wall or thing
     
     if ( !(thing->flags & MF_NOCLIP) )
     {
-	if (::g->tmceilingz - ::g->tmfloorz < thing->height)
+	if (Globals::g->tmceilingz - Globals::g->tmfloorz < thing->height)
 	    return false;	// doesn't fit
 
-	::g->floatok = true;
+	Globals::g->floatok = true;
 	
 	if ( !(thing->flags&MF_TELEPORT) 
-	     &&::g->tmceilingz - thing->z < thing->height)
+	     &&Globals::g->tmceilingz - thing->z < thing->height)
 	    return false;	// mobj must lower itself to fit
 
 	if ( !(thing->flags&MF_TELEPORT)
-	     && ::g->tmfloorz - thing->z > 24*FRACUNIT )
+	     && Globals::g->tmfloorz - thing->z > 24*FRACUNIT )
 	    return false;	// too big a step up
 
 	if ( !(thing->flags&(MF_DROPOFF|MF_FLOAT))
-	     && ::g->tmfloorz - ::g->tmdropoffz > 24*FRACUNIT )
+	     && Globals::g->tmfloorz - Globals::g->tmdropoffz > 24*FRACUNIT )
 	    return false;	// don't stand over a dropoff
     }
     
@@ -480,26 +480,26 @@ P_TryMove
 
     oldx = thing->x;
     oldy = thing->y;
-    thing->floorz = ::g->tmfloorz;
-    thing->ceilingz = ::g->tmceilingz;	
+    thing->floorz = Globals::g->tmfloorz;
+    thing->ceilingz = Globals::g->tmceilingz;	
     thing->x = x;
     thing->y = y;
 
     P_SetThingPosition (thing);
     
-    // if any special ::g->lines were hit, do the effect
+    // if any special Globals::g->lines were hit, do the effect
     if (! (thing->flags&(MF_TELEPORT|MF_NOCLIP)) )
     {
-		while (::g->numspechit--)
+		while (Globals::g->numspechit--)
 		{
 			// see if the line was crossed
-			ld = ::g->spechit[::g->numspechit];
+			ld = Globals::g->spechit[Globals::g->numspechit];
 			side = P_PointOnLineSide (thing->x, thing->y, ld);
 			oldside = P_PointOnLineSide (oldx, oldy, ld);
 			if (side != oldside)
 			{
 			if (ld->special)
-				P_CrossSpecialLine (ld-::g->lines, oldside, thing);
+				P_CrossSpecialLine (ld-Globals::g->lines, oldside, thing);
 			}
 		}
     }
@@ -527,8 +527,8 @@ qboolean P_ThingHeightClip (mobj_t* thing)
     P_CheckPosition (thing, thing->x, thing->y);	
     // what about stranding a monster partially off an edge?
 	
-    thing->floorz = ::g->tmfloorz;
-    thing->ceilingz = ::g->tmceilingz;
+    thing->floorz = Globals::g->tmfloorz;
+    thing->ceilingz = Globals::g->tmceilingz;
 	
     if (onfloor)
     {
@@ -579,24 +579,24 @@ void P_HitSlideLine (line_t* ld)
 	
     if (ld->slopetype == ST_HORIZONTAL)
     {
-	::g->tmymove = 0;
+	Globals::g->tmymove = 0;
 	return;
     }
     
     if (ld->slopetype == ST_VERTICAL)
     {
-	::g->tmxmove = 0;
+	Globals::g->tmxmove = 0;
 	return;
     }
 	
-    side = P_PointOnLineSide (::g->slidemo->x, ::g->slidemo->y, ld);
+    side = P_PointOnLineSide (Globals::g->slidemo->x, Globals::g->slidemo->y, ld);
 	
     lineangle = R_PointToAngle2 (0,0, ld->dx, ld->dy);
 
     if (side == 1)
 	lineangle += ANG180;
 
-    moveangle = R_PointToAngle2 (0,0, ::g->tmxmove, ::g->tmymove);
+    moveangle = R_PointToAngle2 (0,0, Globals::g->tmxmove, Globals::g->tmymove);
     deltaangle = moveangle-lineangle;
 
     if (deltaangle > ANG180)
@@ -606,11 +606,11 @@ void P_HitSlideLine (line_t* ld)
     lineangle >>= ANGLETOFINESHIFT;
     deltaangle >>= ANGLETOFINESHIFT;
 	
-    movelen = P_AproxDistance (::g->tmxmove, ::g->tmymove);
+    movelen = P_AproxDistance (Globals::g->tmxmove, Globals::g->tmymove);
     newlen = FixedMul (movelen, finecosine[deltaangle]);
 
-    ::g->tmxmove = FixedMul (newlen, finecosine[lineangle]);	
-    ::g->tmymove = FixedMul (newlen, finesine[lineangle]);	
+    Globals::g->tmxmove = FixedMul (newlen, finecosine[lineangle]);	
+    Globals::g->tmymove = FixedMul (newlen, finesine[lineangle]);	
 }
 
 
@@ -628,7 +628,7 @@ qboolean PTR_SlideTraverse (intercept_t* in)
     
     if ( ! (li->flags & ML_TWOSIDED) )
     {
-	if (P_PointOnLineSide (::g->slidemo->x, ::g->slidemo->y, li))
+	if (P_PointOnLineSide (Globals::g->slidemo->x, Globals::g->slidemo->y, li))
 	{
 	    // don't hit the back side
 	    return true;		
@@ -636,16 +636,16 @@ qboolean PTR_SlideTraverse (intercept_t* in)
 	goto isblocking;
     }
 
-    // set ::g->openrange, ::g->opentop, ::g->openbottom
+    // set Globals::g->openrange, Globals::g->opentop, Globals::g->openbottom
     P_LineOpening (li);
     
-    if (::g->openrange < ::g->slidemo->height)
+    if (Globals::g->openrange < Globals::g->slidemo->height)
 	goto isblocking;		// doesn't fit
 		
-    if (::g->opentop - ::g->slidemo->z < ::g->slidemo->height)
+    if (Globals::g->opentop - Globals::g->slidemo->z < Globals::g->slidemo->height)
 	goto isblocking;		// mobj is too high
 
-    if (::g->openbottom - ::g->slidemo->z > 24*FRACUNIT )
+    if (Globals::g->openbottom - Globals::g->slidemo->z > 24*FRACUNIT )
 	goto isblocking;		// too big a step up
 
     // this line doesn't block movement
@@ -654,12 +654,12 @@ qboolean PTR_SlideTraverse (intercept_t* in)
     // the line does block movement,
     // see if it is closer than best so far
   isblocking:		
-    if (in->frac < ::g->bestslidefrac)
+    if (in->frac < Globals::g->bestslidefrac)
     {
-	::g->secondslidefrac = ::g->bestslidefrac;
-	::g->secondslideline = ::g->bestslideline;
-	::g->bestslidefrac = in->frac;
-	::g->bestslideline = li;
+	Globals::g->secondslidefrac = Globals::g->bestslidefrac;
+	Globals::g->secondslideline = Globals::g->bestslideline;
+	Globals::g->bestslidefrac = in->frac;
+	Globals::g->bestslideline = li;
     }
 	
     return false;	// stop
@@ -686,7 +686,7 @@ void P_SlideMove (mobj_t* mo)
     fixed_t		newy;
     int			hitcount;
 		
-    ::g->slidemo = mo;
+    Globals::g->slidemo = mo;
     hitcount = 0;
     
   retry:
@@ -694,7 +694,7 @@ void P_SlideMove (mobj_t* mo)
 	goto stairstep;		// don't loop forever
 
     
-    // ::g->trace along the three leading corners
+    // Globals::g->trace along the three leading corners
     if (mo->momx > 0)
     {
 	leadx = mo->x + mo->radius;
@@ -717,7 +717,7 @@ void P_SlideMove (mobj_t* mo)
 	traily = mo->y + mo->radius;
     }
 		
-    ::g->bestslidefrac = FRACUNIT+1;
+    Globals::g->bestslidefrac = FRACUNIT+1;
 	
     P_PathTraverse ( leadx, leady, leadx+mo->momx, leady+mo->momy,
 		     PT_ADDLINES, PTR_SlideTraverse );
@@ -727,7 +727,7 @@ void P_SlideMove (mobj_t* mo)
 		     PT_ADDLINES, PTR_SlideTraverse );
     
     // move up to the wall
-    if (::g->bestslidefrac == FRACUNIT+1)
+    if (Globals::g->bestslidefrac == FRACUNIT+1)
     {
 	// the move most have hit the middle, so stairstep
       stairstep:
@@ -737,11 +737,11 @@ void P_SlideMove (mobj_t* mo)
     }
 
     // fudge a bit to make sure it doesn't hit
-    ::g->bestslidefrac -= 0x800;	
-    if (::g->bestslidefrac > 0)
+    Globals::g->bestslidefrac -= 0x800;	
+    if (Globals::g->bestslidefrac > 0)
     {
-	newx = FixedMul (mo->momx, ::g->bestslidefrac);
-	newy = FixedMul (mo->momy, ::g->bestslidefrac);
+	newx = FixedMul (mo->momx, Globals::g->bestslidefrac);
+	newy = FixedMul (mo->momy, Globals::g->bestslidefrac);
 	
 	if (!P_TryMove (mo, mo->x+newx, mo->y+newy))
 	    goto stairstep;
@@ -749,23 +749,23 @@ void P_SlideMove (mobj_t* mo)
     
     // Now continue along the wall.
     // First calculate remainder.
-    ::g->bestslidefrac = FRACUNIT-(::g->bestslidefrac+0x800);
+    Globals::g->bestslidefrac = FRACUNIT-(Globals::g->bestslidefrac+0x800);
     
-    if (::g->bestslidefrac > FRACUNIT)
-	::g->bestslidefrac = FRACUNIT;
+    if (Globals::g->bestslidefrac > FRACUNIT)
+	Globals::g->bestslidefrac = FRACUNIT;
     
-    if (::g->bestslidefrac <= 0)
+    if (Globals::g->bestslidefrac <= 0)
 	return;
     
-    ::g->tmxmove = FixedMul (mo->momx, ::g->bestslidefrac);
-    ::g->tmymove = FixedMul (mo->momy, ::g->bestslidefrac);
+    Globals::g->tmxmove = FixedMul (mo->momx, Globals::g->bestslidefrac);
+    Globals::g->tmymove = FixedMul (mo->momy, Globals::g->bestslidefrac);
 
-    P_HitSlideLine (::g->bestslideline);	// clip the moves
+    P_HitSlideLine (Globals::g->bestslideline);	// clip the moves
 
-    mo->momx = ::g->tmxmove;
-    mo->momy = ::g->tmymove;
+    mo->momx = Globals::g->tmxmove;
+    mo->momy = Globals::g->tmymove;
 		
-    if (!P_TryMove (mo, mo->x+::g->tmxmove, mo->y+::g->tmymove))
+    if (!P_TryMove (mo, mo->x+Globals::g->tmxmove, mo->y+Globals::g->tmymove))
     {
 	goto retry;
     }
@@ -786,7 +786,7 @@ void P_SlideMove (mobj_t* mo)
 
 //
 // PTR_AimTraverse
-// Sets linetaget and ::g->aimslope when a target is aimed at.
+// Sets linetaget and Globals::g->aimslope when a target is aimed at.
 //
 qboolean
 PTR_AimTraverse (intercept_t* in)
@@ -810,26 +810,26 @@ PTR_AimTraverse (intercept_t* in)
 	// the possible target ranges.
 	P_LineOpening (li);
 	
-	if (::g->openbottom >= ::g->opentop)
+	if (Globals::g->openbottom >= Globals::g->opentop)
 	    return false;		// stop
 	
-	dist = FixedMul (::g->attackrange, in->frac);
+	dist = FixedMul (Globals::g->attackrange, in->frac);
 
 	if (li->frontsector->floorheight != li->backsector->floorheight)
 	{
-	    slope = FixedDiv (::g->openbottom - ::g->shootz , dist);
-	    if (slope > ::g->bottomslope)
-		::g->bottomslope = slope;
+	    slope = FixedDiv (Globals::g->openbottom - Globals::g->shootz , dist);
+	    if (slope > Globals::g->bottomslope)
+		Globals::g->bottomslope = slope;
 	}
 		
 	if (li->frontsector->ceilingheight != li->backsector->ceilingheight)
 	{
-	    slope = FixedDiv (::g->opentop - ::g->shootz , dist);
-	    if (slope < ::g->topslope)
-		::g->topslope = slope;
+	    slope = FixedDiv (Globals::g->opentop - Globals::g->shootz , dist);
+	    if (slope < Globals::g->topslope)
+		Globals::g->topslope = slope;
 	}
 		
-	if (::g->topslope <= ::g->bottomslope)
+	if (Globals::g->topslope <= Globals::g->bottomslope)
 	    return false;		// stop
 			
 	return true;			// shot continues
@@ -837,33 +837,33 @@ PTR_AimTraverse (intercept_t* in)
     
     // shoot a thing
     th = in->d.thing;
-    if (th == ::g->shootthing)
+    if (th == Globals::g->shootthing)
 	return true;			// can't shoot self
     
     if (!(th->flags&MF_SHOOTABLE))
 	return true;			// corpse or something
 
     // check angles to see if the thing can be aimed at
-    dist = FixedMul (::g->attackrange, in->frac);
-    thingtopslope = FixedDiv (th->z+th->height - ::g->shootz , dist);
+    dist = FixedMul (Globals::g->attackrange, in->frac);
+    thingtopslope = FixedDiv (th->z+th->height - Globals::g->shootz , dist);
 
-    if (thingtopslope < ::g->bottomslope)
+    if (thingtopslope < Globals::g->bottomslope)
 	return true;			// shot over the thing
 
-    thingbottomslope = FixedDiv (th->z - ::g->shootz, dist);
+    thingbottomslope = FixedDiv (th->z - Globals::g->shootz, dist);
 
-    if (thingbottomslope > ::g->topslope)
+    if (thingbottomslope > Globals::g->topslope)
 	return true;			// shot under the thing
     
     // this thing can be hit!
-    if (thingtopslope > ::g->topslope)
-	thingtopslope = ::g->topslope;
+    if (thingtopslope > Globals::g->topslope)
+	thingtopslope = Globals::g->topslope;
     
-    if (thingbottomslope < ::g->bottomslope)
-	thingbottomslope = ::g->bottomslope;
+    if (thingbottomslope < Globals::g->bottomslope)
+	thingbottomslope = Globals::g->bottomslope;
 
-    ::g->aimslope = (thingtopslope+thingbottomslope)/2;
-    ::g->linetarget = th;
+    Globals::g->aimslope = (thingtopslope+thingbottomslope)/2;
+    Globals::g->linetarget = th;
 
     return false;			// don't go any farther
 }
@@ -893,7 +893,7 @@ qboolean PTR_ShootTraverse (intercept_t* in)
 	li = in->d.line;
 	
 	if (li->special)
-	    P_ShootSpecialLine (::g->shootthing, li);
+	    P_ShootSpecialLine (Globals::g->shootthing, li);
 
 	if ( !(li->flags & ML_TWOSIDED) )
 	    goto hitline;
@@ -901,19 +901,19 @@ qboolean PTR_ShootTraverse (intercept_t* in)
 	// crosses a two sided line
 	P_LineOpening (li);
 		
-	dist = FixedMul (::g->attackrange, in->frac);
+	dist = FixedMul (Globals::g->attackrange, in->frac);
 
 	if (li->frontsector->floorheight != li->backsector->floorheight)
 	{
-	    slope = FixedDiv (::g->openbottom - ::g->shootz , dist);
-	    if (slope > ::g->aimslope)
+	    slope = FixedDiv (Globals::g->openbottom - Globals::g->shootz , dist);
+	    if (slope > Globals::g->aimslope)
 		goto hitline;
 	}
 		
 	if (li->frontsector->ceilingheight != li->backsector->ceilingheight)
 	{
-	    slope = FixedDiv (::g->opentop - ::g->shootz , dist);
-	    if (slope < ::g->aimslope)
+	    slope = FixedDiv (Globals::g->opentop - Globals::g->shootz , dist);
+	    if (slope < Globals::g->aimslope)
 		goto hitline;
 	}
 
@@ -924,29 +924,29 @@ qboolean PTR_ShootTraverse (intercept_t* in)
 	// hit line
       hitline:
 	// position a bit closer
-	frac = in->frac - FixedDiv (4*FRACUNIT,::g->attackrange);
-	x = ::g->trace.x + FixedMul (::g->trace.dx, frac);
-	y = ::g->trace.y + FixedMul (::g->trace.dy, frac);
-	z = ::g->shootz + FixedMul (::g->aimslope, FixedMul(frac, ::g->attackrange));
+	frac = in->frac - FixedDiv (4*FRACUNIT,Globals::g->attackrange);
+	x = Globals::g->trace.x + FixedMul (Globals::g->trace.dx, frac);
+	y = Globals::g->trace.y + FixedMul (Globals::g->trace.dy, frac);
+	z = Globals::g->shootz + FixedMul (Globals::g->aimslope, FixedMul(frac, Globals::g->attackrange));
 
-	if (li->frontsector->ceilingpic == ::g->skyflatnum)
+	if (li->frontsector->ceilingpic == Globals::g->skyflatnum)
 	{
 	    // don't shoot the sky!
 	    if (z > li->frontsector->ceilingheight)
 		return false;
 	    
 	    // it's a sky hack wall
-	    if	(li->backsector && li->backsector->ceilingpic == ::g->skyflatnum)
+	    if	(li->backsector && li->backsector->ceilingpic == Globals::g->skyflatnum)
 		return false;		
 	}
 
-	mobj_t * sourceObject = ::g->shootthing;
+	mobj_t * sourceObject = Globals::g->shootthing;
 	if( sourceObject ) {
 
-		if( ( sourceObject->player) == &(::g->players[DoomLib::GetPlayer()]) ) {
+		if( ( sourceObject->player) == &(Globals::g->players[DoomLib::GetPlayer()]) ) {
 			
 			// Fist Punch.
-			if( ::g->attackrange == MELEERANGE ) {
+			if( Globals::g->attackrange == MELEERANGE ) {
 			}
 		}
 	}
@@ -960,32 +960,32 @@ qboolean PTR_ShootTraverse (intercept_t* in)
     
     // shoot a thing
     th = in->d.thing;
-    if (th == ::g->shootthing)
+    if (th == Globals::g->shootthing)
 	return true;		// can't shoot self
     
     if (!(th->flags&MF_SHOOTABLE))
 	return true;		// corpse or something
 		
     // check angles to see if the thing can be aimed at
-    dist = FixedMul (::g->attackrange, in->frac);
-    thingtopslope = FixedDiv (th->z+th->height - ::g->shootz , dist);
+    dist = FixedMul (Globals::g->attackrange, in->frac);
+    thingtopslope = FixedDiv (th->z+th->height - Globals::g->shootz , dist);
 
-    if (thingtopslope < ::g->aimslope)
+    if (thingtopslope < Globals::g->aimslope)
 	return true;		// shot over the thing
 
-    thingbottomslope = FixedDiv (th->z - ::g->shootz, dist);
+    thingbottomslope = FixedDiv (th->z - Globals::g->shootz, dist);
 
-    if (thingbottomslope > ::g->aimslope)
+    if (thingbottomslope > Globals::g->aimslope)
 	return true;		// shot under the thing
 
     
     // hit thing
     // position a bit closer
-    frac = in->frac - FixedDiv (10*FRACUNIT,::g->attackrange);
+    frac = in->frac - FixedDiv (10*FRACUNIT,Globals::g->attackrange);
 
-    x = ::g->trace.x + FixedMul (::g->trace.dx, frac);
-    y = ::g->trace.y + FixedMul (::g->trace.dy, frac);
-    z = ::g->shootz + FixedMul (::g->aimslope, FixedMul(frac, ::g->attackrange));
+    x = Globals::g->trace.x + FixedMul (Globals::g->trace.dx, frac);
+    y = Globals::g->trace.y + FixedMul (Globals::g->trace.dy, frac);
+    z = Globals::g->shootz + FixedMul (Globals::g->aimslope, FixedMul(frac, Globals::g->attackrange));
 
 	// check for friendly fire.
 #ifdef ID_ENABLE_DOOM_CLASSIC_NETWORKING
@@ -994,7 +994,7 @@ qboolean PTR_ShootTraverse (intercept_t* in)
 
 		if( hitPlayer ) {
 
-			mobj_t * sourceObject = ::g->shootthing;
+			mobj_t * sourceObject = Globals::g->shootthing;
 
 			if( sourceObject ) {
 				player_t* sourcePlayer = sourceObject->player;
@@ -1007,13 +1007,13 @@ qboolean PTR_ShootTraverse (intercept_t* in)
 	}
 #endif
 
-	mobj_t * sourceObject = ::g->shootthing;
+	mobj_t * sourceObject = Globals::g->shootthing;
 	if( sourceObject ) {
 
-		if( ( sourceObject->player) == &(::g->players[DoomLib::GetPlayer()]) ) {
+		if( ( sourceObject->player) == &(Globals::g->players[DoomLib::GetPlayer()]) ) {
 
 			// Fist Punch.
-			if( ::g->attackrange == MELEERANGE ) {
+			if( Globals::g->attackrange == MELEERANGE ) {
 			}
 		}
 	}
@@ -1024,10 +1024,10 @@ qboolean PTR_ShootTraverse (intercept_t* in)
     if (in->d.thing->flags & MF_NOBLOOD)
 	P_SpawnPuff (x,y,z);
     else
-	P_SpawnBlood (x,y,z, ::g->la_damage);
+	P_SpawnBlood (x,y,z, Globals::g->la_damage);
 
-    if (::g->la_damage)
-	P_DamageMobj (th, ::g->shootthing, ::g->shootthing, ::g->la_damage);
+    if (Globals::g->la_damage)
+	P_DamageMobj (th, Globals::g->shootthing, Globals::g->shootthing, Globals::g->la_damage);
 
     // don't go any farther
     return false;
@@ -1048,26 +1048,26 @@ P_AimLineAttack
     fixed_t	y2;
 	
     angle >>= ANGLETOFINESHIFT;
-    ::g->shootthing = t1;
+    Globals::g->shootthing = t1;
     
     x2 = t1->x + (distance>>FRACBITS)*finecosine[angle];
     y2 = t1->y + (distance>>FRACBITS)*finesine[angle];
-    ::g->shootz = t1->z + (t1->height>>1) + 8*FRACUNIT;
+    Globals::g->shootz = t1->z + (t1->height>>1) + 8*FRACUNIT;
 
     // can't shoot outside view angles
-    ::g->topslope = 100*FRACUNIT/160;	
-    ::g->bottomslope = -100*FRACUNIT/160;
+    Globals::g->topslope = 100*FRACUNIT/160;	
+    Globals::g->bottomslope = -100*FRACUNIT/160;
     
-    ::g->attackrange = distance;
-    ::g->linetarget = NULL;
+    Globals::g->attackrange = distance;
+    Globals::g->linetarget = NULL;
 	
     P_PathTraverse ( t1->x, t1->y,
 		     x2, y2,
 		     PT_ADDLINES|PT_ADDTHINGS,
 		     PTR_AimTraverse );
 		
-    if (::g->linetarget)
-	return ::g->aimslope;
+    if (Globals::g->linetarget)
+	return Globals::g->aimslope;
 
     return 0;
 }
@@ -1075,8 +1075,8 @@ P_AimLineAttack
 
 //
 // P_LineAttack
-// If damage == 0, it is just a test ::g->trace
-// that will leave ::g->linetarget set.
+// If damage == 0, it is just a test Globals::g->trace
+// that will leave Globals::g->linetarget set.
 //
 void
 P_LineAttack
@@ -1090,13 +1090,13 @@ P_LineAttack
     fixed_t	y2;
 	
     angle >>= ANGLETOFINESHIFT;
-    ::g->shootthing = t1;
-    ::g->la_damage = damage;
+    Globals::g->shootthing = t1;
+    Globals::g->la_damage = damage;
     x2 = t1->x + (distance>>FRACBITS)*finecosine[angle];
     y2 = t1->y + (distance>>FRACBITS)*finesine[angle];
-    ::g->shootz = t1->z + (t1->height>>1) + 8*FRACUNIT;
-    ::g->attackrange = distance;
-    ::g->aimslope = slope;
+    Globals::g->shootz = t1->z + (t1->height>>1) + 8*FRACUNIT;
+    Globals::g->attackrange = distance;
+    Globals::g->aimslope = slope;
 		
     P_PathTraverse ( t1->x, t1->y,
 		     x2, y2,
@@ -1117,9 +1117,9 @@ qboolean	PTR_UseTraverse (intercept_t* in)
     if (!in->d.line->special)
     {
 	P_LineOpening (in->d.line);
-	if (::g->openrange <= 0)
+	if (Globals::g->openrange <= 0)
 	{
-	    S_StartSound (::g->usething, sfx_noway);
+	    S_StartSound (Globals::g->usething, sfx_noway);
 	    
 	    // can't use through a wall
 	    return false;	
@@ -1129,12 +1129,12 @@ qboolean	PTR_UseTraverse (intercept_t* in)
     }
 	
     side = 0;
-    if (P_PointOnLineSide (::g->usething->x, ::g->usething->y, in->d.line) == 1)
+    if (P_PointOnLineSide (Globals::g->usething->x, Globals::g->usething->y, in->d.line) == 1)
 	side = 1;
     
     //	return false;		// don't use back side
 	
-    P_UseSpecialLine (::g->usething, in->d.line, side);
+    P_UseSpecialLine (Globals::g->usething, in->d.line, side);
 
     // can't use for than one special line in a row
     return false;
@@ -1143,7 +1143,7 @@ qboolean	PTR_UseTraverse (intercept_t* in)
 
 //
 // P_UseLines
-// Looks for special ::g->lines in front of the player to activate.
+// Looks for special Globals::g->lines in front of the player to activate.
 //
 void P_UseLines (player_t*	player) 
 {
@@ -1153,7 +1153,7 @@ void P_UseLines (player_t*	player)
     fixed_t	x2;
     fixed_t	y2;
 	
-    ::g->usething = player->mo;
+    Globals::g->usething = player->mo;
 		
     angle = player->mo->angle >> ANGLETOFINESHIFT;
 
@@ -1191,8 +1191,8 @@ qboolean PIT_RadiusAttack (mobj_t* thing)
 	|| thing->type == MT_SPIDER)
 	return true;	
 		
-    dx = abs(thing->x - ::g->bombspot->x);
-    dy = abs(thing->y - ::g->bombspot->y);
+    dx = abs(thing->x - Globals::g->bombspot->x);
+    dy = abs(thing->y - Globals::g->bombspot->y);
     
     dist = dx>dy ? dx : dy;
     dist = (dist - thing->radius) >> FRACBITS;
@@ -1200,13 +1200,13 @@ qboolean PIT_RadiusAttack (mobj_t* thing)
     if (dist < 0)
 	dist = 0;
 
-    if (dist >= ::g->bombdamage)
+    if (dist >= Globals::g->bombdamage)
 	return true;	// out of range
 
-    if ( P_CheckSight (thing, ::g->bombspot) )
+    if ( P_CheckSight (thing, Globals::g->bombspot) )
     {
 	// must be in direct path
-	P_DamageMobj (thing, ::g->bombspot, ::g->bombsource, ::g->bombdamage - dist);
+	P_DamageMobj (thing, Globals::g->bombspot, Globals::g->bombsource, Globals::g->bombdamage - dist);
     }
     
     return true;
@@ -1234,13 +1234,13 @@ P_RadiusAttack
     fixed_t	dist;
 	
     dist = (damage+MAXRADIUS)<<FRACBITS;
-    yh = (spot->y + dist - ::g->bmaporgy)>>MAPBLOCKSHIFT;
-    yl = (spot->y - dist - ::g->bmaporgy)>>MAPBLOCKSHIFT;
-    xh = (spot->x + dist - ::g->bmaporgx)>>MAPBLOCKSHIFT;
-    xl = (spot->x - dist - ::g->bmaporgx)>>MAPBLOCKSHIFT;
-    ::g->bombspot = spot;
-    ::g->bombsource = source;
-    ::g->bombdamage = damage;
+    yh = (spot->y + dist - Globals::g->bmaporgy)>>MAPBLOCKSHIFT;
+    yl = (spot->y - dist - Globals::g->bmaporgy)>>MAPBLOCKSHIFT;
+    xh = (spot->x + dist - Globals::g->bmaporgx)>>MAPBLOCKSHIFT;
+    xl = (spot->x - dist - Globals::g->bmaporgx)>>MAPBLOCKSHIFT;
+    Globals::g->bombspot = spot;
+    Globals::g->bombsource = source;
+    Globals::g->bombdamage = damage;
 	
     for (y=yl ; y<=yh ; y++)
 	for (x=xl ; x<=xh ; x++)
@@ -1251,7 +1251,7 @@ P_RadiusAttack
 
 //
 // SECTOR HEIGHT CHANGING
-// After modifying a ::g->sectors floor or ceiling height,
+// After modifying a Globals::g->sectors floor or ceiling height,
 // call this routine to adjust the positions
 // of all things that touch the sector.
 //
@@ -1306,9 +1306,9 @@ qboolean PIT_ChangeSector (mobj_t*	thing)
 	return true;			
     }
     
-    ::g->nofit = true;
+    Globals::g->nofit = true;
 
-    if (::g->crushchange && !(::g->leveltime&3) )
+    if (Globals::g->crushchange && !(Globals::g->leveltime&3) )
     {
 	P_DamageMobj(thing,NULL,NULL,10);
 
@@ -1338,8 +1338,8 @@ P_ChangeSector
     int		x;
     int		y;
 	
-    ::g->nofit = false;
-    ::g->crushchange = crunch;
+    Globals::g->nofit = false;
+    Globals::g->crushchange = crunch;
 	
     // re-check heights for all things near the moving sector
     for (x=sector->blockbox[BOXLEFT] ; x<= sector->blockbox[BOXRIGHT] ; x++)
@@ -1347,7 +1347,7 @@ P_ChangeSector
 	    P_BlockThingsIterator (x, y, PIT_ChangeSector);
 	
 	
-    return ::g->nofit;
+    return Globals::g->nofit;
 }
 
 

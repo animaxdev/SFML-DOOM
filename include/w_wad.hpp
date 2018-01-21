@@ -34,6 +34,7 @@ If you have questions concerning this license or the applicable additional terms
 #pragma interface
 #endif
 
+#include <array>
 
 //
 // TYPES
@@ -42,17 +43,17 @@ typedef struct
 {
     // Should be "IWAD" or "PWAD".
     char		identification[4];		
-    int			numlumps;
-    int			infotableofs;
+    int32_t			numlumps;
+    int32_t			infotableofs;
     
 } wadinfo_t;
 
 
 typedef struct
 {
-    int			filepos;
-    int			size;
-    char		name[8];
+    int32_t			filepos;
+    int32_t			size;
+    char		name[8] = {0};
     
 } filelump_t;
 
@@ -61,15 +62,15 @@ typedef struct
 //
 typedef struct
 {
-    char	name[8];
-    //idFile *	handle;
-    int		position;
-    int		size;
+    std::array<char,8>	name = {{0}};
+    std::weak_ptr<std::ifstream>	handle;
+    int32_t		position;
+    int32_t		size;
 } lumpinfo_t;
 
 
-extern	void**		lumpcache;
-extern	lumpinfo_t*	lumpinfo;
+extern	std::vector<void*>		lumpcache;
+extern	std::vector<lumpinfo_t>	lumpinfo;
 extern	int		numlumps;
 
 void    W_InitMultipleFiles (const char** filenames);
@@ -77,7 +78,7 @@ void    W_Reload (void);
 void	W_FreeLumps();
 void	W_FreeWadFiles();
 
-int	W_CheckNumForName (const char* name);
+int	W_CheckNumForName (const std::string& name);
 int	W_GetNumForName (const char* name);
 
 int	W_LumpLength (int lump);

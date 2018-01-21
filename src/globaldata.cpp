@@ -28,8 +28,9 @@ If you have questions concerning this license or the applicable additional terms
 
 #include "Precompiled.hpp"
 #include "globaldata.hpp"
-#include "globaldata.hpp"
 #include "Main.hpp"
+
+#include <memory>
 
 //
 // PROTOTYPES
@@ -88,7 +89,7 @@ void M_WriteText(int x, int y, char *string);
 int  M_StringWidth(char *string);
 int  M_StringHeight(char *string);
 void M_StartControlPanel(void);
-void M_StartMessage(char *string,messageRoutine_t routine,qboolean input);
+//void M_StartMessage(char *string, messageRoutine_t routine,qboolean input);
 void M_StopMessage(void);
 void M_ClearMenus (void);
 
@@ -97,10 +98,10 @@ extern const anim_t temp_epsd1animinfo[9];
 extern const anim_t temp_epsd2animinfo[6];
 extern const char* const temp_chat_macros[];
 
+std::unique_ptr<Globals> Globals::g = std::make_unique<Globals>();
+
 void Globals::InitGlobals()
 {
 #include "constructs.hpp"
 }
-
-Globals *g;
 

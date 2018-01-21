@@ -96,8 +96,8 @@ P_GiveAmmo
 	else
 		num = clipammo[ammo]/2;
 
-	if (::g->gameskill == sk_baby
-		|| ::g->gameskill == sk_nightmare)
+	if (Globals::g->gameskill == sk_baby
+		|| Globals::g->gameskill == sk_nightmare)
 	{
 		// give double ammo in trainer mode,
 		// you'll need in nightmare
@@ -177,8 +177,8 @@ P_GiveWeapon
 	qboolean	gaveammo;
 	qboolean	gaveweapon;
 
-	if (::g->netgame
-		&& (::g->deathmatch!=2)
+	if (Globals::g->netgame
+		&& (Globals::g->deathmatch!=2)
 		&& !dropped )
 	{
 		// leave placed weapons forever on net games
@@ -188,13 +188,13 @@ P_GiveWeapon
 		player->bonuscount += BONUSADD;
 		player->weaponowned[weapon] = true;
 
-		if (::g->deathmatch)
+		if (Globals::g->deathmatch)
 			P_GiveAmmo (player, weaponinfo[weapon].ammo, 5);
 		else
 			P_GiveAmmo (player, weaponinfo[weapon].ammo, 2);
 		player->pendingweapon = weapon;
 
-		if (player == &::g->players[::g->consoleplayer])
+		if (player == &Globals::g->players[Globals::g->consoleplayer])
 			S_StartSound (player->mo, sfx_wpnup);
 		return false;
 	}
@@ -276,10 +276,10 @@ P_GiveArmor
 //
 void P_GiveCard( player_t* player, card_t card, const char *pickup_message ) {
 
-	/*if ( ( ::g->demoplayback && ::g->netgame ) || common->IsMultiplayer() ) {
+	/*if ( ( Globals::g->demoplayback && Globals::g->netgame ) || common->IsMultiplayer() ) {
 		for ( int i=0; i < MAXPLAYERS; i++ ) {
-			if ( ::g->playeringame[i] ) {
-				player_t *thePlayer = &::g->players[i];
+			if ( Globals::g->playeringame[i] ) {
+				player_t *thePlayer = &Globals::g->players[i];
 
 				if (thePlayer->cards[card])
 					continue;
@@ -424,7 +424,7 @@ P_TouchSpecialThing
 		break;
 
 	case SPR_MEGA:
-		if (::g->gamemode != commercial)
+		if (Globals::g->gamemode != commercial)
 			return;
 		player->health = 200;
 		player->mo->health = player->health;
@@ -439,7 +439,7 @@ P_TouchSpecialThing
 		//if (!player->cards[it_bluecard])
 			//player->message = GOTBLUECARD;
 		P_GiveCard (player, it_bluecard, GOTBLUECARD);
-		if (!::g->netgame)
+		if (!Globals::g->netgame)
 			break;
 		return;
 
@@ -447,7 +447,7 @@ P_TouchSpecialThing
 		//if (!player->cards[it_yellowcard])
 			//player->message = GOTYELWCARD;
 		P_GiveCard (player, it_yellowcard, GOTYELWCARD);
-		if (!::g->netgame)
+		if (!Globals::g->netgame)
 			break;
 		return;
 
@@ -455,7 +455,7 @@ P_TouchSpecialThing
 		//if (!player->cards[it_redcard])
 			//player->message = GOTREDCARD;
 		P_GiveCard (player, it_redcard, GOTREDCARD);
-		if (!::g->netgame)
+		if (!Globals::g->netgame)
 			break;
 		return;
 
@@ -463,7 +463,7 @@ P_TouchSpecialThing
 		//if (!player->cards[it_blueskull])
 			//player->message = GOTBLUESKUL;
 		P_GiveCard (player, it_blueskull, GOTBLUESKUL);
-		if (!::g->netgame)
+		if (!Globals::g->netgame)
 			break;
 		return;
 
@@ -471,7 +471,7 @@ P_TouchSpecialThing
 		//if (!player->cards[it_yellowskull])
 			//player->message = GOTYELWSKUL;
 		P_GiveCard (player, it_yellowskull, GOTYELWSKUL);
-		if (!::g->netgame)
+		if (!Globals::g->netgame)
 			break;
 		return;
 
@@ -479,7 +479,7 @@ P_TouchSpecialThing
 		//if (!player->cards[it_redskull])
 			//player->message = GOTREDSKULL;
 		P_GiveCard (player, it_redskull, GOTREDSKULL);
-		if (!::g->netgame)
+		if (!Globals::g->netgame)
 			break;
 		return;
 
@@ -688,7 +688,7 @@ P_TouchSpecialThing
 		player->itemcount++;
 	P_RemoveMobj (special);
 	player->bonuscount += BONUSADD;
-	if (player == &::g->players[::g->consoleplayer])
+	if (player == &Globals::g->players[Globals::g->consoleplayer])
 		S_StartSound (player->mo, sound);
 }
 
@@ -703,11 +703,11 @@ P_TouchSpecialThing
 		return NULL;
 	}
 
-	if ( !::g ) {
+	if ( !Globals::g ) {
 		return NULL;
 	}
 
-	if ( !::g->deathmatch ) {
+	if ( !Globals::g->deathmatch ) {
 		return NULL;
 	}
 
@@ -752,12 +752,12 @@ P_KillMobj
 			source->player->killcount++;	
 
 		if (target->player) {
-			source->player->frags[target->player-::g->players]++;
+			source->player->frags[target->player-Globals::g->players]++;
 
 			// Keep track of the local player's total frags for trophy awards.
 
 			// Make sure the killing player is the local player
-			if ( source->player == &(::g->players[::g->consoleplayer]) ) {
+			if ( source->player == &(Globals::g->players[Globals::g->consoleplayer]) ) {
 				// Make sure this is an online game.
 				// TODO: PC
 			}
@@ -832,25 +832,25 @@ P_KillMobj
 			}
 		}*/
 	}
-	else if (!::g->netgame && (target->flags & MF_COUNTKILL) )
+	else if (!Globals::g->netgame && (target->flags & MF_COUNTKILL) )
 	{
 		// count all monster deaths,
 		// even those caused by other monsters
-		::g->players[0].killcount++;
+		Globals::g->players[0].killcount++;
 	}
 
 	if (target->player)
 	{
 		// count environment kills against you
 		if (!source)	
-			target->player->frags[target->player-::g->players]++;
+			target->player->frags[target->player-Globals::g->players]++;
 
 		target->flags &= ~MF_SOLID;
 		target->player->playerstate = PST_DEAD;
 		P_DropWeapon (target->player);
 
-		if (target->player == &::g->players[::g->consoleplayer]
-		&& ::g->automapactive)
+		if (target->player == &Globals::g->players[Globals::g->consoleplayer]
+		&& Globals::g->automapactive)
 		{
 			// don't die in auto map,
 			// switch view prior to dying
@@ -905,7 +905,7 @@ P_KillMobj
 
 //
 // P_DamageMobj
-// Damages both enemies and ::g->players
+// Damages both enemies and Globals::g->players
 // "inflictor" is the thing that caused the damage
 //  creature or missile, can be NULL (slime, etc)
 // "source" is the thing to target after taking damage
@@ -939,7 +939,7 @@ P_DamageMobj
 	}
 
 	player = target->player;
-	if (player && ::g->gameskill == sk_baby)
+	if (player && Globals::g->gameskill == sk_baby)
 		damage >>= 1; 	// take half damage in trainer mode
 
 
@@ -994,7 +994,7 @@ P_DamageMobj
 		float additional = 0.5f * damageFloat;
 		int additional_time = 500.0f * damageFloat;
 
-		if( ::g->plyr == player ) {
+		if( Globals::g->plyr == player ) {
 		}
 
 
@@ -1063,7 +1063,7 @@ P_DamageMobj
 		// chase after this one
 		target->target = source;
 		target->threshold = BASETHRESHOLD;
-		if (target->state == &::g->states[target->info->spawnstate]
+		if (target->state == &Globals::g->states[target->info->spawnstate]
 		&& target->info->seestate != S_NULL)
 			P_SetMobjState (target, (statenum_t)target->info->seestate);
 	}

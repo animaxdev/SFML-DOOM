@@ -51,7 +51,7 @@ std::queue< networkitem > networkstacks[4];
 int DoomLibRecv( char* buff, int *numRecv )
 {
 	//int player = DoomInterface::CurrentPlayer();
-	int player = ::g->consoleplayer;
+	int player = Globals::g->consoleplayer;
 
 	if (networkstacks[player].empty())
 		return -1;
@@ -75,7 +75,7 @@ int DoomLibSend( const char* buff, int size, sf::IpAddress *target, int toNode )
 	
 	i = DoomLib::RemoteNodeToPlayerIndex( toNode );
 
-	//I_Printf( "DoomLibSend %d --> %d: %d\n", ::g->consoleplayer, i, size );
+	//I_Printf( "DoomLibSend %d --> %d: %d\n", Globals::g->consoleplayer, i, size );
 
 	networkitem item;
 	item.source = DoomInterface::CurrentPlayer();
@@ -103,7 +103,7 @@ int DoomLibSendRemote()
 		
 			//Check if it is remote
 			int node = DoomLib::PlayerIndexToRemoteNode( i );
-			if ( ::g->sendaddress[node].sin_addr.s_addr == ::g->sendaddress[0].sin_addr.s_addr ) {
+			if ( Globals::g->sendaddress[node].sin_addr.s_addr == Globals::g->sendaddress[0].sin_addr.s_addr ) {
 				continue;
 			}
 
@@ -123,12 +123,12 @@ int DoomLibSendRemote()
 					lobbyUser_t * user = lobby.GetLobbyUser( i );
 
 					if ( user != NULL ) {
-						lobby.SendConnectionLess( user->address, idLobby::OOB_GENERIC_GAME_DATA, (const byte *)(&item.buffer[0] ), item.size );
+						lobby.SendConnectionLess( user->address, idLobby::OOB_GENERIC_GAME_DATA, (const unsigned char *)(&item.buffer[0] ), item.size );
 					}
 				} else {
-					c = sendto( ::g->sendsocket, &item.buffer, item.size, MSG_DONTWAIT, (sockaddr*)&::g->sendaddress[node], sizeof(::g->sendaddress[node]) );
+					c = sendto( Globals::g->sendsocket, &item.buffer, item.size, MSG_DONTWAIT, (sockaddr*)&Globals::g->sendaddress[node], sizeof(Globals::g->sendaddress[node]) );
 
-					//c = WSASendTo(::g->sendsocket, &buffer, 1, &num_sent, 0, (sockaddr*)&::g->sendaddress[node], sizeof(::g->sendaddress[node]), 0, 0);
+					//c = WSASendTo(Globals::g->sendsocket, &buffer, 1, &num_sent, 0, (sockaddr*)&Globals::g->sendaddress[node], sizeof(Globals::g->sendaddress[node]), 0, 0);
 				}
 
 				networkstacks[i].pop();

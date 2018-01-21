@@ -45,8 +45,8 @@ typedef struct
     char	sidemove;	// *2048 for move
     short	angleturn;	// <<16 for angle delta
     short	consistancy;	// checks for net game
-    byte	buttons;
-	byte	nextPrevWeapon;
+    unsigned char	buttons;
+	unsigned char	nextPrevWeapon;
 } ticcmd_t;
 
 

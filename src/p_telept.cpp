@@ -77,13 +77,13 @@ EV_Teleport
 
     
     tag = line->tag;
-    for (i = 0; i < ::g->numsectors; i++)
+    for (i = 0; i < Globals::g->numsectors; i++)
     {
-	if (::g->sectors[ i ].tag == tag )
+	if (Globals::g->sectors[ i ].tag == tag )
 	{
-	    thinker = ::g->thinkercap.next;
-	    for (thinker = ::g->thinkercap.next;
-		 thinker != &::g->thinkercap;
+	    thinker = Globals::g->thinkercap.next;
+	    for (thinker = Globals::g->thinkercap.next;
+		 thinker != &Globals::g->thinkercap;
 		 thinker = thinker->next)
 	    {
 		// not a mobj
@@ -98,7 +98,7 @@ EV_Teleport
 
 		sector = m->subsector->sector;
 		// wrong sector
-		if (sector-::g->sectors != i )
+		if (sector-Globals::g->sectors != i )
 		    continue;	
 
 		oldx = thing->x;

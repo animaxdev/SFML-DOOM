@@ -44,9 +44,9 @@ If you have questions concerning this license or the applicable additional terms
 #include "r_sky.hpp"
 
 
-// OPTIMIZE: closed two sided ::g->lines as single sided
+// OPTIMIZE: closed two sided Globals::g->lines as single sided
 
-// True if any of the ::g->segs textures might be visible.
+// True if any of the Globals::g->segs textures might be visible.
 
 // False if the back side is the same plane.
 
@@ -85,77 +85,77 @@ R_RenderMaskedSegRange
     // Use different light tables
     //   for horizontal / vertical / diagonal. Diagonal?
     // OPTIMIZE: get rid of LIGHTSEGSHIFT globally
-    ::g->curline = ds->curline;
-    ::g->frontsector = ::g->curline->frontsector;
-    ::g->backsector = ::g->curline->backsector;
-    texnum = ::g->texturetranslation[::g->curline->sidedef->midtexture];
+    Globals::g->curline = ds->curline;
+    Globals::g->frontsector = Globals::g->curline->frontsector;
+    Globals::g->backsector = Globals::g->curline->backsector;
+    texnum = Globals::g->texturetranslation[Globals::g->curline->sidedef->midtexture];
 	
-    lightnum = (::g->frontsector->lightlevel >> LIGHTSEGSHIFT)+::g->extralight;
+    lightnum = (Globals::g->frontsector->lightlevel >> LIGHTSEGSHIFT)+Globals::g->extralight;
 
-    if (::g->curline->v1->y == ::g->curline->v2->y)
+    if (Globals::g->curline->v1->y == Globals::g->curline->v2->y)
 	lightnum--;
-    else if (::g->curline->v1->x == ::g->curline->v2->x)
+    else if (Globals::g->curline->v1->x == Globals::g->curline->v2->x)
 	lightnum++;
 
     if (lightnum < 0)		
-	::g->walllights = ::g->scalelight[0];
+	Globals::g->walllights = Globals::g->scalelight[0];
     else if (lightnum >= LIGHTLEVELS)
-	::g->walllights = ::g->scalelight[LIGHTLEVELS-1];
+	Globals::g->walllights = Globals::g->scalelight[LIGHTLEVELS-1];
     else
-	::g->walllights = ::g->scalelight[lightnum];
+	Globals::g->walllights = Globals::g->scalelight[lightnum];
 
-    ::g->maskedtexturecol = ds->maskedtexturecol;
+    Globals::g->maskedtexturecol = ds->maskedtexturecol;
 
-    ::g->rw_scalestep = ds->scalestep;		
-    ::g->spryscale = ds->scale1 + (x1 - ds->x1)*::g->rw_scalestep;
-    ::g->mfloorclip = ds->sprbottomclip;
-    ::g->mceilingclip = ds->sprtopclip;
+    Globals::g->rw_scalestep = ds->scalestep;		
+    Globals::g->spryscale = ds->scale1 + (x1 - ds->x1)*Globals::g->rw_scalestep;
+    Globals::g->mfloorclip = ds->sprbottomclip;
+    Globals::g->mceilingclip = ds->sprtopclip;
     
     // find positioning
-    if (::g->curline->linedef->flags & ML_DONTPEGBOTTOM)
+    if (Globals::g->curline->linedef->flags & ML_DONTPEGBOTTOM)
     {
-	::g->dc_texturemid = ::g->frontsector->floorheight > ::g->backsector->floorheight
-	    ? ::g->frontsector->floorheight : ::g->backsector->floorheight;
-	::g->dc_texturemid = ::g->dc_texturemid + ::g->s_textureheight[texnum] - ::g->viewz;
+	Globals::g->dc_texturemid = Globals::g->frontsector->floorheight > Globals::g->backsector->floorheight
+	    ? Globals::g->frontsector->floorheight : Globals::g->backsector->floorheight;
+	Globals::g->dc_texturemid = Globals::g->dc_texturemid + Globals::g->s_textureheight[texnum] - Globals::g->viewz;
     }
     else
     {
-	::g->dc_texturemid =::g->frontsector->ceilingheight < ::g->backsector->ceilingheight
-	    ? ::g->frontsector->ceilingheight : ::g->backsector->ceilingheight;
-	::g->dc_texturemid = ::g->dc_texturemid - ::g->viewz;
+	Globals::g->dc_texturemid =Globals::g->frontsector->ceilingheight < Globals::g->backsector->ceilingheight
+	    ? Globals::g->frontsector->ceilingheight : Globals::g->backsector->ceilingheight;
+	Globals::g->dc_texturemid = Globals::g->dc_texturemid - Globals::g->viewz;
     }
-    ::g->dc_texturemid += ::g->curline->sidedef->rowoffset;
+    Globals::g->dc_texturemid += Globals::g->curline->sidedef->rowoffset;
 			
-    if (::g->fixedcolormap)
-	::g->dc_colormap = ::g->fixedcolormap;
+    if (Globals::g->fixedcolormap)
+	Globals::g->dc_colormap = Globals::g->fixedcolormap;
     
     // draw the columns
-    for (::g->dc_x = x1 ; ::g->dc_x <= x2 ; ::g->dc_x++)
+    for (Globals::g->dc_x = x1 ; Globals::g->dc_x <= x2 ; Globals::g->dc_x++)
     {
 	// calculate lighting
-	if (::g->maskedtexturecol[::g->dc_x] != SHRT_MAX)
+	if (Globals::g->maskedtexturecol[Globals::g->dc_x] != SHRT_MAX)
 	{
-	    if (!::g->fixedcolormap)
+	    if (!Globals::g->fixedcolormap)
 	    {
-		index = ::g->spryscale>>LIGHTSCALESHIFT;
+		index = Globals::g->spryscale>>LIGHTSCALESHIFT;
 
 		if (index >=  MAXLIGHTSCALE )
 		    index = MAXLIGHTSCALE-1;
 
-		::g->dc_colormap = ::g->walllights[index];
+		Globals::g->dc_colormap = Globals::g->walllights[index];
 	    }
 			
-	    ::g->sprtopscreen = ::g->centeryfrac - FixedMul(::g->dc_texturemid, ::g->spryscale);
-	    ::g->dc_iscale = 0xffffffffu / (unsigned)::g->spryscale;
+	    Globals::g->sprtopscreen = Globals::g->centeryfrac - FixedMul(Globals::g->dc_texturemid, Globals::g->spryscale);
+	    Globals::g->dc_iscale = 0xffffffffu / (unsigned)Globals::g->spryscale;
 	    
 	    // draw the texture
 	    col = (postColumn_t *)( 
-		(byte *)R_GetColumn(texnum,::g->maskedtexturecol[::g->dc_x]) -3);
+		(unsigned char *)R_GetColumn(texnum,Globals::g->maskedtexturecol[Globals::g->dc_x]) -3);
 			
 	    R_DrawMaskedColumn (col);
-	    ::g->maskedtexturecol[::g->dc_x] = SHRT_MAX;
+	    Globals::g->maskedtexturecol[Globals::g->dc_x] = SHRT_MAX;
 	}
-	::g->spryscale += ::g->rw_scalestep;
+	Globals::g->spryscale += Globals::g->rw_scalestep;
     }
 	
 }
@@ -185,150 +185,150 @@ void R_RenderSegLoop (void)
 
     texturecolumn = 0;				// shut up compiler warning
 	
-    for ( ; ::g->rw_x < ::g->rw_stopx ; ::g->rw_x++)
+    for ( ; Globals::g->rw_x < Globals::g->rw_stopx ; Globals::g->rw_x++)
     {
 		// mark floor / ceiling areas
-		yl = (::g->topfrac+HEIGHTUNIT-1)>>HEIGHTBITS;
+		yl = (Globals::g->topfrac+HEIGHTUNIT-1)>>HEIGHTBITS;
 
 		// no space above wall?
-		if (yl < ::g->ceilingclip[::g->rw_x]+1)
-			yl = ::g->ceilingclip[::g->rw_x]+1;
+		if (yl < Globals::g->ceilingclip[Globals::g->rw_x]+1)
+			yl = Globals::g->ceilingclip[Globals::g->rw_x]+1;
 		
-		if (::g->markceiling)
+		if (Globals::g->markceiling)
 		{
-			top = ::g->ceilingclip[::g->rw_x]+1;
+			top = Globals::g->ceilingclip[Globals::g->rw_x]+1;
 			bottom = yl-1;
 
-			if (bottom >= ::g->floorclip[::g->rw_x])
-				bottom = ::g->floorclip[::g->rw_x]-1;
+			if (bottom >= Globals::g->floorclip[Globals::g->rw_x])
+				bottom = Globals::g->floorclip[Globals::g->rw_x]-1;
 
 			if (top <= bottom)
 			{
-				::g->ceilingplane->top[::g->rw_x] = top;
-				::g->ceilingplane->bottom[::g->rw_x] = bottom;
+				Globals::g->ceilingplane->top[Globals::g->rw_x] = top;
+				Globals::g->ceilingplane->bottom[Globals::g->rw_x] = bottom;
 			}
 		}
 		
-		yh = ::g->bottomfrac>>HEIGHTBITS;
+		yh = Globals::g->bottomfrac>>HEIGHTBITS;
 
-		if (yh >= ::g->floorclip[::g->rw_x])
-			yh = ::g->floorclip[::g->rw_x]-1;
+		if (yh >= Globals::g->floorclip[Globals::g->rw_x])
+			yh = Globals::g->floorclip[Globals::g->rw_x]-1;
 
-		if (::g->markfloor)
+		if (Globals::g->markfloor)
 		{
 			top = yh+1;
-			bottom = ::g->floorclip[::g->rw_x]-1;
-			if (top <= ::g->ceilingclip[::g->rw_x])
-				top = ::g->ceilingclip[::g->rw_x]+1;
+			bottom = Globals::g->floorclip[Globals::g->rw_x]-1;
+			if (top <= Globals::g->ceilingclip[Globals::g->rw_x])
+				top = Globals::g->ceilingclip[Globals::g->rw_x]+1;
 			if (top <= bottom)
 			{
-				::g->floorplane->top[::g->rw_x] = top;
-				::g->floorplane->bottom[::g->rw_x] = bottom;
+				Globals::g->floorplane->top[Globals::g->rw_x] = top;
+				Globals::g->floorplane->bottom[Globals::g->rw_x] = bottom;
 			}
 		}
 		
 	// texturecolumn and lighting are independent of wall tiers
-	if (::g->segtextured)
+	if (Globals::g->segtextured)
 	{
 	    // calculate texture offset
-	    angle = (::g->rw_centerangle + ::g->xtoviewangle[::g->rw_x])>>ANGLETOFINESHIFT;
-	    texturecolumn = ::g->rw_offset-FixedMul(finetangent[angle],::g->rw_distance);
+	    angle = (Globals::g->rw_centerangle + Globals::g->xtoviewangle[Globals::g->rw_x])>>ANGLETOFINESHIFT;
+	    texturecolumn = Globals::g->rw_offset-FixedMul(finetangent[angle],Globals::g->rw_distance);
 	    texturecolumn >>= FRACBITS;
 	    // calculate lighting
-	    index = ::g->rw_scale>>LIGHTSCALESHIFT;
+	    index = Globals::g->rw_scale>>LIGHTSCALESHIFT;
 
 	    if (index >=  MAXLIGHTSCALE )
 			index = MAXLIGHTSCALE-1;
 
-	    ::g->dc_colormap = ::g->walllights[index];
-	    ::g->dc_x = ::g->rw_x;
-	    ::g->dc_iscale = 0xffffffffu / (unsigned)::g->rw_scale;
+	    Globals::g->dc_colormap = Globals::g->walllights[index];
+	    Globals::g->dc_x = Globals::g->rw_x;
+	    Globals::g->dc_iscale = 0xffffffffu / (unsigned)Globals::g->rw_scale;
 	}
 	
 	// draw the wall tiers
-	if (::g->midtexture)
+	if (Globals::g->midtexture)
 	{
 	    // single sided line
-	    ::g->dc_yl = yl;
-	    ::g->dc_yh = yh;
-	    ::g->dc_texturemid = ::g->rw_midtexturemid;
-	    ::g->dc_source = R_GetColumn(::g->midtexture,texturecolumn);
-	    colfunc ( ::g->dc_colormap, ::g->dc_source );
-	    ::g->ceilingclip[::g->rw_x] = ::g->viewheight;
-	    ::g->floorclip[::g->rw_x] = -1;
+	    Globals::g->dc_yl = yl;
+	    Globals::g->dc_yh = yh;
+	    Globals::g->dc_texturemid = Globals::g->rw_midtexturemid;
+	    Globals::g->dc_source = R_GetColumn(Globals::g->midtexture,texturecolumn);
+	    colfunc ( Globals::g->dc_colormap, Globals::g->dc_source );
+	    Globals::g->ceilingclip[Globals::g->rw_x] = Globals::g->viewheight;
+	    Globals::g->floorclip[Globals::g->rw_x] = -1;
 	}
 	else
 	{
 	    // two sided line
-	    if (::g->toptexture)
+	    if (Globals::g->toptexture)
 	    {
 			// top wall
-			mid = ::g->pixhigh>>HEIGHTBITS;
-			::g->pixhigh += ::g->pixhighstep;
+			mid = Globals::g->pixhigh>>HEIGHTBITS;
+			Globals::g->pixhigh += Globals::g->pixhighstep;
 
-			if (mid >= ::g->floorclip[::g->rw_x])
-				mid = ::g->floorclip[::g->rw_x]-1;
+			if (mid >= Globals::g->floorclip[Globals::g->rw_x])
+				mid = Globals::g->floorclip[Globals::g->rw_x]-1;
 
 			if (mid >= yl)
 			{
-				::g->dc_yl = yl;
-				::g->dc_yh = mid;
-				::g->dc_texturemid = ::g->rw_toptexturemid;
-				::g->dc_source = R_GetColumn(::g->toptexture,texturecolumn);
-				colfunc ( ::g->dc_colormap, ::g->dc_source );
-				::g->ceilingclip[::g->rw_x] = mid;
+				Globals::g->dc_yl = yl;
+				Globals::g->dc_yh = mid;
+				Globals::g->dc_texturemid = Globals::g->rw_toptexturemid;
+				Globals::g->dc_source = R_GetColumn(Globals::g->toptexture,texturecolumn);
+				colfunc ( Globals::g->dc_colormap, Globals::g->dc_source );
+				Globals::g->ceilingclip[Globals::g->rw_x] = mid;
 			}
 			else
-				::g->ceilingclip[::g->rw_x] = yl-1;
+				Globals::g->ceilingclip[Globals::g->rw_x] = yl-1;
 		}
 	    else
 	    {
 			// no top wall
-			if (::g->markceiling)
-				::g->ceilingclip[::g->rw_x] = yl-1;
+			if (Globals::g->markceiling)
+				Globals::g->ceilingclip[Globals::g->rw_x] = yl-1;
 		}
 			
-	    if (::g->bottomtexture)
+	    if (Globals::g->bottomtexture)
 	    {
 			// bottom wall
-			mid = (::g->pixlow+HEIGHTUNIT-1)>>HEIGHTBITS;
-			::g->pixlow += ::g->pixlowstep;
+			mid = (Globals::g->pixlow+HEIGHTUNIT-1)>>HEIGHTBITS;
+			Globals::g->pixlow += Globals::g->pixlowstep;
 
 			// no space above wall?
-			if (mid <= ::g->ceilingclip[::g->rw_x])
-				mid = ::g->ceilingclip[::g->rw_x]+1;
+			if (mid <= Globals::g->ceilingclip[Globals::g->rw_x])
+				mid = Globals::g->ceilingclip[Globals::g->rw_x]+1;
 			
 			if (mid <= yh)
 			{
-				::g->dc_yl = mid;
-				::g->dc_yh = yh;
-				::g->dc_texturemid = ::g->rw_bottomtexturemid;
-				::g->dc_source = R_GetColumn(::g->bottomtexture,
+				Globals::g->dc_yl = mid;
+				Globals::g->dc_yh = yh;
+				Globals::g->dc_texturemid = Globals::g->rw_bottomtexturemid;
+				Globals::g->dc_source = R_GetColumn(Globals::g->bottomtexture,
 							texturecolumn);
-				colfunc ( ::g->dc_colormap, ::g->dc_source );
-				::g->floorclip[::g->rw_x] = mid;
+				colfunc ( Globals::g->dc_colormap, Globals::g->dc_source );
+				Globals::g->floorclip[Globals::g->rw_x] = mid;
 			}
 			else
-				::g->floorclip[::g->rw_x] = yh+1;
+				Globals::g->floorclip[Globals::g->rw_x] = yh+1;
 	    }
 	    else
 	    {
 			// no bottom wall
-			if (::g->markfloor)
-				::g->floorclip[::g->rw_x] = yh+1;
+			if (Globals::g->markfloor)
+				Globals::g->floorclip[Globals::g->rw_x] = yh+1;
 			}
 			
-			if (::g->maskedtexture)
+			if (Globals::g->maskedtexture)
 			{
 				// save texturecol
 				//  for backdrawing of masked mid texture
-				::g->maskedtexturecol[::g->rw_x] = texturecolumn;
+				Globals::g->maskedtexturecol[Globals::g->rw_x] = texturecolumn;
 			}
 		}
 		
-		::g->rw_scale += ::g->rw_scalestep;
-		::g->topfrac += ::g->topstep;
-		::g->bottomfrac += ::g->bottomstep;
+		Globals::g->rw_scale += Globals::g->rw_scalestep;
+		Globals::g->topfrac += Globals::g->topstep;
+		Globals::g->bottomfrac += Globals::g->bottomstep;
     }
 }
 
@@ -352,244 +352,244 @@ R_StoreWallRange
     int			lightnum;
 
     // don't overflow and crash
-    if (::g->ds_p == &::g->drawsegs[MAXDRAWSEGS])
+    if (Globals::g->ds_p == &Globals::g->drawsegs[MAXDRAWSEGS])
 	return;		
 		
 #ifdef RANGECHECK
-    if (start >=::g->viewwidth || start > stop)
+    if (start >=Globals::g->viewwidth || start > stop)
 	I_Error ("Bad R_RenderWallRange: %i to %i", start , stop);
 #endif
     
-    ::g->sidedef = ::g->curline->sidedef;
-    ::g->linedef = ::g->curline->linedef;
+    Globals::g->sidedef = Globals::g->curline->sidedef;
+    Globals::g->linedef = Globals::g->curline->linedef;
 
     // mark the segment as visible for auto map
-    ::g->linedef->flags |= ML_MAPPED;
+    Globals::g->linedef->flags |= ML_MAPPED;
     
-    // calculate ::g->rw_distance for scale calculation
-    ::g->rw_normalangle = ::g->curline->angle + ANG90;
-	offsetangle = abs((long)(::g->rw_normalangle-::g->rw_angle1));
+    // calculate Globals::g->rw_distance for scale calculation
+    Globals::g->rw_normalangle = Globals::g->curline->angle + ANG90;
+	offsetangle = abs((long)(Globals::g->rw_normalangle-Globals::g->rw_angle1));
     
     if (offsetangle > ANG90)
 	offsetangle = ANG90;
 
     distangle = ANG90 - offsetangle;
-    hyp = R_PointToDist (::g->curline->v1->x, ::g->curline->v1->y);
+    hyp = R_PointToDist (Globals::g->curline->v1->x, Globals::g->curline->v1->y);
     sineval = finesine[distangle>>ANGLETOFINESHIFT];
-    ::g->rw_distance = FixedMul (hyp, sineval);
+    Globals::g->rw_distance = FixedMul (hyp, sineval);
 		
 	
-    ::g->ds_p->x1 = ::g->rw_x = start;
-    ::g->ds_p->x2 = stop;
-    ::g->ds_p->curline = ::g->curline;
-    ::g->rw_stopx = stop+1;
+    Globals::g->ds_p->x1 = Globals::g->rw_x = start;
+    Globals::g->ds_p->x2 = stop;
+    Globals::g->ds_p->curline = Globals::g->curline;
+    Globals::g->rw_stopx = stop+1;
     
     // calculate scale at both ends and step
 	extern angle_t GetViewAngle();
-    ::g->ds_p->scale1 = ::g->rw_scale = 
-	R_ScaleFromGlobalAngle (GetViewAngle() + ::g->xtoviewangle[start]);
+    Globals::g->ds_p->scale1 = Globals::g->rw_scale = 
+	R_ScaleFromGlobalAngle (GetViewAngle() + Globals::g->xtoviewangle[start]);
     
     if (stop > start )
     {
-	::g->ds_p->scale2 = R_ScaleFromGlobalAngle (GetViewAngle() + ::g->xtoviewangle[stop]);
-	::g->ds_p->scalestep = ::g->rw_scalestep = 
-	    (::g->ds_p->scale2 - ::g->rw_scale) / (stop-start);
+	Globals::g->ds_p->scale2 = R_ScaleFromGlobalAngle (GetViewAngle() + Globals::g->xtoviewangle[stop]);
+	Globals::g->ds_p->scalestep = Globals::g->rw_scalestep = 
+	    (Globals::g->ds_p->scale2 - Globals::g->rw_scale) / (stop-start);
     }
     else
     {
 	// UNUSED: try to fix the stretched line bug
 #if 0
-	if (::g->rw_distance < FRACUNIT/2)
+	if (Globals::g->rw_distance < FRACUNIT/2)
 	{
 	    fixed_t		trx,try;
 	    fixed_t		gxt,gyt;
 
 	extern fixed_t GetViewX(); extern fixed_t GetViewY(); 
-	    trx = ::g->curline->v1->x - GetViewX();
-	    try = ::g->curline->v1->y - GetVewY();
+	    trx = Globals::g->curline->v1->x - GetViewX();
+	    try = Globals::g->curline->v1->y - GetVewY();
 			
-	    gxt = FixedMul(trx,::g->viewcos); 
-	    gyt = -FixedMul(try,::g->viewsin); 
-	    ::g->ds_p->scale1 = FixedDiv(::g->projection, gxt-gyt) << ::g->detailshift;
+	    gxt = FixedMul(trx,Globals::g->viewcos); 
+	    gyt = -FixedMul(try,Globals::g->viewsin); 
+	    Globals::g->ds_p->scale1 = FixedDiv(Globals::g->projection, gxt-gyt) << Globals::g->detailshift;
 	}
 #endif
-	::g->ds_p->scale2 = ::g->ds_p->scale1;
+	Globals::g->ds_p->scale2 = Globals::g->ds_p->scale1;
     }
     
     // calculate texture boundaries
     //  and decide if floor / ceiling marks are needed
-    ::g->worldtop = ::g->frontsector->ceilingheight - ::g->viewz;
-    ::g->worldbottom = ::g->frontsector->floorheight - ::g->viewz;
+    Globals::g->worldtop = Globals::g->frontsector->ceilingheight - Globals::g->viewz;
+    Globals::g->worldbottom = Globals::g->frontsector->floorheight - Globals::g->viewz;
 	
-    ::g->midtexture = ::g->toptexture = ::g->bottomtexture = ::g->maskedtexture = 0;
-    ::g->ds_p->maskedtexturecol = NULL;
+    Globals::g->midtexture = Globals::g->toptexture = Globals::g->bottomtexture = Globals::g->maskedtexture = 0;
+    Globals::g->ds_p->maskedtexturecol = NULL;
 	
-    if (!::g->backsector)
+    if (!Globals::g->backsector)
     {
 	// single sided line
-	::g->midtexture = ::g->texturetranslation[::g->sidedef->midtexture];
+	Globals::g->midtexture = Globals::g->texturetranslation[Globals::g->sidedef->midtexture];
 	// a single sided line is terminal, so it must mark ends
-	::g->markfloor = ::g->markceiling = true;
-	if (::g->linedef->flags & ML_DONTPEGBOTTOM)
+	Globals::g->markfloor = Globals::g->markceiling = true;
+	if (Globals::g->linedef->flags & ML_DONTPEGBOTTOM)
 	{
-	    vtop = ::g->frontsector->floorheight +
-		::g->s_textureheight[::g->sidedef->midtexture];
+	    vtop = Globals::g->frontsector->floorheight +
+		Globals::g->s_textureheight[Globals::g->sidedef->midtexture];
 	    // bottom of texture at bottom
-	    ::g->rw_midtexturemid = vtop - ::g->viewz;	
+	    Globals::g->rw_midtexturemid = vtop - Globals::g->viewz;	
 	}
 	else
 	{
 	    // top of texture at top
-	    ::g->rw_midtexturemid = ::g->worldtop;
+	    Globals::g->rw_midtexturemid = Globals::g->worldtop;
 	}
-	::g->rw_midtexturemid += ::g->sidedef->rowoffset;
+	Globals::g->rw_midtexturemid += Globals::g->sidedef->rowoffset;
 
-	::g->ds_p->silhouette = SIL_BOTH;
-	::g->ds_p->sprtopclip = ::g->screenheightarray;
-	::g->ds_p->sprbottomclip = ::g->negonearray;
-	::g->ds_p->bsilheight = std::numeric_limits<int>::max();
-	::g->ds_p->tsilheight = std::numeric_limits<int>::min();
+	Globals::g->ds_p->silhouette = SIL_BOTH;
+	Globals::g->ds_p->sprtopclip = Globals::g->screenheightarray;
+	Globals::g->ds_p->sprbottomclip = Globals::g->negonearray;
+	Globals::g->ds_p->bsilheight = std::numeric_limits<int>::max();
+	Globals::g->ds_p->tsilheight = std::numeric_limits<int>::min();
     }
     else
     {
 	// two sided line
-	::g->ds_p->sprtopclip = ::g->ds_p->sprbottomclip = NULL;
-	::g->ds_p->silhouette = 0;
+	Globals::g->ds_p->sprtopclip = Globals::g->ds_p->sprbottomclip = NULL;
+	Globals::g->ds_p->silhouette = 0;
 	
-	if (::g->frontsector->floorheight > ::g->backsector->floorheight)
+	if (Globals::g->frontsector->floorheight > Globals::g->backsector->floorheight)
 	{
-	    ::g->ds_p->silhouette = SIL_BOTTOM;
-	    ::g->ds_p->bsilheight = ::g->frontsector->floorheight;
+	    Globals::g->ds_p->silhouette = SIL_BOTTOM;
+	    Globals::g->ds_p->bsilheight = Globals::g->frontsector->floorheight;
 	}
-	else if (::g->backsector->floorheight > ::g->viewz)
+	else if (Globals::g->backsector->floorheight > Globals::g->viewz)
 	{
-	    ::g->ds_p->silhouette = SIL_BOTTOM;
-	    ::g->ds_p->bsilheight = std::numeric_limits<int>::max();
-	    // ::g->ds_p->sprbottomclip = ::g->negonearray;
+	    Globals::g->ds_p->silhouette = SIL_BOTTOM;
+	    Globals::g->ds_p->bsilheight = std::numeric_limits<int>::max();
+	    // Globals::g->ds_p->sprbottomclip = Globals::g->negonearray;
 	}
 	
-	if (::g->frontsector->ceilingheight < ::g->backsector->ceilingheight)
+	if (Globals::g->frontsector->ceilingheight < Globals::g->backsector->ceilingheight)
 	{
-	    ::g->ds_p->silhouette |= SIL_TOP;
-	    ::g->ds_p->tsilheight = ::g->frontsector->ceilingheight;
+	    Globals::g->ds_p->silhouette |= SIL_TOP;
+	    Globals::g->ds_p->tsilheight = Globals::g->frontsector->ceilingheight;
 	}
-	else if (::g->backsector->ceilingheight < ::g->viewz)
+	else if (Globals::g->backsector->ceilingheight < Globals::g->viewz)
 	{
-	    ::g->ds_p->silhouette |= SIL_TOP;
-	    ::g->ds_p->tsilheight = std::numeric_limits<int>::min();
-	    // ::g->ds_p->sprtopclip = ::g->screenheightarray;
+	    Globals::g->ds_p->silhouette |= SIL_TOP;
+	    Globals::g->ds_p->tsilheight = std::numeric_limits<int>::min();
+	    // Globals::g->ds_p->sprtopclip = Globals::g->screenheightarray;
 	}
 		
-	if (::g->backsector->ceilingheight <= ::g->frontsector->floorheight)
+	if (Globals::g->backsector->ceilingheight <= Globals::g->frontsector->floorheight)
 	{
-	    ::g->ds_p->sprbottomclip = ::g->negonearray;
-	    ::g->ds_p->bsilheight = std::numeric_limits<int>::max();
-	    ::g->ds_p->silhouette |= SIL_BOTTOM;
+	    Globals::g->ds_p->sprbottomclip = Globals::g->negonearray;
+	    Globals::g->ds_p->bsilheight = std::numeric_limits<int>::max();
+	    Globals::g->ds_p->silhouette |= SIL_BOTTOM;
 	}
 	
-	if (::g->backsector->floorheight >= ::g->frontsector->ceilingheight)
+	if (Globals::g->backsector->floorheight >= Globals::g->frontsector->ceilingheight)
 	{
-	    ::g->ds_p->sprtopclip = ::g->screenheightarray;
-	    ::g->ds_p->tsilheight = std::numeric_limits<int>::min();
-	    ::g->ds_p->silhouette |= SIL_TOP;
+	    Globals::g->ds_p->sprtopclip = Globals::g->screenheightarray;
+	    Globals::g->ds_p->tsilheight = std::numeric_limits<int>::min();
+	    Globals::g->ds_p->silhouette |= SIL_TOP;
 	}
 	
-	::g->worldhigh = ::g->backsector->ceilingheight - ::g->viewz;
-	::g->worldlow = ::g->backsector->floorheight - ::g->viewz;
+	Globals::g->worldhigh = Globals::g->backsector->ceilingheight - Globals::g->viewz;
+	Globals::g->worldlow = Globals::g->backsector->floorheight - Globals::g->viewz;
 		
 	// hack to allow height changes in outdoor areas
-	if (::g->frontsector->ceilingpic == ::g->skyflatnum 
-	    && ::g->backsector->ceilingpic == ::g->skyflatnum)
+	if (Globals::g->frontsector->ceilingpic == Globals::g->skyflatnum 
+	    && Globals::g->backsector->ceilingpic == Globals::g->skyflatnum)
 	{
-	    ::g->worldtop = ::g->worldhigh;
+	    Globals::g->worldtop = Globals::g->worldhigh;
 	}
 	
 			
-	if (::g->worldlow != ::g->worldbottom 
-	    || ::g->backsector->floorpic != ::g->frontsector->floorpic
-	    || ::g->backsector->lightlevel != ::g->frontsector->lightlevel)
+	if (Globals::g->worldlow != Globals::g->worldbottom 
+	    || Globals::g->backsector->floorpic != Globals::g->frontsector->floorpic
+	    || Globals::g->backsector->lightlevel != Globals::g->frontsector->lightlevel)
 	{
-	    ::g->markfloor = true;
+	    Globals::g->markfloor = true;
 	}
 	else
 	{
-	    // same plane on both ::g->sides
-	    ::g->markfloor = false;
+	    // same plane on both Globals::g->sides
+	    Globals::g->markfloor = false;
 	}
 	
 			
-	if (::g->worldhigh != ::g->worldtop 
-	    || ::g->backsector->ceilingpic != ::g->frontsector->ceilingpic
-	    || ::g->backsector->lightlevel != ::g->frontsector->lightlevel)
+	if (Globals::g->worldhigh != Globals::g->worldtop 
+	    || Globals::g->backsector->ceilingpic != Globals::g->frontsector->ceilingpic
+	    || Globals::g->backsector->lightlevel != Globals::g->frontsector->lightlevel)
 	{
-	    ::g->markceiling = true;
+	    Globals::g->markceiling = true;
 	}
 	else
 	{
-	    // same plane on both ::g->sides
-	    ::g->markceiling = false;
+	    // same plane on both Globals::g->sides
+	    Globals::g->markceiling = false;
 	}
 	
-	if (::g->backsector->ceilingheight <= ::g->frontsector->floorheight
-	    || ::g->backsector->floorheight >= ::g->frontsector->ceilingheight)
+	if (Globals::g->backsector->ceilingheight <= Globals::g->frontsector->floorheight
+	    || Globals::g->backsector->floorheight >= Globals::g->frontsector->ceilingheight)
 	{
 	    // closed door
-	    ::g->markceiling = ::g->markfloor = true;
+	    Globals::g->markceiling = Globals::g->markfloor = true;
 	}
 	
 
-	if (::g->worldhigh < ::g->worldtop)
+	if (Globals::g->worldhigh < Globals::g->worldtop)
 	{
 	    // top texture
-	    ::g->toptexture = ::g->texturetranslation[::g->sidedef->toptexture];
-	    if (::g->linedef->flags & ML_DONTPEGTOP)
+	    Globals::g->toptexture = Globals::g->texturetranslation[Globals::g->sidedef->toptexture];
+	    if (Globals::g->linedef->flags & ML_DONTPEGTOP)
 	    {
 		// top of texture at top
-		::g->rw_toptexturemid = ::g->worldtop;
+		Globals::g->rw_toptexturemid = Globals::g->worldtop;
 	    }
 	    else
 	    {
 		vtop =
-		    ::g->backsector->ceilingheight
-		    + ::g->s_textureheight[::g->sidedef->toptexture];
+		    Globals::g->backsector->ceilingheight
+		    + Globals::g->s_textureheight[Globals::g->sidedef->toptexture];
 		
 		// bottom of texture
-		::g->rw_toptexturemid = vtop - ::g->viewz;	
+		Globals::g->rw_toptexturemid = vtop - Globals::g->viewz;	
 	    }
 	}
-	if (::g->worldlow > ::g->worldbottom)
+	if (Globals::g->worldlow > Globals::g->worldbottom)
 	{
 	    // bottom texture
-	    ::g->bottomtexture = ::g->texturetranslation[::g->sidedef->bottomtexture];
+	    Globals::g->bottomtexture = Globals::g->texturetranslation[Globals::g->sidedef->bottomtexture];
 
-	    if (::g->linedef->flags & ML_DONTPEGBOTTOM )
+	    if (Globals::g->linedef->flags & ML_DONTPEGBOTTOM )
 	    {
 		// bottom of texture at bottom
 		// top of texture at top
-		::g->rw_bottomtexturemid = ::g->worldtop;
+		Globals::g->rw_bottomtexturemid = Globals::g->worldtop;
 	    }
 	    else	// top of texture at top
-		::g->rw_bottomtexturemid = ::g->worldlow;
+		Globals::g->rw_bottomtexturemid = Globals::g->worldlow;
 	}
-	::g->rw_toptexturemid += ::g->sidedef->rowoffset;
-	::g->rw_bottomtexturemid += ::g->sidedef->rowoffset;
+	Globals::g->rw_toptexturemid += Globals::g->sidedef->rowoffset;
+	Globals::g->rw_bottomtexturemid += Globals::g->sidedef->rowoffset;
 	
 	// allocate space for masked texture tables
-	if (::g->sidedef->midtexture)
+	if (Globals::g->sidedef->midtexture)
 	{
-	    // masked ::g->midtexture
-	    ::g->maskedtexture = true;
-	    ::g->ds_p->maskedtexturecol = ::g->maskedtexturecol = ::g->lastopening - ::g->rw_x;
-	    ::g->lastopening += ::g->rw_stopx - ::g->rw_x;
+	    // masked Globals::g->midtexture
+	    Globals::g->maskedtexture = true;
+	    Globals::g->ds_p->maskedtexturecol = Globals::g->maskedtexturecol = Globals::g->lastopening - Globals::g->rw_x;
+	    Globals::g->lastopening += Globals::g->rw_stopx - Globals::g->rw_x;
 	}
     }
     
-    // calculate ::g->rw_offset (only needed for textured ::g->lines)
-    ::g->segtextured = ::g->midtexture | ::g->toptexture | ::g->bottomtexture | ::g->maskedtexture;
+    // calculate Globals::g->rw_offset (only needed for textured Globals::g->lines)
+    Globals::g->segtextured = Globals::g->midtexture | Globals::g->toptexture | Globals::g->bottomtexture | Globals::g->maskedtexture;
 
-    if (::g->segtextured)
+    if (Globals::g->segtextured)
     {
-		offsetangle = ::g->rw_normalangle-::g->rw_angle1;
+		offsetangle = Globals::g->rw_normalangle-Globals::g->rw_angle1;
 		
 		if (offsetangle > ANG180)
 			offsetangle = -offsetangle; // ALANHACK UNSIGNED
@@ -598,33 +598,33 @@ R_StoreWallRange
 			offsetangle = ANG90;
 
 		sineval = finesine[offsetangle >>ANGLETOFINESHIFT];
-		::g->rw_offset = FixedMul (hyp, sineval);
+		Globals::g->rw_offset = FixedMul (hyp, sineval);
 
-		if (::g->rw_normalangle-::g->rw_angle1 < ANG180)
-			::g->rw_offset = -::g->rw_offset;
+		if (Globals::g->rw_normalangle-Globals::g->rw_angle1 < ANG180)
+			Globals::g->rw_offset = -Globals::g->rw_offset;
 
-		::g->rw_offset += ::g->sidedef->textureoffset + ::g->curline->offset;
-		::g->rw_centerangle = ANG90 + GetViewAngle() - ::g->rw_normalangle;
+		Globals::g->rw_offset += Globals::g->sidedef->textureoffset + Globals::g->curline->offset;
+		Globals::g->rw_centerangle = ANG90 + GetViewAngle() - Globals::g->rw_normalangle;
 		
 		// calculate light table
 		//  use different light tables
 		//  for horizontal / vertical / diagonal
 		// OPTIMIZE: get rid of LIGHTSEGSHIFT globally
-		if (!::g->fixedcolormap)
+		if (!Globals::g->fixedcolormap)
 		{
-			lightnum = (::g->frontsector->lightlevel >> LIGHTSEGSHIFT)+::g->extralight;
+			lightnum = (Globals::g->frontsector->lightlevel >> LIGHTSEGSHIFT)+Globals::g->extralight;
 
-			if (::g->curline->v1->y == ::g->curline->v2->y)
+			if (Globals::g->curline->v1->y == Globals::g->curline->v2->y)
 			lightnum--;
-			else if (::g->curline->v1->x == ::g->curline->v2->x)
+			else if (Globals::g->curline->v1->x == Globals::g->curline->v2->x)
 			lightnum++;
 
 			if (lightnum < 0)		
-			::g->walllights = ::g->scalelight[0];
+			Globals::g->walllights = Globals::g->scalelight[0];
 			else if (lightnum >= LIGHTLEVELS)
-			::g->walllights = ::g->scalelight[LIGHTLEVELS-1];
+			Globals::g->walllights = Globals::g->scalelight[LIGHTLEVELS-1];
 			else
-			::g->walllights = ::g->scalelight[lightnum];
+			Globals::g->walllights = Globals::g->scalelight[lightnum];
 		}
     }
     
@@ -633,86 +633,86 @@ R_StoreWallRange
     //  and doesn't need to be marked.
     
   
-    if (::g->frontsector->floorheight >= ::g->viewz)
+    if (Globals::g->frontsector->floorheight >= Globals::g->viewz)
     {
 	// above view plane
-	::g->markfloor = false;
+	Globals::g->markfloor = false;
     }
     
-    if (::g->frontsector->ceilingheight <= ::g->viewz 
-	&& ::g->frontsector->ceilingpic != ::g->skyflatnum)
+    if (Globals::g->frontsector->ceilingheight <= Globals::g->viewz 
+	&& Globals::g->frontsector->ceilingpic != Globals::g->skyflatnum)
     {
 	// below view plane
-	::g->markceiling = false;
+	Globals::g->markceiling = false;
     }
 
     
     // calculate incremental stepping values for texture edges
-    ::g->worldtop >>= 4;
-    ::g->worldbottom >>= 4;
+    Globals::g->worldtop >>= 4;
+    Globals::g->worldbottom >>= 4;
 	
-    ::g->topstep = -FixedMul (::g->rw_scalestep, ::g->worldtop);
-    ::g->topfrac = (::g->centeryfrac>>4) - FixedMul (::g->worldtop, ::g->rw_scale);
+    Globals::g->topstep = -FixedMul (Globals::g->rw_scalestep, Globals::g->worldtop);
+    Globals::g->topfrac = (Globals::g->centeryfrac>>4) - FixedMul (Globals::g->worldtop, Globals::g->rw_scale);
 
-    ::g->bottomstep = -FixedMul (::g->rw_scalestep,::g->worldbottom);
-    ::g->bottomfrac = (::g->centeryfrac>>4) - FixedMul (::g->worldbottom, ::g->rw_scale);
+    Globals::g->bottomstep = -FixedMul (Globals::g->rw_scalestep,Globals::g->worldbottom);
+    Globals::g->bottomfrac = (Globals::g->centeryfrac>>4) - FixedMul (Globals::g->worldbottom, Globals::g->rw_scale);
 	
-    if (::g->backsector)
+    if (Globals::g->backsector)
     {	
-	::g->worldhigh >>= 4;
-	::g->worldlow >>= 4;
+	Globals::g->worldhigh >>= 4;
+	Globals::g->worldlow >>= 4;
 
-	if (::g->worldhigh < ::g->worldtop)
+	if (Globals::g->worldhigh < Globals::g->worldtop)
 	{
-	    ::g->pixhigh = (::g->centeryfrac>>4) - FixedMul (::g->worldhigh, ::g->rw_scale);
-	    ::g->pixhighstep = -FixedMul (::g->rw_scalestep,::g->worldhigh);
+	    Globals::g->pixhigh = (Globals::g->centeryfrac>>4) - FixedMul (Globals::g->worldhigh, Globals::g->rw_scale);
+	    Globals::g->pixhighstep = -FixedMul (Globals::g->rw_scalestep,Globals::g->worldhigh);
 	}
 	
-	if (::g->worldlow > ::g->worldbottom)
+	if (Globals::g->worldlow > Globals::g->worldbottom)
 	{
-	    ::g->pixlow = (::g->centeryfrac>>4) - FixedMul (::g->worldlow, ::g->rw_scale);
-	    ::g->pixlowstep = -FixedMul (::g->rw_scalestep,::g->worldlow);
+	    Globals::g->pixlow = (Globals::g->centeryfrac>>4) - FixedMul (Globals::g->worldlow, Globals::g->rw_scale);
+	    Globals::g->pixlowstep = -FixedMul (Globals::g->rw_scalestep,Globals::g->worldlow);
 	}
     }
     
     // render it
-	 if (::g->markceiling)
-		 ::g->ceilingplane = R_CheckPlane (::g->ceilingplane, ::g->rw_x, ::g->rw_stopx-1);
+	 if (Globals::g->markceiling)
+		 Globals::g->ceilingplane = R_CheckPlane (Globals::g->ceilingplane, Globals::g->rw_x, Globals::g->rw_stopx-1);
 
-	 if (::g->markfloor)
-		 ::g->floorplane = R_CheckPlane (::g->floorplane, ::g->rw_x, ::g->rw_stopx-1);
+	 if (Globals::g->markfloor)
+		 Globals::g->floorplane = R_CheckPlane (Globals::g->floorplane, Globals::g->rw_x, Globals::g->rw_stopx-1);
 
     R_RenderSegLoop ();
 
     
     // save sprite clipping info
-    if ( ((::g->ds_p->silhouette & SIL_TOP) || ::g->maskedtexture)
-	 && !::g->ds_p->sprtopclip)
+    if ( ((Globals::g->ds_p->silhouette & SIL_TOP) || Globals::g->maskedtexture)
+	 && !Globals::g->ds_p->sprtopclip)
     {
-	memcpy (::g->lastopening, ::g->ceilingclip+start, 2*(::g->rw_stopx-start));
-	::g->ds_p->sprtopclip = ::g->lastopening - start;
-	::g->lastopening += ::g->rw_stopx - start;
+	memcpy (Globals::g->lastopening, Globals::g->ceilingclip+start, 2*(Globals::g->rw_stopx-start));
+	Globals::g->ds_p->sprtopclip = Globals::g->lastopening - start;
+	Globals::g->lastopening += Globals::g->rw_stopx - start;
     }
     
-    if ( ((::g->ds_p->silhouette & SIL_BOTTOM) || ::g->maskedtexture)
-	 && !::g->ds_p->sprbottomclip)
+    if ( ((Globals::g->ds_p->silhouette & SIL_BOTTOM) || Globals::g->maskedtexture)
+	 && !Globals::g->ds_p->sprbottomclip)
     {
-	memcpy (::g->lastopening, ::g->floorclip+start, 2*(::g->rw_stopx-start));
-	::g->ds_p->sprbottomclip = ::g->lastopening - start;
-	::g->lastopening += ::g->rw_stopx - start;	
+	memcpy (Globals::g->lastopening, Globals::g->floorclip+start, 2*(Globals::g->rw_stopx-start));
+	Globals::g->ds_p->sprbottomclip = Globals::g->lastopening - start;
+	Globals::g->lastopening += Globals::g->rw_stopx - start;	
     }
 
-    if (::g->maskedtexture && !(::g->ds_p->silhouette&SIL_TOP))
+    if (Globals::g->maskedtexture && !(Globals::g->ds_p->silhouette&SIL_TOP))
     {
-	::g->ds_p->silhouette |= SIL_TOP;
-	::g->ds_p->tsilheight = std::numeric_limits<int>::min();
+	Globals::g->ds_p->silhouette |= SIL_TOP;
+	Globals::g->ds_p->tsilheight = std::numeric_limits<int>::min();
     }
-    if (::g->maskedtexture && !(::g->ds_p->silhouette&SIL_BOTTOM))
+    if (Globals::g->maskedtexture && !(Globals::g->ds_p->silhouette&SIL_BOTTOM))
     {
-	::g->ds_p->silhouette |= SIL_BOTTOM;
-	::g->ds_p->bsilheight = std::numeric_limits<int>::min();
+	Globals::g->ds_p->silhouette |= SIL_BOTTOM;
+	Globals::g->ds_p->bsilheight = std::numeric_limits<int>::min();
     }
-    ::g->ds_p++;
+    Globals::g->ds_p++;
 }
 
 

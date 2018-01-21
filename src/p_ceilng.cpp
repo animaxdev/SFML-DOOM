@@ -70,7 +70,7 @@ void T_MoveCeiling (ceiling_t* ceiling)
 			  ceiling->topheight,
 			  false,1,ceiling->direction);
 	
-	if (!(::g->leveltime&7))
+	if (!(Globals::g->leveltime&7))
 	{
 	    switch(ceiling->type)
 	    {
@@ -114,7 +114,7 @@ void T_MoveCeiling (ceiling_t* ceiling)
 			  ceiling->bottomheight,
 			  ceiling->crush,1,ceiling->direction);
 	
-	if (!(::g->leveltime&7))
+	if (!(Globals::g->leveltime&7))
 	{
 	    switch(ceiling->type)
 	    {
@@ -199,7 +199,7 @@ EV_DoCeiling
 	
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
-	sec = &::g->sectors[secnum];
+	sec = &Globals::g->sectors[secnum];
 	if (sec->specialdata)
 	    continue;
 	
@@ -259,9 +259,9 @@ void P_AddActiveCeiling(ceiling_t* c)
     
     for (i = 0; i < MAXCEILINGS;i++)
     {
-	if (::g->activeceilings[i] == NULL)
+	if (Globals::g->activeceilings[i] == NULL)
 	{
-	    ::g->activeceilings[i] = c;
+	    Globals::g->activeceilings[i] = c;
 	    return;
 	}
     }
@@ -278,11 +278,11 @@ void P_RemoveActiveCeiling(ceiling_t* c)
 	
     for (i = 0;i < MAXCEILINGS;i++)
     {
-	if (::g->activeceilings[i] == c)
+	if (Globals::g->activeceilings[i] == c)
 	{
-	    ::g->activeceilings[i]->sector->specialdata = NULL;
-	    P_RemoveThinker (&::g->activeceilings[i]->thinker);
-	    ::g->activeceilings[i] = NULL;
+	    Globals::g->activeceilings[i]->sector->specialdata = NULL;
+	    P_RemoveThinker (&Globals::g->activeceilings[i]->thinker);
+	    Globals::g->activeceilings[i] = NULL;
 	    break;
 	}
     }
@@ -299,12 +299,12 @@ void P_ActivateInStasisCeiling(line_t* line)
 	
     for (i = 0;i < MAXCEILINGS;i++)
     {
-	if (::g->activeceilings[i]
-	    && (::g->activeceilings[i]->tag == line->tag)
-	    && (::g->activeceilings[i]->direction == 0))
+	if (Globals::g->activeceilings[i]
+	    && (Globals::g->activeceilings[i]->tag == line->tag)
+	    && (Globals::g->activeceilings[i]->direction == 0))
 	{
-	    ::g->activeceilings[i]->direction = ::g->activeceilings[i]->olddirection;
-	    ::g->activeceilings[i]->thinker.function.acp1
+	    Globals::g->activeceilings[i]->direction = Globals::g->activeceilings[i]->olddirection;
+	    Globals::g->activeceilings[i]->thinker.function.acp1
 	      = (actionf_p1)T_MoveCeiling;
 	}
     }
@@ -324,13 +324,13 @@ int	EV_CeilingCrushStop(line_t	*line)
     rtn = 0;
     for (i = 0;i < MAXCEILINGS;i++)
     {
-	if (::g->activeceilings[i]
-	    && (::g->activeceilings[i]->tag == line->tag)
-	    && (::g->activeceilings[i]->direction != 0))
+	if (Globals::g->activeceilings[i]
+	    && (Globals::g->activeceilings[i]->tag == line->tag)
+	    && (Globals::g->activeceilings[i]->direction != 0))
 	{
-	    ::g->activeceilings[i]->olddirection = ::g->activeceilings[i]->direction;
-	    ::g->activeceilings[i]->thinker.function.acv = (actionf_v)NULL;
-	    ::g->activeceilings[i]->direction = 0;		// in-stasis
+	    Globals::g->activeceilings[i]->olddirection = Globals::g->activeceilings[i]->direction;
+	    Globals::g->activeceilings[i]->thinker.function.acv = (actionf_v)NULL;
+	    Globals::g->activeceilings[i]->direction = 0;		// in-stasis
 	    rtn = 1;
 	}
     }

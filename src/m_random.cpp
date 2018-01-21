@@ -60,19 +60,19 @@ const unsigned char rndtable[256] = {
 // Which one is deterministic?
 int P_Random (void)
 {
-    ::g->prndindex = (::g->prndindex+1)&0xff;
-    return rndtable[::g->prndindex];
+    Globals::g->prndindex = (Globals::g->prndindex+1)&0xff;
+    return rndtable[Globals::g->prndindex];
 }
 
 int M_Random (void)
 {
-    ::g->rndindex = (::g->rndindex+1)&0xff;
-    return rndtable[::g->rndindex];
+    Globals::g->rndindex = (Globals::g->rndindex+1)&0xff;
+    return rndtable[Globals::g->rndindex];
 }
 
 void M_ClearRandom (void)
 {
-    ::g->rndindex = ::g->prndindex = 0;
+    Globals::g->rndindex = Globals::g->prndindex = 0;
 }
 
 

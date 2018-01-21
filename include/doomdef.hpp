@@ -84,7 +84,7 @@ typedef enum
 
 // If rangecheck is undefined,
 // most parameter validation debugging code will not be compiled
-#ifdef _DEBUG
+#ifndef NDEBUG
 #define RANGECHECK
 #endif
 

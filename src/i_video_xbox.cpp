@@ -145,15 +145,15 @@ void I_FinishUpdate (void)
 //
 // I_ReadScreen
 //
-void I_ReadScreen (byte* scr)
+void I_ReadScreen (unsigned char* scr)
 {
- //   XMemCpy(scr, ::g->screens[0], SCREENWIDTH*SCREENHEIGHT);
+ //   XMemCpy(scr, Globals::g->screens[0], SCREENWIDTH*SCREENHEIGHT);
 }
 
 //
 // I_SetPalette
 //
-void I_SetPalette (byte* palette)
+void I_SetPalette (unsigned char* palette)
 {
 	int i;
 
@@ -161,10 +161,10 @@ void I_SetPalette (byte* palette)
 	for (i=0 ; i<256 ; i++)
 	{
 		int r,b,g;
-		r = gammatable[::g->usegamma][*palette++];
-		g = gammatable[::g->usegamma][*palette++];
-		b = gammatable[::g->usegamma][*palette++];
-		//::g->XColorMap[i] = D3DCOLOR_ARGB(0xff, r, g, b);
+		r = gammatable[Globals::g->usegamma][*palette++];
+		g = gammatable[Globals::g->usegamma][*palette++];
+		b = gammatable[Globals::g->usegamma][*palette++];
+		//Globals::g->XColorMap[i] = D3DCOLOR_ARGB(0xff, r, g, b);
 	}
 }
 

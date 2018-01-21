@@ -77,7 +77,7 @@ If you have questions concerning this license or the applicable additional terms
 
 //IXAudio2SourceVoice*	pMusicSourceVoice;
 MidiSong*				doomMusic;
-byte*					musicBuffer;
+unsigned char*					musicBuffer;
 int						totalBufferSize;
 
 //HANDLE	hMusicThread;
@@ -178,7 +178,7 @@ void* getsfx ( char* sfxname, int* len )
 	else
 		sfxlump = W_GetNumForName(name);
 
-	// Sound lump headers are 8 bytes.
+	// Sound lump headers are 8 unsigned chars.
 	const int SOUND_LUMP_HEADER_SIZE_IN_BYTES = 8;
 
 	size = W_LumpLength( sfxlump ) - SOUND_LUMP_HEADER_SIZE_IN_BYTES;
@@ -361,7 +361,7 @@ int I_StartSound2 ( int id, int player, mobj_t *origin, mobj_t *listener_origin,
 //
 //    // set id, and start time
 //    sound->id = id;
-//    sound->start = ::g->gametic;
+//    sound->start = Globals::g->gametic;
 //    sound->valid = 1;
 //    sound->player = player;
 //    sound->originator = origin;
@@ -390,14 +390,14 @@ I_StartSound
 */
 int I_StartSound ( int id, mobj_t *origin, mobj_t *listener_origin, int vol, int pitch, int priority ) {
 	// only allow player 0s sounds in intermission and finale screens
-	if( ::g->gamestate != GS_LEVEL && DoomLib::GetPlayer() != 0 ) {
+	if( Globals::g->gamestate != GS_LEVEL && DoomLib::GetPlayer() != 0 ) {
 		return 0;
 	}
 
 	// if we're only one player or we're trying to play the chainsaw sound, do it normal
 	// otherwise only allow one sound of each type per frame
 	if( PLAYERCOUNT == 1 || id == sfx_sawup || id == sfx_sawidl || id == sfx_sawful || id == sfx_sawhit ) {
-		return I_StartSound2( id, ::g->consoleplayer, origin, listener_origin, pitch, priority );
+		return I_StartSound2( id, Globals::g->consoleplayer, origin, listener_origin, pitch, priority );
 	}
 	else {
 		if( soundEvents[ id ].vol < vol ) {
@@ -502,7 +502,7 @@ void I_UpdateSound( void ) {
 //        sound->m_pSourceVoice->GetState( &state );
 
 //        if ( state.BuffersQueued > 0 ) {
-//            mobj_t *playerObj = ::g->players[ sound->player ].mo;
+//            mobj_t *playerObj = Globals::g->players[ sound->player ].mo;
 //
 //            // Update Listener Orientation and Position
 //            angle_t    pAngle = playerObj->angle;
@@ -890,7 +890,7 @@ size_t I_LoadSong( void* songname ) {
 	doomMusic = Timidity_LoadSongMem( midiConversionBuffer, length );
 
 	if ( doomMusic ) {
-		musicBuffer = (byte *)malloc( MIDI_CHANNELS * MIDI_FORMAT_BYTES * doomMusic->samples );
+		musicBuffer = (unsigned char *)malloc( MIDI_CHANNELS * MIDI_FORMAT_BYTES * doomMusic->samples );
 		totalBufferSize = doomMusic->samples * MIDI_CHANNELS * MIDI_FORMAT_BYTES;
 
 		Timidity_Start( doomMusic );
@@ -958,7 +958,7 @@ void I_PlaySong( const char *songname, int looping)
 	waitingForMusic = true;
 
 	if ( DoomLib::GetPlayer() >= 0 ) {
-		::g->mus_looping = looping;
+		Globals::g->mus_looping = looping;
 	}
 }
 
@@ -986,7 +986,7 @@ void I_UpdateMusic( void ) {
 				Packet.PlayLength = 0;
 				Packet.LoopBegin = 0;
 				Packet.LoopLength = 0;
-				Packet.LoopCount = ::g->mus_looping ? XAUDIO2_LOOP_INFINITE : 0;
+				Packet.LoopCount = Globals::g->mus_looping ? XAUDIO2_LOOP_INFINITE : 0;
 				Packet.pContext = NULL;
 
 				// Submit packet

@@ -48,11 +48,11 @@ If you have questions concerning this license or the applicable additional terms
 
 
 
-extern	byte*		screens[5];
+extern	unsigned char*		screens[5];
 
 extern  int	dirtybox[4];
 
-const extern	byte	gammatable[5][256];
+const extern	unsigned char	gammatable[5][256];
 extern	int	usegamma;
 
 
@@ -95,7 +95,7 @@ V_DrawBlock
   int		scrn,
   int		width,
   int		height,
-  byte*		src );
+  unsigned char*		src );
 
 // Reads a linear block of pixels into the view buffer.
 void
@@ -105,7 +105,7 @@ V_GetBlock
   int		scrn,
   int		width,
   int		height,
-  byte*		dest );
+  unsigned char*		dest );
 
 
 void

@@ -116,27 +116,27 @@ const char*		extraWad = 0;
 //
 void D_PostEvent (event_t* ev)
 {
-	::g->events[::g->eventhead] = *ev;
-	::g->eventhead = (++::g->eventhead)&(MAXEVENTS-1);
+    Globals::g->events[Globals::g->eventhead] = *ev;
+    Globals::g->eventhead = (++Globals::g->eventhead)&(MAXEVENTS-1);
 }
 
 
 //
 // D_ProcessEvents
-// Send all the ::g->events of the given timestamp down the responder chain
+// Send all the Globals::g->events of the given timestamp down the responder chain
 //
 void D_ProcessEvents (void)
 {
 	event_t*	ev;
 
 	// IF STORE DEMO, DO NOT ACCEPT INPUT
-	if ( ( ::g->gamemode == commercial )
+	if ( ( Globals::g->gamemode == commercial )
 		&& (W_CheckNumForName("map01")<0) )
 		return;
 
-	for ( ; ::g->eventtail != ::g->eventhead ; ::g->eventtail = (++::g->eventtail)&(MAXEVENTS-1) )
+	for ( ; Globals::g->eventtail != Globals::g->eventhead ; Globals::g->eventtail = (++Globals::g->eventtail)&(MAXEVENTS-1) )
 	{
-		ev = &::g->events[::g->eventtail];
+		ev = &Globals::g->events[Globals::g->eventtail];
 		if (M_Responder (ev))
 			continue;               // menu ate the event
 		G_Responder (ev);
@@ -150,7 +150,7 @@ void D_ProcessEvents (void)
 // D_Display
 //  draw current display, possibly wiping it from the previous
 //
-// ::g->wipegamestate can be set to -1 to force a ::g->wipe on the next draw
+// Globals::g->wipegamestate can be set to -1 to force a Globals::g->wipe on the next draw
 extern bool waitingForWipe;
 
 void D_Wipe()
@@ -158,18 +158,18 @@ void D_Wipe()
 	int nowtime, tics;
 
 	nowtime = I_GetTime();
-	tics = nowtime - ::g->wipestart;
+	tics = nowtime - Globals::g->wipestart;
 
 	if (tics != 0)
 	{
-		::g->wipestart = nowtime;
-		::g->wipedone = wipe_ScreenWipe( 0, 0, SCREENWIDTH, SCREENHEIGHT, tics );
+		Globals::g->wipestart = nowtime;
+		Globals::g->wipedone = wipe_ScreenWipe( 0, 0, SCREENWIDTH, SCREENHEIGHT, tics );
 
 		// DHM - Nerve :: Demo recording :: Stop large hitch on first frame after the wipe
-		if ( ::g->wipedone ) {
-			::g->oldtrt_entertics = nowtime / ::g->ticdup;
-			::g->gametime = nowtime;
-			::g->wipe = false;
+		if ( Globals::g->wipedone ) {
+			Globals::g->oldtrt_entertics = nowtime / Globals::g->ticdup;
+			Globals::g->gametime = nowtime;
+			Globals::g->wipe = false;
 			waitingForWipe = false;
 		}
 	}
@@ -180,45 +180,45 @@ void D_Display (void)
 {
 	qboolean			redrawsbar;
 
-	if (::g->nodrawers)
+	if (Globals::g->nodrawers)
 		return;                    // for comparative timing / profiling
 
 	redrawsbar = false;
 
 	// change the view size if needed
-	if (::g->setsizeneeded)
+	if (Globals::g->setsizeneeded)
 	{
 		R_ExecuteSetViewSize();
-		::g->oldgamestate = (gamestate_t)-1;                      // force background redraw
-		::g->borderdrawcount = 3;
+		Globals::g->oldgamestate = (gamestate_t)-1;                      // force background redraw
+		Globals::g->borderdrawcount = 3;
 	}
 
-	// save the current screen if about to ::g->wipe
-	if (::g->gamestate != ::g->wipegamestate)
+	// save the current screen if about to Globals::g->wipe
+	if (Globals::g->gamestate != Globals::g->wipegamestate)
 	{
-		::g->wipe = true;
+		Globals::g->wipe = true;
 		wipe_StartScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
 	}
 	else
-		::g->wipe = false;
+		Globals::g->wipe = false;
 
-	if (::g->gamestate == GS_LEVEL && ::g->gametic)
+	if (Globals::g->gamestate == GS_LEVEL && Globals::g->gametic)
 		HU_Erase();
 
 	// do buffered drawing
-	switch (::g->gamestate)
+	switch(Globals::g->gamestate)
 	{
 	case GS_LEVEL:
-		if (!::g->gametic)
+		if (!Globals::g->gametic)
 			break;
-		if (::g->automapactive)
+		if (Globals::g->automapactive)
 			AM_Drawer ();
-		if (::g->wipe || (::g->viewheight != 200 * GLOBAL_IMAGE_SCALER && ::g->fullscreen) )
+		if (Globals::g->wipe ||(Globals::g->viewheight != 200 * GLOBAL_IMAGE_SCALER && Globals::g->fullscreen) )
 			redrawsbar = true;
-		if (::g->inhelpscreensstate && !::g->inhelpscreens)
+		if (Globals::g->inhelpscreensstate && !Globals::g->inhelpscreens)
 			redrawsbar = true;              // just put away the help screen
-		ST_Drawer ( ::g->viewheight == 200 * GLOBAL_IMAGE_SCALER, redrawsbar );
-		::g->fullscreen = ::g->viewheight == 200 * GLOBAL_IMAGE_SCALER;
+		ST_Drawer ( Globals::g->viewheight == 200 * GLOBAL_IMAGE_SCALER, redrawsbar );
+		Globals::g->fullscreen = Globals::g->viewheight == 200 * GLOBAL_IMAGE_SCALER;
 		break;
 
 	case GS_INTERMISSION:
@@ -238,60 +238,60 @@ void D_Display (void)
 	I_UpdateNoBlit ();
 
 	// draw the view directly
-	if (::g->gamestate == GS_LEVEL && !::g->automapactive && ::g->gametic)
-		R_RenderPlayerView (&::g->players[::g->displayplayer]);
+	if(Globals::g->gamestate == GS_LEVEL &&!Globals::g->automapactive && Globals::g->gametic)
+		R_RenderPlayerView (&Globals::g->players[Globals::g->displayplayer]);
 
-	if (::g->gamestate == GS_LEVEL && ::g->gametic)
+	if(Globals::g->gamestate == GS_LEVEL && Globals::g->gametic)
 		HU_Drawer ();
 
 	// clean up border stuff
-	if (::g->gamestate != ::g->oldgamestate && ::g->gamestate != GS_LEVEL)
-		I_SetPalette ((byte*)W_CacheLumpName ("PLAYPAL",PU_CACHE_SHARED));
+	if(Globals::g->gamestate != Globals::g->oldgamestate && Globals::g->gamestate != GS_LEVEL)
+		I_SetPalette ((unsigned char*)W_CacheLumpName ("PLAYPAL",PU_CACHE_SHARED));
 
 	// see if the border needs to be initially drawn
-	if (::g->gamestate == GS_LEVEL && ::g->oldgamestate != GS_LEVEL)
+	if(Globals::g->gamestate == GS_LEVEL && Globals::g->oldgamestate != GS_LEVEL)
 	{
-		::g->viewactivestate = false;        // view was not active
+		Globals::g->viewactivestate = false;        // view was not active
 		R_FillBackScreen ();    // draw the pattern into the back screen
 	}
 
 	// see if the border needs to be updated to the screen
-	if (::g->gamestate == GS_LEVEL && !::g->automapactive && ::g->scaledviewwidth != (320 * GLOBAL_IMAGE_SCALER) )
+	if(Globals::g->gamestate == GS_LEVEL &&!Globals::g->automapactive && Globals::g->scaledviewwidth != (320 * GLOBAL_IMAGE_SCALER) )
 	{
-		if (::g->menuactive || ::g->menuactivestate || !::g->viewactivestate)
-			::g->borderdrawcount = 3;
-		if (::g->borderdrawcount)
+		if(Globals::g->menuactive || Globals::g->menuactivestate ||!Globals::g->viewactivestate)
+			Globals::g->borderdrawcount = 3;
+		if(Globals::g->borderdrawcount)
 		{
 			R_DrawViewBorder ();    // erase old menu stuff
-			::g->borderdrawcount--;
+			Globals::g->borderdrawcount--;
 		}
 
 	}
 
-	::g->menuactivestate = ::g->menuactive;
-	::g->viewactivestate = ::g->viewactive;
-	::g->inhelpscreensstate = ::g->inhelpscreens;
-	::g->oldgamestate = ::g->wipegamestate = ::g->gamestate;
+	Globals::g->menuactivestate = Globals::g->menuactive;
+	Globals::g->viewactivestate = Globals::g->viewactive;
+	Globals::g->inhelpscreensstate = Globals::g->inhelpscreens;
+	Globals::g->oldgamestate = Globals::g->wipegamestate = Globals::g->gamestate;
 
 	// draw pause pic
 /*
-	if (::g->paused)
+	if(Globals::g->paused)
 	{
-		if (::g->automapactive)
+		if(Globals::g->automapactive)
 			y = 4;
 		else
-			y = ::g->viewwindowy+4;
-		V_DrawPatchDirect(::g->viewwindowx+(ORIGINAL_WIDTH-68)/2,
+			y = Globals::g->viewwindowy+4;
+		V_DrawPatchDirect(Globals::g->viewwindowx+(ORIGINAL_WIDTH-68)/2,
 			y,0,(patch_t*)W_CacheLumpName ("M_PAUSE", PU_CACHE_SHARED));
 	}
 */
 
 	// menus go directly to the screen
 	M_Drawer ();          // menu is drawn even on top of everything
-	NetUpdate ( NULL );         // send out any new accumulation
+	NetUpdate ( );         // send out any new accumulation
 	
 	// normal update
-	if (!::g->wipe)
+	if (!Globals::g->wipe)
 	{
 		I_FinishUpdate ();              // page flip or blit buffer
 		return;
@@ -300,7 +300,7 @@ void D_Display (void)
 	// \ update
 	wipe_EndScreen(0, 0, SCREENWIDTH, SCREENHEIGHT);
 
-	::g->wipestart = I_GetTime () - 1;
+	Globals::g->wipestart = I_GetTime () - 1;
 
 	D_Wipe(); // initialize g->wipedone
 }
@@ -311,7 +311,7 @@ void D_RunFrame( bool Sounds )
 {
 	if (Sounds)	{
 		// move positional sounds
-		S_UpdateSounds (::g->players[::g->consoleplayer].mo);
+		S_UpdateSounds(Globals::g->players[Globals::g->consoleplayer].mo);
 	}
 
 	// Update display, next frame, with current state.
@@ -335,9 +335,9 @@ void D_DoomLoop (void)
 	if (M_CheckParm ("-debugfile"))
 	{
 		char    filename[20];
-		sprintf (filename,"debug%i.txt",::g->consoleplayer);
+		sprintf (filename,"debug%i.txt",Globals::g->consoleplayer);
 		I_Printf ("debug output to: %s\n",filename);
-		::g->debugfile = f o p e n(filename,"w");
+		Globals::g->debugfile = f o p e n(filename,"w");
 	}
 
 	I_InitGraphics ();
@@ -359,11 +359,11 @@ void D_DoomLoop (void)
 
 //
 // D_PageTicker
-// Handles timing for warped ::g->projection
+// Handles timing for warped Globals::g->projection
 //
 void D_PageTicker (void)
 {
-	if (--::g->pagetic < 0)
+	if (--Globals::g->pagetic < 0)
 		D_AdvanceDemo ();
 }
 
@@ -374,17 +374,17 @@ void D_PageTicker (void)
 //
 void D_PageDrawer (void)
 {
-	V_DrawPatch (0,0, 0, (patch_t*)W_CacheLumpName(::g->pagename, PU_CACHE_SHARED));
+	V_DrawPatch (0,0, 0, (patch_t*)W_CacheLumpName(Globals::g->pagename, PU_CACHE_SHARED));
 }
 
 
 //
 // D_AdvanceDemo
-// Called after each demo or intro ::g->demosequence finishes
+// Called after each demo or intro Globals::g->demosequence finishes
 //
 void D_AdvanceDemo (void)
 {
-	::g->advancedemo = true;
+	Globals::g->advancedemo = true;
 }
 
 
@@ -394,29 +394,29 @@ void D_AdvanceDemo (void)
 //
 void D_DoAdvanceDemo (void)
 {
-	::g->players[::g->consoleplayer].playerstate = PST_LIVE;  // not reborn
-	::g->advancedemo = false;
-	::g->usergame = false;               // no save / end game here
-	::g->paused = false;
-	::g->gameaction = ga_nothing;
+	Globals::g->players[Globals::g->consoleplayer].playerstate = PST_LIVE;  // not reborn
+	Globals::g->advancedemo = false;
+	Globals::g->usergame = false;               // no save / end game here
+	Globals::g->paused = false;
+	Globals::g->gameaction = ga_nothing;
 
-	if ( ::g->gamemode == retail )
-		::g->demosequence = (::g->demosequence+1)%8;
+	if ( Globals::g->gamemode == retail )
+		Globals::g->demosequence =(Globals::g->demosequence+1)%8;
 	else
-		::g->demosequence = (::g->demosequence+1)%6;
+		Globals::g->demosequence =(Globals::g->demosequence+1)%6;
 
-	switch (::g->demosequence)
+	switch(Globals::g->demosequence)
 	{
 	case 0:
-		if ( ::g->gamemode == commercial )
-			::g->pagetic = 35 * 11;
+		if ( Globals::g->gamemode == commercial )
+			Globals::g->pagetic = 35 * 11;
 		else
-			::g->pagetic = 8 * TICRATE;
+			Globals::g->pagetic = 8 * TICRATE;
 
-		::g->gamestate = GS_DEMOSCREEN;
-		::g->pagename = "INTERPIC";
+		Globals::g->gamestate = GS_DEMOSCREEN;
+		Globals::g->pagename = "INTERPIC";
 
-		if ( ::g->gamemode == commercial )
+		if ( Globals::g->gamemode == commercial )
 			S_StartMusic(mus_dm2ttl);
 		else
 			S_StartMusic (mus_intro);
@@ -426,26 +426,26 @@ void D_DoAdvanceDemo (void)
 		G_DeferedPlayDemo ("demo1");
 		break;
 	case 2:
-		::g->pagetic = 3 * TICRATE;
-		::g->gamestate = GS_DEMOSCREEN;
-		::g->pagename = "INTERPIC";
+		Globals::g->pagetic = 3 * TICRATE;
+		Globals::g->gamestate = GS_DEMOSCREEN;
+		Globals::g->pagename = "INTERPIC";
 		break;
 	case 3:
 		G_DeferedPlayDemo ("demo2");
 		break;
 	case 4:
-		::g->pagetic = 3 * TICRATE;
-		::g->gamestate = GS_DEMOSCREEN;
-		::g->pagename = "INTERPIC";
+		Globals::g->pagetic = 3 * TICRATE;
+		Globals::g->gamestate = GS_DEMOSCREEN;
+		Globals::g->pagename = "INTERPIC";
 		break;
 	case 5:
 		G_DeferedPlayDemo ("demo3");
 		break;
 		// THE DEFINITIVE DOOM Special Edition demo
 	case 6:
-		::g->pagetic = 3 * TICRATE;
-		::g->gamestate = GS_DEMOSCREEN;
-		::g->pagename = "INTERPIC";
+		Globals::g->pagetic = 3 * TICRATE;
+		Globals::g->gamestate = GS_DEMOSCREEN;
+		Globals::g->pagename = "INTERPIC";
 		break;
 	case 7:
 		G_DeferedPlayDemo ("demo4");
@@ -460,15 +460,15 @@ void D_DoAdvanceDemo (void)
 //
 void D_StartTitle (void)
 {
-	::g->gameaction = ga_nothing;
-	::g->demosequence = -1;
+	Globals::g->gameaction = ga_nothing;
+	Globals::g->demosequence = -1;
 	D_AdvanceDemo ();
 }
 
 
 
 
-//      print ::g->title for every printed line
+//      print Globals::g->title for every printed line
 
 //
 // D_AddExtraWadFile
@@ -503,8 +503,8 @@ void IdentifyVersion (void)
 	W_FreeWadFiles();
 
 	const ExpansionData * expansion =  DoomLib::GetCurrentExpansion();
-	::g->gamemode = expansion->gameMode;
-	::g->gamemission = expansion->pack_type;
+	Globals::g->gamemode = expansion->gameMode;
+	Globals::g->gamemission = expansion->pack_type;
 
 
 	if( expansion->type == ExpansionData::PWAD ) {
@@ -530,7 +530,7 @@ void FindResponseFile (void)
 // D_DoomMain
 //
 
-int main (void)
+void D_DoomMain (void)
 {
 	int             p;
 	char                    file[256];
@@ -541,53 +541,53 @@ int main (void)
 	IdentifyVersion ();
 
 	setbuf (stdout, NULL);
-	::g->modifiedgame = false;
+	Globals::g->modifiedgame = false;
 
 	// TODO: Networking
 	//const bool isDeathmatch = gameLocal->GetMatchParms().GetGameType() == GAME_TYPE_PVP;
 	const bool isDeathmatch = false;
 
-	::g->nomonsters = M_CheckParm ("-nomonsters") || isDeathmatch;
-	::g->respawnparm = M_CheckParm ("-respawn");
-	::g->fastparm = M_CheckParm ("-fast");
-	::g->devparm = M_CheckParm ("-devparm");
+	Globals::g->nomonsters = M_CheckParm ("-nomonsters") || isDeathmatch;
+	Globals::g->respawnparm = M_CheckParm ("-respawn");
+	Globals::g->fastparm = M_CheckParm ("-fast");
+	Globals::g->devparm = M_CheckParm ("-devparm");
 	if (M_CheckParm ("-altdeath") || isDeathmatch)
-		::g->deathmatch = 2;
+		Globals::g->deathmatch = 2;
 	else if (M_CheckParm ("-deathmatch"))
-		::g->deathmatch = 1;
+		Globals::g->deathmatch = 1;
 
-	switch ( ::g->gamemode )
+	switch ( Globals::g->gamemode )
 	{
 	case retail:
-		sprintf (::g->title,
+		sprintf(Globals::g->title,
 			"                         "
 			"The Ultimate DOOM Startup v%i.%i"
 			"                           ",
 			VERSION/100,VERSION%100);
 		break;
 	case shareware:
-		sprintf (::g->title,
+		sprintf(Globals::g->title,
 			"                            "
 			"DOOM Shareware Startup v%i.%i"
 			"                           ",
 			VERSION/100,VERSION%100);
 		break;
 	case registered:
-		sprintf (::g->title,
+		sprintf(Globals::g->title,
 			"                            "
 			"DOOM Registered Startup v%i.%i"
 			"                           ",
 			VERSION/100,VERSION%100);
 		break;
 	case commercial:
-		sprintf (::g->title,
+		sprintf(Globals::g->title,
 			"                         "
 			"DOOM 2: Hell on Earth v%i.%i"
 			"                           ",
 			VERSION/100,VERSION%100);
 		break;
 	default:
-		sprintf (::g->title,
+		sprintf(Globals::g->title,
 			"                     "
 			"Public DOOM - v%i.%i"
 			"                           ",
@@ -595,29 +595,29 @@ int main (void)
 		break;
 	}
 
-	I_Printf ("%s\n",::g->title);
+	I_Printf ("%s\n",Globals::g->title);
 
-	if (::g->devparm)
+	if(Globals::g->devparm)
 		I_Printf(D_DEVSTR);
 
 	if (M_CheckParm("-cdrom"))
 	{
 		I_Printf(D_CDROM);
 //c++		mkdir("c:\\doomdata",0);
-		strcpy (::g->basedefault,"c:/doomdata/default.cfg");
+		strcpy(Globals::g->basedefault,"c:/doomdata/default.cfg");
 	}	
 
-	// add any files specified on the command line with -file ::g->wadfile
+	// add any files specified on the command line with -file Globals::g->wadfile
 	// to the wad list
 	//
 	p = M_CheckParm ("-file");
 	if (p)
 	{
-		// the parms after p are ::g->wadfile/lump names,
+		// the parms after p are Globals::g->wadfile/lump names,
 		// until end of parms or another - preceded parm
-		::g->modifiedgame = true;            // homebrew levels
-		while (++p != ::g->myargc && ::g->myargv[p][0] != '-')
-			D_AddFile (::g->myargv[p]);
+		Globals::g->modifiedgame = true;            // homebrew levels
+		while (++p != Globals::g->myargc && Globals::g->myargv[p][0] != '-')
+			D_AddFile(Globals::g->myargv[p]);
 	}
 
 	p = M_CheckParm ("-playdemo");
@@ -625,59 +625,59 @@ int main (void)
 	if (!p)
 		p = M_CheckParm ("-timedemo");
 
-	if (p && p < ::g->myargc-1)
+	if (p && p < Globals::g->myargc-1)
 	{
-		sprintf (file,"d:\\%s.lmp", ::g->myargv[p+1]);
+		sprintf (file,"d:\\%s.lmp", Globals::g->myargv[p+1]);
 		D_AddFile (file);
-		I_Printf("Playing demo %s.lmp.\n",::g->myargv[p+1]);
+		I_Printf("Playing demo %s.lmp.\n",Globals::g->myargv[p+1]);
 	}
 
 	// get skill / episode / map from defaults
-	::g->startskill = sk_medium;
-	::g->startepisode = 1;
-	::g->startmap = 1;
-	::g->autostart = false;
+	Globals::g->startskill = sk_medium;
+	Globals::g->startepisode = 1;
+	Globals::g->startmap = 1;
+	Globals::g->autostart = false;
 
 	/*if ( DoomLib::matchParms.gameEpisode != GAME_EPISODE_UNKNOWN ) {
-		::g->startepisode = DoomLib::matchParms.gameEpisode;
-		::g->autostart = 1;
+		Globals::g->startepisode = DoomLib::matchParms.gameEpisode;
+		Globals::g->autostart = 1;
 	}
 
 	if ( DoomLib::matchParms.gameMap != -1 ) {
-		::g->startmap = DoomLib::matchParms.gameMap;
-		::g->autostart = 1;
+		Globals::g->startmap = DoomLib::matchParms.gameMap;
+		Globals::g->autostart = 1;
 	}
 
 	if ( DoomLib::matchParms.gameSkill != -1) {
-		::g->startskill = (skill_t)DoomLib::matchParms.gameSkill;
+		Globals::g->startskill = (skill_t)DoomLib::matchParms.gameSkill;
 	}*/
 
 	// get skill / episode / map from cmdline
 	p = M_CheckParm ("-skill");
-	if (p && p < ::g->myargc-1)
+	if (p && p < Globals::g->myargc-1)
 	{
-		::g->startskill = (skill_t)(::g->myargv[p+1][0]-'1');
-		::g->autostart = true;
+		Globals::g->startskill = (skill_t)(Globals::g->myargv[p+1][0]-'1');
+		Globals::g->autostart = true;
 	}
 
 	p = M_CheckParm ("-episode");
-	if (p && p < ::g->myargc-1)
+	if (p && p < Globals::g->myargc-1)
 	{
-		::g->startepisode = ::g->myargv[p+1][0]-'0';
-		::g->startmap = 1;
-		::g->autostart = true;
+		Globals::g->startepisode = Globals::g->myargv[p+1][0]-'0';
+		Globals::g->startmap = 1;
+		Globals::g->autostart = true;
 	}
 
 	/*p = M_CheckParm ("-timer");
-	if (p && p < ::g->myargc-1 && ::g->deathmatch)
+	if (p && p < Globals::g->myargc-1 && Globals::g->deathmatch)
 	{*/
 	// TODO: Networking
 	//const int timeLimit = gameLocal->GetMatchParms().GetTimeLimit();
 	const int timeLimit = 0;
-	if (timeLimit != 0 && ::g->deathmatch) 
+	if (timeLimit != 0 && Globals::g->deathmatch)
 	{
 		int     time;
-		//time = atoi(::g->myargv[p+1]);
+		//time = atoi(Globals::g->myargv[p+1]);
 		time = timeLimit;
 		I_Printf("Levels will end after %d minute",time);
 		if (time>1)
@@ -686,27 +686,27 @@ int main (void)
 	}
 
 	p = M_CheckParm ("-avg");
-	if (p && p < ::g->myargc-1 && ::g->deathmatch)
+	if (p && p < Globals::g->myargc-1 && Globals::g->deathmatch)
 		I_Printf("Austin Virtual Gaming: Levels will end after 20 minutes\n");
 
 	p = M_CheckParm ("-warp");
-	if (p && p < ::g->myargc-1)
+	if (p && p < Globals::g->myargc-1)
 	{
-		if (::g->gamemode == commercial)
-			::g->startmap = atoi (::g->myargv[p+1]);
+		if(Globals::g->gamemode == commercial)
+			Globals::g->startmap = atoi(Globals::g->myargv[p+1]);
 		else
 		{
-			::g->startepisode = ::g->myargv[p+1][0]-'0';
-			::g->startmap = ::g->myargv[p+2][0]-'0';
+			Globals::g->startepisode = Globals::g->myargv[p+1][0]-'0';
+			Globals::g->startmap = Globals::g->myargv[p+2][0]-'0';
 		}
-		::g->autostart = true;
+		Globals::g->autostart = true;
 	}
 
 	I_Printf ("Z_Init: Init zone memory allocation daemon. \n");
 	Z_Init ();
 
 	// init subsystems
-	I_Printf ("V_Init: allocate ::g->screens.\n");
+	I_Printf ("V_Init: allocate Globals::g->screens.\n");
 	V_Init ();
 
 	I_Printf ("M_LoadDefaults: Load system defaults.\n");
@@ -717,7 +717,7 @@ int main (void)
 
 
 	// Check for -file in shareware
-	if (::g->modifiedgame)
+	if(Globals::g->modifiedgame)
 	{
 		// These are the lumps that will be checked in IWAD,
 		// if any one is not present, execution will be aborted.
@@ -729,20 +729,20 @@ int main (void)
 		};
 		int i;
 
-		if ( ::g->gamemode == shareware)
+		if ( Globals::g->gamemode == shareware)
 			I_Error("\nYou cannot -file with the shareware "
 			"version. Register!");
 
 		// Check for fake IWAD with right name,
 		// but w/o all the lumps of the registered version. 
-		if (::g->gamemode == registered)
+		if(Globals::g->gamemode == registered)
 			for (i = 0;i < 23; i++)
 				if (W_CheckNumForName(name[i])<0)
 					I_Error("\nThis is not the registered version.");
 	}
 
 	// Iff additonal PWAD files are used, print modified banner
-	if (::g->modifiedgame)
+	if(Globals::g->modifiedgame)
 	{
 		/*m*/I_Printf (
 		"===========================================================================\n"
@@ -757,7 +757,7 @@ int main (void)
 
 
 	// Check and print which version is executed.
-	switch ( ::g->gamemode )
+	switch ( Globals::g->gamemode )
 	{
 	case shareware:
 	case indetermined:
@@ -820,43 +820,43 @@ bool D_DoomMainPoll(void)
 	// start the apropriate game based on parms
 	p = M_CheckParm ("-record");
 
-	if (p && p < ::g->myargc-1)
+	if (p && p < Globals::g->myargc-1)
 	{
-		G_RecordDemo (::g->myargv[p+1]);
-		::g->autostart = true;
+		G_RecordDemo(Globals::g->myargv[p+1]);
+		Globals::g->autostart = true;
 	}
 
 	p = M_CheckParm ("-playdemo");
-	if (p && p < ::g->myargc-1)
+	if (p && p < Globals::g->myargc-1)
 	{
-		//::g->singledemo = true;              // quit after one demo
-		G_DeferedPlayDemo (::g->myargv[p+1]);
+		//Globals::g->singledemo = true;              // quit after one demo
+		G_DeferedPlayDemo(Globals::g->myargv[p+1]);
 		//D_DoomLoop ();  // never returns
 	}
 
 	p = M_CheckParm ("-timedemo");
-	if (p && p < ::g->myargc-1)
+	if (p && p < Globals::g->myargc-1)
 	{
-		G_TimeDemo ("nukage1");//::g->myargv[p+1]);
+		G_TimeDemo ("nukage1");//Globals::g->myargv[p+1]);
 		D_DoomLoop ();  // never returns
 	}
 
 	p = M_CheckParm ("-loadgame");
-	if (p && p < ::g->myargc-1)
+	if (p && p < Globals::g->myargc-1)
 	{
 		if (M_CheckParm("-cdrom"))
-            sprintf(file, (std::string("c:\\doomdata\\") + SAVEGAMENAME + "%c.dsg").c_str(),::g->myargv[p+1][0]);
+            sprintf(file, (std::string("c:\\doomdata\\") + SAVEGAMENAME + "%c.dsg").c_str(),Globals::g->myargv[p+1][0]);
 		else
-			sprintf(file, SAVEGAMENAME"%c.dsg",::g->myargv[p+1][0]);
+			sprintf(file, SAVEGAMENAME"%c.dsg",Globals::g->myargv[p+1][0]);
 		G_LoadGame (file);
 	}
 
 
-	if ( ::g->gameaction != ga_loadgame && ::g->gameaction != ga_playdemo )
+	if ( Globals::g->gameaction != ga_loadgame && Globals::g->gameaction != ga_playdemo )
 	{
-		if (::g->autostart || ::g->netgame ) {
-			G_InitNew (::g->startskill, ::g->startepisode, ::g->startmap );
-		} else if(  ::g->gameaction != ga_newgame) {
+		if(Globals::g->autostart || Globals::g->netgame ) {
+			G_InitNew(Globals::g->startskill, Globals::g->startepisode, Globals::g->startmap );
+		} else if(  Globals::g->gameaction != ga_newgame) {
 			D_StartTitle ();                // start up intro loop
 		}
 	}

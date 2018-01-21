@@ -48,7 +48,7 @@ If you have questions concerning this license or the applicable additional terms
 
 
 // Now where did these came from?
-const byte gammatable[5][256] =
+const unsigned char gammatable[5][256] =
 {
     {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
      17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,
@@ -145,8 +145,8 @@ V_MarkRect
   int		width,
   int		height ) 
 { 
-    M_AddToBox (::g->dirtybox, x, y); 
-    M_AddToBox (::g->dirtybox, x+width-1, y+height-1); 
+    M_AddToBox (Globals::g->dirtybox, x, y); 
+    M_AddToBox (Globals::g->dirtybox, x+width-1, y+height-1); 
 } 
  
 
@@ -164,8 +164,8 @@ V_CopyRect
   int		desty,
   int		destscrn ) 
 { 
-    byte*	src;
-    byte*	dest; 
+    unsigned char*	src;
+    unsigned char*	dest; 
 	 
 #ifdef RANGECHECK 
     if (srcx<0
@@ -191,8 +191,8 @@ V_CopyRect
 	width *= GLOBAL_IMAGE_SCALER;
 	height *= GLOBAL_IMAGE_SCALER;
 
-	src = ::g->screens[srcscrn] + srcy * SCREENWIDTH + srcx; 
-	dest = ::g->screens[destscrn] + desty * SCREENWIDTH + destx; 
+	src = Globals::g->screens[srcscrn] + srcy * SCREENWIDTH + srcx; 
+	dest = Globals::g->screens[destscrn] + desty * SCREENWIDTH + destx; 
 
 	for ( ; height>0 ; height--) { 
 		memcpy(dest, src, width); 
@@ -217,7 +217,7 @@ V_DrawPatch
     int				count;
     int				col; 
     postColumn_t*	column; 
-    byte*			source; 
+    unsigned char*			source; 
     int				w; 
 	 
     y -= SHORT(patch->topoffset); 
@@ -247,13 +247,13 @@ V_DrawPatch
 
 	// SMF - rewritten for scaling
 	for ( ; col < w ; x++, col++ ) {
-		column = (postColumn_t *)((byte *)patch + LONG(patch->columnofs[col]));
+		column = (postColumn_t *)((unsigned char *)patch + LONG(patch->columnofs[col]));
 
 		destx = x;
 
 		// step through the posts in a column
 		while (column->topdelta != 0xff ) {
-			source = (byte *)column + 3;
+			source = (unsigned char *)column + 3;
 			desty = y + column->topdelta;
 			count = column->length;
 
@@ -261,18 +261,18 @@ V_DrawPatch
 				int scaledx, scaledy;
 				scaledx = destx * GLOBAL_IMAGE_SCALER;
 				scaledy = desty * GLOBAL_IMAGE_SCALER;
-				byte src = *source++;
+				unsigned char src = *source++;
 
 				for ( int i = 0; i < GLOBAL_IMAGE_SCALER; i++ ) {
 					for ( int j = 0; j < GLOBAL_IMAGE_SCALER; j++ ) {
-						::g->screens[scrn][( scaledx + j ) + ( scaledy + i ) * SCREENWIDTH] = src;
+						Globals::g->screens[scrn][( scaledx + j ) + ( scaledy + i ) * SCREENWIDTH] = src;
 					}
 				}
 
 				desty++;
 			}
 
-			column = (postColumn_t *)( (byte *)column + column->length + 4 );
+			column = (postColumn_t *)( (unsigned char *)column + column->length + 4 );
 		}
 	}
 } 
@@ -293,7 +293,7 @@ V_DrawPatchFlipped
     int				count;
     int				col; 
     postColumn_t*	column; 
-    byte*			source; 
+    unsigned char*			source; 
     int				w; 
 	 
     y -= SHORT(patch->topoffset); 
@@ -321,14 +321,14 @@ V_DrawPatchFlipped
 
     for ( ; col<w ; x++, col++ ) 
     { 
-		column = (postColumn_t *)((byte *)patch + LONG(patch->columnofs[w-1-col])); 
+		column = (postColumn_t *)((unsigned char *)patch + LONG(patch->columnofs[w-1-col])); 
 
 		destx = x;
 	 
 		// step through the posts in a column 
 		while (column->topdelta != 0xff ) 
 		{ 
-			source = (byte *)column + 3; 
+			source = (unsigned char *)column + 3; 
 			desty = y + column->topdelta;
 			count = column->length; 
 				 
@@ -337,17 +337,17 @@ V_DrawPatchFlipped
 				int scaledx, scaledy;
 				scaledx = destx * GLOBAL_IMAGE_SCALER;
 				scaledy = desty * GLOBAL_IMAGE_SCALER;
-				byte src = *source++;
+				unsigned char src = *source++;
 
 				for ( int i = 0; i < GLOBAL_IMAGE_SCALER; i++ ) {
 					for ( int j = 0; j < GLOBAL_IMAGE_SCALER; j++ ) {
-						::g->screens[scrn][( scaledx + j ) + ( scaledy + i ) * SCREENWIDTH] = src;
+						Globals::g->screens[scrn][( scaledx + j ) + ( scaledy + i ) * SCREENWIDTH] = src;
 					}
 				}
 
 				desty++;
 			} 
-			column = (postColumn_t *)(  (byte *)column + column->length + 4 );
+			column = (postColumn_t *)(  (unsigned char *)column + column->length + 4 );
 		} 
     }			 
 } 
@@ -371,9 +371,9 @@ V_DrawPatchDirect
     int		count;
     int		col; 
     postColumn_t*	column; 
-    byte*	desttop;
-    byte*	dest;
-    byte*	source; 
+    unsigned char*	desttop;
+    unsigned char*	dest;
+    unsigned char*	source; 
     int		w; 
 	 
     y -= SHORT(patch->topoffset); 
@@ -397,13 +397,13 @@ V_DrawPatchDirect
     for ( col = 0 ; col<w ; col++) 
     { 
 	outp (SC_INDEX+1,1<<(x&3)); 
-	column = (postColumn_t *)((byte *)patch + LONG(patch->columnofs[col])); 
+	column = (postColumn_t *)((unsigned char *)patch + LONG(patch->columnofs[col])); 
  
 	// step through the posts in a column 
 	 
 	while (column->topdelta != 0xff ) 
 	{ 
-	    source = (byte *)column + 3; 
+	    source = (unsigned char *)column + 3; 
 	    dest = desttop + column->topdelta*ORIGINAL_WIDTH/4; 
 	    count = column->length; 
  
@@ -412,11 +412,11 @@ V_DrawPatchDirect
 		*dest = *source++; 
 		dest += ORIGINAL_WIDTH/4; 
 	    } 
-	    column = (postColumn_t *)(  (byte *)column + column->length 
+	    column = (postColumn_t *)(  (unsigned char *)column + column->length 
 				    + 4 ); 
 	} 
 	if ( ((++x)&3) == 0 ) 
-	    desttop++;	// go to next byte, not next plane 
+	    desttop++;	// go to next unsigned char, not next plane 
     }*/ 
 } 
  
@@ -433,9 +433,9 @@ V_DrawBlock
   int		scrn,
   int		width,
   int		height,
-  byte*		src ) 
+  unsigned char*		src ) 
 { 
-    byte*	dest; 
+    unsigned char*	dest; 
 	 
 #ifdef RANGECHECK 
     if (x<0
@@ -450,7 +450,7 @@ V_DrawBlock
  
     V_MarkRect (x, y, width, height); 
  
-    dest = ::g->screens[scrn] + y*SCREENWIDTH+x; 
+    dest = Globals::g->screens[scrn] + y*SCREENWIDTH+x; 
 
     while (height--) 
     { 
@@ -473,9 +473,9 @@ V_GetBlock
   int		scrn,
   int		width,
   int		height,
-  byte*		dest ) 
+  unsigned char*		dest ) 
 { 
-    byte*	src; 
+    unsigned char*	src; 
 	 
 #ifdef RANGECHECK 
     if (x<0
@@ -488,7 +488,7 @@ V_GetBlock
     }
 #endif 
  
-    src = ::g->screens[scrn] + y*SCREENWIDTH+x; 
+    src = Globals::g->screens[scrn] + y*SCREENWIDTH+x; 
 
     while (height--) 
     { 
@@ -507,13 +507,13 @@ V_GetBlock
 void V_Init (void) 
 { 
     int		i;
-    byte*	base;
+    unsigned char*	base;
 
     // stick these in low dos memory on PCs
 
-    base = (byte*)DoomLib::Z_Malloc(SCREENWIDTH*SCREENHEIGHT*4, PU_STATIC, 0);
+    base = (unsigned char*)DoomLib::Z_Malloc(SCREENWIDTH*SCREENHEIGHT*4, PU_STATIC, 0);
 
     for (i=0 ; i<4 ; i++)
-		::g->screens[i] = base + i*SCREENWIDTH*SCREENHEIGHT;
+		Globals::g->screens[i] = base + i*SCREENWIDTH*SCREENHEIGHT;
 }
 

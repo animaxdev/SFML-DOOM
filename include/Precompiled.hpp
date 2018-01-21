@@ -40,7 +40,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #define ID_INLINE inline
 
-typedef unsigned char byte;
 typedef unsigned int dword;
 
 

@@ -100,21 +100,21 @@ void	F_CastDrawer (void);
 //
 void F_StartFinale (void)
 {
-    ::g->gameaction = ga_nothing;
-    ::g->gamestate = GS_FINALE;
-    ::g->viewactive = false;
-    ::g->automapactive = false;
+    Globals::g->gameaction = ga_nothing;
+    Globals::g->gamestate = GS_FINALE;
+    Globals::g->viewactive = false;
+    Globals::g->automapactive = false;
 
 	// Check for end of episode/mission
 	bool endOfMission = false;
 
-	if ( ( ::g->gamemission == doom || ::g->gamemission == doom2 || ::g->gamemission == pack_tnt ||  ::g->gamemission == pack_plut  ) && ::g->gamemap == 30 ) {
+	if ( ( Globals::g->gamemission == doom || Globals::g->gamemission == doom2 || Globals::g->gamemission == pack_tnt ||  Globals::g->gamemission == pack_plut  ) && Globals::g->gamemap == 30 ) {
 		endOfMission = true;
 	}
-	else if ( ::g->gamemission == pack_nerve && ::g->gamemap == 8 ) {
+	else if ( Globals::g->gamemission == pack_nerve && Globals::g->gamemap == 8 ) {
 		endOfMission = true;
 	}
-	else if ( ::g->gamemission == pack_master && ::g->gamemap == 21 ) {
+	else if ( Globals::g->gamemission == pack_master && Globals::g->gamemap == 21 ) {
 		endOfMission = true;
 	}
 
@@ -123,7 +123,7 @@ void F_StartFinale (void)
     // Okay - IWAD dependend stuff.
     // This has been changed severly, and
     //  some stuff might have changed in the process.
-    switch ( ::g->gamemode )
+    switch ( Globals::g->gamemode )
     {
 
 		// DOOM 1 - E1, E3 or E4, but each nine missions
@@ -133,7 +133,7 @@ void F_StartFinale (void)
 		{
 			S_ChangeMusic(mus_victor, true);
 
-			switch (::g->gameepisode)
+			switch (Globals::g->gameepisode)
 			{
 			  case 1:
 				finaleflat = "FLOOR4_8";
@@ -163,8 +163,8 @@ void F_StartFinale (void)
 		{
 			S_ChangeMusic(mus_read_m, true);
 
-			if ( ::g->gamemission == doom2 || ::g->gamemission == pack_tnt || ::g->gamemission == pack_plut ) {
-				switch (::g->gamemap)
+			if ( Globals::g->gamemission == doom2 || Globals::g->gamemission == pack_tnt || Globals::g->gamemission == pack_plut ) {
+				switch (Globals::g->gamemap)
 				{
 				  case 6:
 					finaleflat = "SLIME16";
@@ -194,16 +194,16 @@ void F_StartFinale (void)
 					// Ouch.
 					break;
 				}
-			} else if( ::g->gamemission == pack_master ) {
-				switch (::g->gamemap)
+			} else if( Globals::g->gamemission == pack_master ) {
+				switch (Globals::g->gamemap)
 				{
 					case 21:
 						finaleflat = "SLIME16";
 						finaletext = c8Text;
 						break;
 				}
-			} else if ( ::g->gamemission == pack_nerve ) {
-				switch( ::g->gamemap ){
+			} else if ( Globals::g->gamemission == pack_nerve ) {
+				switch( Globals::g->gamemap ){
 					case 8:
 						finaleflat = "SLIME16";
 						finaletext = c7text;
@@ -222,8 +222,8 @@ void F_StartFinale (void)
 			break;
 	}
     
-    ::g->finalestage = 0;
-    ::g->finalecount = 0;
+    Globals::g->finalestage = 0;
+    Globals::g->finalecount = 0;
 }
 
 
@@ -236,7 +236,7 @@ qboolean F_Responder (event_t *event)
 		return true;
 	}
 
-	if (::g->finalestage == 2)
+	if (Globals::g->finalestage == 2)
 		return F_CastResponder (event);
 */
     return false;
@@ -251,30 +251,30 @@ void F_Ticker (void)
     int		i;
     
 	// check for skipping
-	if ( (::g->gamemode == commercial) && ( ::g->finalecount > 50) )
+	if ( (Globals::g->gamemode == commercial) && ( Globals::g->finalecount > 50) )
 	{
 		// go on to the next level
 		for (i=0 ; i<MAXPLAYERS ; i++)
-			if (::g->players[i].cmd.buttons)
+			if (Globals::g->players[i].cmd.buttons)
 				break;
 
 		if ( finaleButtonPressed || i < MAXPLAYERS)
 		{	
 			bool castStarted = false;
-			if( ::g->gamemission == doom2 || ::g->gamemission == pack_plut || ::g->gamemission == pack_tnt ) {
-				if (::g->gamemap == 30) {
+			if( Globals::g->gamemission == doom2 || Globals::g->gamemission == pack_plut || Globals::g->gamemission == pack_tnt ) {
+				if (Globals::g->gamemap == 30) {
 					F_StartCast ();
 					castStarted = true;
 				}
 
-			} else if(  ::g->gamemission == pack_master ) {
-				if( :: g->gamemap == 21 ) {
+			} else if(  Globals::g->gamemission == pack_master ) {
+                if( Globals::g->gamemap == 21 ) {
 					F_StartCast ();
 					castStarted = true;
 				}
 
-			} else if(  ::g->gamemission == pack_nerve ) {
-				if( :: g->gamemap == 8 ) {
+			} else if(  Globals::g->gamemission == pack_nerve ) {
+                if( Globals::g->gamemap == 8 ) {
 					F_StartCast ();
 					castStarted = true;
 				}
@@ -282,7 +282,7 @@ void F_Ticker (void)
 			} 
 
 			if( castStarted == false ) {
-				::g->gameaction = ga_worlddone;
+				Globals::g->gameaction = ga_worlddone;
 			}
 		}
 	}
@@ -290,30 +290,30 @@ void F_Ticker (void)
 	bool SkipTheText = 	finaleButtonPressed;
 
     // advance animation
-    ::g->finalecount++;
+    Globals::g->finalecount++;
 	finaleButtonPressed = false;
 	
-    if (::g->finalestage == 2)
+    if (Globals::g->finalestage == 2)
     {
 		F_CastTicker ();
 		return;
     }
 	
-    if ( ::g->gamemode == commercial) {
+    if ( Globals::g->gamemode == commercial) {
 		startButtonPressed = false;
 		return;
 	}
 	
-	if( SkipTheText && ( ::g->finalecount > 50) ) {
-		::g->finalecount =  static_cast<int>(strlen(finaletext)) * TEXTSPEED + TEXTWAIT;
+	if( SkipTheText && ( Globals::g->finalecount > 50) ) {
+		Globals::g->finalecount =  static_cast<int>(strlen(finaletext)) * TEXTSPEED + TEXTWAIT;
 	}
 
-    if (!::g->finalestage && ::g->finalecount > static_cast<int>(strlen(finaletext)) * TEXTSPEED + TEXTWAIT)
+    if (!Globals::g->finalestage && Globals::g->finalecount > static_cast<int>(strlen(finaletext)) * TEXTSPEED + TEXTWAIT)
     {
-		::g->finalecount = 0;
-		::g->finalestage = 1;
-		::g->wipegamestate = (gamestate_t)-1;		// force a wipe
-		if (::g->gameepisode == 3)
+		Globals::g->finalecount = 0;
+		Globals::g->finalestage = 1;
+		Globals::g->wipegamestate = (gamestate_t)-1;		// force a wipe
+		if (Globals::g->gameepisode == 3)
 		    S_StartMusic (mus_bunny);
     }
 
@@ -332,8 +332,8 @@ void F_Ticker (void)
 
 void F_TextWrite (void)
 {
-    byte*	src;
-    byte*	dest;
+    unsigned char*	src;
+    unsigned char*	dest;
     
     int		x,y,w;
     int		count;
@@ -342,13 +342,13 @@ void F_TextWrite (void)
     int		cx;
     int		cy;
     
-	if(::g->finalecount == 60 ) {
+	if(Globals::g->finalecount == 60 ) {
 		DoomLib::ShowXToContinue( true );
 	}
 
     // erase the entire screen to a tiled background
-    src = (byte*)W_CacheLumpName ( finaleflat , PU_CACHE_SHARED);
-    dest = ::g->screens[0];
+    src = (unsigned char*)W_CacheLumpName ( finaleflat , PU_CACHE_SHARED);
+    dest = Globals::g->screens[0];
 	
     for (y=0 ; y<SCREENHEIGHT ; y++)
     {
@@ -371,7 +371,7 @@ void F_TextWrite (void)
     cy = 10;
     ch = finaletext;
 	
-    count = (::g->finalecount - 10)/TEXTSPEED;
+    count = (Globals::g->finalecount - 10)/TEXTSPEED;
     if (count < 0)
 	count = 0;
     for ( ; count ; count-- )
@@ -393,10 +393,10 @@ void F_TextWrite (void)
 	    continue;
 	}
 		
-	w = SHORT (::g->hu_font[c]->width);
+	w = SHORT (Globals::g->hu_font[c]->width);
 	if (cx+w > SCREENWIDTH)
 	    break;
-	V_DrawPatch(cx, cy, 0, ::g->hu_font[c]);
+	V_DrawPatch(cx, cy, 0, Globals::g->hu_font[c]);
 	cx+=w;
     }
 	
@@ -440,19 +440,19 @@ castinfo_t	castorder[] =
 
 void F_StartCast (void)
 {
-	if ( ::g->finalestage != 2 ) {
-		::g->wipegamestate = (gamestate_t)-1;		// force a screen wipe
-		::g->castnum = 0;
-		::g->caststate = &::g->states[mobjinfo[castorder[::g->castnum].type].seestate];
-		::g->casttics = ::g->caststate->tics;
-		::g->castdeath = false;
-		::g->finalestage = 2;	
-		::g->castframes = 0;
-		::g->castonmelee = 0;
-		::g->castattacking = false;
+	if ( Globals::g->finalestage != 2 ) {
+		Globals::g->wipegamestate = (gamestate_t)-1;		// force a screen wipe
+		Globals::g->castnum = 0;
+		Globals::g->caststate = &Globals::g->states[mobjinfo[castorder[Globals::g->castnum].type].seestate];
+		Globals::g->casttics = Globals::g->caststate->tics;
+		Globals::g->castdeath = false;
+		Globals::g->finalestage = 2;	
+		Globals::g->castframes = 0;
+		Globals::g->castonmelee = 0;
+		Globals::g->castattacking = false;
 		S_ChangeMusic(mus_evil, true);
 
-		::g->caststartmenu = ::g->finalecount + 50;
+		Globals::g->caststartmenu = Globals::g->finalecount + 50;
 	}	
 }
 
@@ -465,33 +465,33 @@ void F_CastTicker (void)
     int		st;
     int		sfx;
 
-	if( ::g->finalecount == ::g->caststartmenu ) {
+	if( Globals::g->finalecount == Globals::g->caststartmenu ) {
 		DoomLib::ShowXToContinue( true );
 	}
 
-    if (--::g->casttics > 0)
+    if (--Globals::g->casttics > 0)
 	return;			// not time to change state yet
 		
-    if (::g->caststate->tics == -1 || ::g->caststate->nextstate == S_NULL)
+    if (Globals::g->caststate->tics == -1 || Globals::g->caststate->nextstate == S_NULL)
     {
 	// switch from deathstate to next monster
-	::g->castnum++;
-	::g->castdeath = false;
-	if (castorder[::g->castnum].name == NULL)
-	    ::g->castnum = 0;
-	if (mobjinfo[castorder[::g->castnum].type].seesound)
-	    S_StartSound (NULL, mobjinfo[castorder[::g->castnum].type].seesound);
-	::g->caststate = &::g->states[mobjinfo[castorder[::g->castnum].type].seestate];
-	::g->castframes = 0;
+	Globals::g->castnum++;
+	Globals::g->castdeath = false;
+	if (castorder[Globals::g->castnum].name == NULL)
+	    Globals::g->castnum = 0;
+	if (mobjinfo[castorder[Globals::g->castnum].type].seesound)
+	    S_StartSound (NULL, mobjinfo[castorder[Globals::g->castnum].type].seesound);
+	Globals::g->caststate = &Globals::g->states[mobjinfo[castorder[Globals::g->castnum].type].seestate];
+	Globals::g->castframes = 0;
     }
     else
     {
 	// just advance to next state in animation
-	if (::g->caststate == &::g->states[S_PLAY_ATK1])
+	if (Globals::g->caststate == &Globals::g->states[S_PLAY_ATK1])
 	    goto stopattack;	// Oh, gross hack!
-	st = ::g->caststate->nextstate;
-	::g->caststate = &::g->states[st];
-	::g->castframes++;
+	st = Globals::g->caststate->nextstate;
+	Globals::g->caststate = &Globals::g->states[st];
+	Globals::g->castframes++;
 	
 	// sound hacks....
 	switch (st)
@@ -529,41 +529,41 @@ void F_CastTicker (void)
 	    S_StartSound (NULL, sfx);
     }
 	
-    if (::g->castframes == 12)
+    if (Globals::g->castframes == 12)
     {
 	// go into attack frame
-	::g->castattacking = true;
-	if (::g->castonmelee)
-	    ::g->caststate=&::g->states[mobjinfo[castorder[::g->castnum].type].meleestate];
+	Globals::g->castattacking = true;
+	if (Globals::g->castonmelee)
+	    Globals::g->caststate=&Globals::g->states[mobjinfo[castorder[Globals::g->castnum].type].meleestate];
 	else
-	    ::g->caststate=&::g->states[mobjinfo[castorder[::g->castnum].type].missilestate];
-	::g->castonmelee ^= 1;
-	if (::g->caststate == &::g->states[S_NULL])
+	    Globals::g->caststate=&Globals::g->states[mobjinfo[castorder[Globals::g->castnum].type].missilestate];
+	Globals::g->castonmelee ^= 1;
+	if (Globals::g->caststate == &Globals::g->states[S_NULL])
 	{
-	    if (::g->castonmelee)
-		::g->caststate=
-		    &::g->states[mobjinfo[castorder[::g->castnum].type].meleestate];
+	    if (Globals::g->castonmelee)
+		Globals::g->caststate=
+		    &Globals::g->states[mobjinfo[castorder[Globals::g->castnum].type].meleestate];
 	    else
-		::g->caststate=
-		    &::g->states[mobjinfo[castorder[::g->castnum].type].missilestate];
+		Globals::g->caststate=
+		    &Globals::g->states[mobjinfo[castorder[Globals::g->castnum].type].missilestate];
 	}
     }
 	
-    if (::g->castattacking)
+    if (Globals::g->castattacking)
     {
-	if (::g->castframes == 24
-	    ||	::g->caststate == &::g->states[mobjinfo[castorder[::g->castnum].type].seestate] )
+	if (Globals::g->castframes == 24
+	    ||	Globals::g->caststate == &Globals::g->states[mobjinfo[castorder[Globals::g->castnum].type].seestate] )
 	{
 	  stopattack:
-	    ::g->castattacking = false;
-	    ::g->castframes = 0;
-	    ::g->caststate = &::g->states[mobjinfo[castorder[::g->castnum].type].seestate];
+	    Globals::g->castattacking = false;
+	    Globals::g->castframes = 0;
+	    Globals::g->caststate = &Globals::g->states[mobjinfo[castorder[Globals::g->castnum].type].seestate];
 	}
     }
 	
-    ::g->casttics = ::g->caststate->tics;
-    if (::g->casttics == -1)
-	::g->casttics = 15;
+    Globals::g->casttics = Globals::g->caststate->tics;
+    if (Globals::g->casttics == -1)
+	Globals::g->casttics = 15;
 }
 
 
@@ -576,17 +576,17 @@ qboolean F_CastResponder (event_t* ev)
     if (ev->type != ev_keydown)
 	return false;
 		
-    if (::g->castdeath)
+    if (Globals::g->castdeath)
 	return true;			// already in dying frames
 		
     // go into death frame
-    ::g->castdeath = true;
-    ::g->caststate = &::g->states[mobjinfo[castorder[::g->castnum].type].deathstate];
-    ::g->casttics = ::g->caststate->tics;
-    ::g->castframes = 0;
-    ::g->castattacking = false;
-    if (mobjinfo[castorder[::g->castnum].type].deathsound)
-	S_StartSound (NULL, mobjinfo[castorder[::g->castnum].type].deathsound);
+    Globals::g->castdeath = true;
+    Globals::g->caststate = &Globals::g->states[mobjinfo[castorder[Globals::g->castnum].type].deathstate];
+    Globals::g->casttics = Globals::g->caststate->tics;
+    Globals::g->castframes = 0;
+    Globals::g->castattacking = false;
+    if (mobjinfo[castorder[Globals::g->castnum].type].deathsound)
+	S_StartSound (NULL, mobjinfo[castorder[Globals::g->castnum].type].deathsound);
 	
     return true;
 }
@@ -616,7 +616,7 @@ void F_CastPrint (char* text)
 	    continue;
 	}
 		
-	w = SHORT (::g->hu_font[c]->width);
+	w = SHORT (Globals::g->hu_font[c]->width);
 	width += w;
     }
     
@@ -635,8 +635,8 @@ void F_CastPrint (char* text)
 	    continue;
 	}
 		
-	w = SHORT (::g->hu_font[c]->width);
-	V_DrawPatch(cx, 180, 0, ::g->hu_font[c]);
+	w = SHORT (Globals::g->hu_font[c]->width);
+	V_DrawPatch(cx, 180, 0, Globals::g->hu_font[c]);
 	cx+=w;
     }
 	
@@ -659,15 +659,15 @@ void F_CastDrawer (void)
     // erase the entire screen to a background
     V_DrawPatch (0,0,0, (patch_t*)W_CacheLumpName ("BOSSBACK", PU_CACHE_SHARED));
 
-    F_CastPrint (castorder[::g->castnum].name);
+    F_CastPrint (castorder[Globals::g->castnum].name);
     
     // draw the current frame in the middle of the screen
-    sprdef = &::g->sprites[::g->caststate->sprite];
-    sprframe = &sprdef->spriteframes[ ::g->caststate->frame & FF_FRAMEMASK];
+    sprdef = &Globals::g->sprites[Globals::g->caststate->sprite];
+    sprframe = &sprdef->spriteframes[ Globals::g->caststate->frame & FF_FRAMEMASK];
     lump = sprframe->lump[0];
     flip = (qboolean)sprframe->flip[0];
 			
-    patch = (patch_t*)W_CacheLumpNum (lump+::g->firstspritelump, PU_CACHE_SHARED);
+    patch = (patch_t*)W_CacheLumpNum (lump+Globals::g->firstspritelump, PU_CACHE_SHARED);
     if (flip)
 		V_DrawPatchFlipped (160,170,0,patch);
     else
@@ -681,10 +681,10 @@ void F_CastDrawer (void)
 void
 F_DrawPatchCol( int x, patch_t* patch, int col ) {
     postColumn_t*	column;
-    byte*			source;
+    unsigned char*			source;
     int				count;
 	
-    column = (postColumn_t *)((byte *)patch + LONG(patch->columnofs[col]));
+    column = (postColumn_t *)((unsigned char *)patch + LONG(patch->columnofs[col]));
 
 	int destx = x;
 	int desty = 0;
@@ -692,7 +692,7 @@ F_DrawPatchCol( int x, patch_t* patch, int col ) {
     // step through the posts in a column
     while (column->topdelta != 0xff )
     {
-		source = (byte *)column + 3;
+		source = (unsigned char *)column + 3;
 		desty = column->topdelta;
 		count = column->length;
 			
@@ -701,17 +701,17 @@ F_DrawPatchCol( int x, patch_t* patch, int col ) {
 			int scaledx, scaledy;
 			scaledx = destx * GLOBAL_IMAGE_SCALER;
 			scaledy = desty * GLOBAL_IMAGE_SCALER;
-			byte src = *source++;
+			unsigned char src = *source++;
 
 			for ( int i = 0; i < GLOBAL_IMAGE_SCALER; i++ ) {
 				for ( int j = 0; j < GLOBAL_IMAGE_SCALER; j++ ) {
-					::g->screens[0][( scaledx + j ) + ( scaledy + i ) * SCREENWIDTH] = src;
+					Globals::g->screens[0][( scaledx + j ) + ( scaledy + i ) * SCREENWIDTH] = src;
 				}
 			}
 
 			desty++;
 		}
-		column = (postColumn_t *)(  (byte *)column + column->length + 4 );
+		column = (postColumn_t *)(  (unsigned char *)column + column->length + 4 );
     }
 }
 
@@ -733,7 +733,7 @@ void F_BunnyScroll (void)
 
     V_MarkRect (0, 0, SCREENWIDTH, SCREENHEIGHT);
 	
-    scrolled = 320 - (::g->finalecount-230)/2;
+    scrolled = 320 - (Globals::g->finalecount-230)/2;
     if (scrolled > 320)
 	scrolled = 320;
     if (scrolled < 0)
@@ -747,23 +747,23 @@ void F_BunnyScroll (void)
 	    F_DrawPatchCol (x, p2, x+scrolled - 320);		
     }
 	
-    if (::g->finalecount < 1130)
+    if (Globals::g->finalecount < 1130)
 	return;
-    if (::g->finalecount < 1180)
+    if (Globals::g->finalecount < 1180)
     {
 	V_DrawPatch ((ORIGINAL_WIDTH-13*8)/2,
 		     (ORIGINAL_HEIGHT-8*8)/2,0, (patch_t*)W_CacheLumpName ("END0",PU_CACHE_SHARED));
-	::g->laststage = 0;
+	Globals::g->laststage = 0;
 	return;
     }
 	
-    stage = (::g->finalecount-1180) / 5;
+    stage = (Globals::g->finalecount-1180) / 5;
     if (stage > 6)
 	stage = 6;
-    if (stage > ::g->laststage)
+    if (stage > Globals::g->laststage)
     {
 	S_StartSound (NULL, sfx_pistol);
-	::g->laststage = stage;
+	Globals::g->laststage = stage;
     }
 	
     sprintf (name,"END%i",stage);
@@ -776,20 +776,20 @@ void F_BunnyScroll (void)
 //
 void F_Drawer (void)
 {
-    if (::g->finalestage == 2)
+    if (Globals::g->finalestage == 2)
     {
 	F_CastDrawer ();
 	return;
     }
 
-    if (!::g->finalestage)
+    if (!Globals::g->finalestage)
 	F_TextWrite ();
     else
     {
-	switch (::g->gameepisode)
+	switch (Globals::g->gameepisode)
 	{
 	  case 1:
-	    if ( ::g->gamemode == retail )
+	    if ( Globals::g->gamemode == retail )
 	      V_DrawPatch (0,0,0,
 			 (patch_t*)W_CacheLumpName("CREDIT",PU_CACHE_SHARED));
 	    else

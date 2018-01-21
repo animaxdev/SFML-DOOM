@@ -82,12 +82,12 @@ struct InputEvent
 //  mus2midi.structs begin // 
 typedef struct tagMUSheader_t {
 	char    ID[4];          // identifier "MUS" 0x1A
-	WORD    scoreLen;
-	WORD    scoreStart;
-	WORD    channels;	// count of primary channels
-	WORD    sec_channels;	// count of secondary channels
-	WORD    instrCnt;
-	WORD    dummy;
+	short    scoreLen;
+	short    scoreStart;
+	short    channels;	// count of primary channels
+	short    sec_channels;	// count of secondary channels
+	short    instrCnt;
+	short    dummy;
 	//// variable-length part starts here
 } MUSheader_t ;
 typedef struct tagMidiHeaderChunk_t {
@@ -263,7 +263,7 @@ typedef struct
     
     char		reserved;
     char		color_planes;
-    unsigned short	bytes_per_line;
+    unsigned short	unsigned chars_per_line;
     unsigned short	palette_type;
     
     char		filler[58];
@@ -475,7 +475,7 @@ struct lumplookup
 };
 typedef struct
 {
-    // total bytes malloced, including header
+    // total unsigned chars malloced, including header
     int		size;
 
     // start / end cap for linked list

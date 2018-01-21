@@ -328,14 +328,14 @@ void HU_Init(void)
 	for (i=0;i<HU_FONTSIZE;i++)
 	{
 		sprintf(buffer, "STCFN%.3d", j++);
-		::g->hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC_SHARED);
+		Globals::g->hu_font[i] = (patch_t *) W_CacheLumpName(buffer, PU_STATIC_SHARED);
 	}
 
 }
 
 void HU_Stop(void)
 {
-	::g->headsupactive = false;
+	Globals::g->headsupactive = false;
 }
 
 void HU_Start(void)
@@ -344,28 +344,28 @@ void HU_Start(void)
 	int		i;
 	const char*	s;
 
-	if (::g->headsupactive)
+	if (Globals::g->headsupactive)
 		HU_Stop();
 
-	::g->plr = &::g->players[::g->consoleplayer];
-	::g->message_on = false;
-	::g->message_dontfuckwithme = false;
-	::g->message_nottobefuckedwith = false;
-	::g->chat_on = false;
+	Globals::g->plr = &Globals::g->players[Globals::g->consoleplayer];
+	Globals::g->message_on = false;
+	Globals::g->message_dontfuckwithme = false;
+	Globals::g->message_nottobefuckedwith = false;
+	Globals::g->chat_on = false;
 
 	// create the message widget
-	HUlib_initSText(&::g->w_message,
+	HUlib_initSText(&Globals::g->w_message,
 		HU_MSGX, HU_MSGY, HU_MSGHEIGHT,
-		::g->hu_font,
-		HU_FONTSTART, &::g->message_on);
+		Globals::g->hu_font,
+		HU_FONTSTART, &Globals::g->message_on);
 
 	// create the map title widget
-	HUlib_initTextLine(&::g->w_title,
+	HUlib_initTextLine(&Globals::g->w_title,
 		HU_TITLEX, HU_TITLEY,
-		::g->hu_font,
+		Globals::g->hu_font,
 		HU_FONTSTART);
 
-	switch ( ::g->gamemode )
+	switch ( Globals::g->gamemode )
 	{
 	case shareware:
 	case registered:
@@ -375,14 +375,14 @@ void HU_Start(void)
 	case commercial:
 	default:
 		if( DoomLib::expansionSelected == 5 ) {
-			int map = ::g->gamemap;
-			if( ::g->gamemap > 9 ) {
+			int map = Globals::g->gamemap;
+			if( Globals::g->gamemap > 9 ) {
 				map = 0;
 			} 
 
 			s = DoomLib::GetCurrentExpansion()->mapNames[ map - 1 ];
 		} else {
-			s = DoomLib::GetCurrentExpansion()->mapNames[ ::g->gamemap - 1 ];
+			s = DoomLib::GetCurrentExpansion()->mapNames[ Globals::g->gamemap - 1 ];
 		}
 
 		
@@ -390,66 +390,66 @@ void HU_Start(void)
 	}
 
 	while (*s)
-		HUlib_addCharToTextLine(&::g->w_title, *(s++));
+		HUlib_addCharToTextLine(&Globals::g->w_title, *(s++));
 
 	// create the chat widget
-	HUlib_initIText(&::g->w_chat,
+	HUlib_initIText(&Globals::g->w_chat,
 		HU_INPUTX, HU_INPUTY,
-		::g->hu_font,
-		HU_FONTSTART, &::g->chat_on);
+		Globals::g->hu_font,
+		HU_FONTSTART, &Globals::g->chat_on);
 
 	// create the inputbuffer widgets
 	for (i=0 ; i<MAXPLAYERS ; i++)
-		HUlib_initIText(&::g->w_inputbuffer[i], 0, 0, 0, 0, &::g->always_off);
+		HUlib_initIText(&Globals::g->w_inputbuffer[i], 0, 0, 0, 0, &Globals::g->always_off);
 
-	::g->headsupactive = true;
+	Globals::g->headsupactive = true;
 
 }
 
 void HU_Drawer(void)
 {
 
-	HUlib_drawSText(&::g->w_message);
-	HUlib_drawIText(&::g->w_chat);
-	if (::g->automapactive)
-		HUlib_drawTextLine(&::g->w_title, false);
+	HUlib_drawSText(&Globals::g->w_message);
+	HUlib_drawIText(&Globals::g->w_chat);
+	if (Globals::g->automapactive)
+		HUlib_drawTextLine(&Globals::g->w_title, false);
 
 }
 
 void HU_Erase(void)
 {
 
-	HUlib_eraseSText(&::g->w_message);
-	HUlib_eraseIText(&::g->w_chat);
-	HUlib_eraseTextLine(&::g->w_title);
+	HUlib_eraseSText(&Globals::g->w_message);
+	HUlib_eraseIText(&Globals::g->w_chat);
+	HUlib_eraseTextLine(&Globals::g->w_title);
 
 }
 
 void HU_Ticker(void)
 {
 	// tick down message counter if message is up
-	if (::g->message_counter && !--::g->message_counter)
+	if (Globals::g->message_counter && !--Globals::g->message_counter)
 	{
-		::g->message_on = false;
-		::g->message_nottobefuckedwith = false;
+		Globals::g->message_on = false;
+		Globals::g->message_nottobefuckedwith = false;
 	}
 
-	/*if ( ( m_inDemoMode.GetBool() == false && m_show_messages.GetBool() ) || ::g->message_dontfuckwithme)
+	/*if ( ( m_inDemoMode.GetBool() == false && m_show_messages.GetBool() ) || Globals::g->message_dontfuckwithme)
 	{
 
 		// display message if necessary
-		if ((::g->plr->message && !::g->message_nottobefuckedwith)
-			|| (::g->plr->message && ::g->message_dontfuckwithme))
+		if ((Globals::g->plr->message && !Globals::g->message_nottobefuckedwith)
+			|| (Globals::g->plr->message && Globals::g->message_dontfuckwithme))
 		{
-			HUlib_addMessageToSText(&::g->w_message, 0, ::g->plr->message);
-			::g->plr->message = 0;
-			::g->message_on = true;
-			::g->message_counter = HU_MSGTIMEOUT;
-			::g->message_nottobefuckedwith = ::g->message_dontfuckwithme;
-			::g->message_dontfuckwithme = 0;
+			HUlib_addMessageToSText(&Globals::g->w_message, 0, Globals::g->plr->message);
+			Globals::g->plr->message = 0;
+			Globals::g->message_on = true;
+			Globals::g->message_counter = HU_MSGTIMEOUT;
+			Globals::g->message_nottobefuckedwith = Globals::g->message_dontfuckwithme;
+			Globals::g->message_dontfuckwithme = 0;
 		}
 
-	} // else ::g->message_on = false;*/
+	} // else Globals::g->message_on = false;*/
 }
 
 
@@ -457,14 +457,14 @@ void HU_Ticker(void)
 
 void HU_queueChatChar(char c)
 {
-	if (((::g->head + 1) & (QUEUESIZE-1)) == ::g->tail)
+	if (((Globals::g->head + 1) & (QUEUESIZE-1)) == Globals::g->tail)
 	{
-		::g->plr->message = HUSTR_MSGU;
+		Globals::g->plr->message = HUSTR_MSGU;
 	}
 	else
 	{
-		::g->chatchars[::g->head] = c;
-		::g->head = (::g->head + 1) & (QUEUESIZE-1);
+		Globals::g->chatchars[Globals::g->head] = c;
+		Globals::g->head = (Globals::g->head + 1) & (QUEUESIZE-1);
 	}
 }
 
@@ -472,10 +472,10 @@ char HU_dequeueChatChar(void)
 {
 	char c;
 
-	if (::g->head != ::g->tail)
+	if (Globals::g->head != Globals::g->tail)
 	{
-		c = ::g->chatchars[::g->tail];
-		::g->tail = (::g->tail + 1) & (QUEUESIZE-1);
+		c = Globals::g->chatchars[Globals::g->tail];
+		Globals::g->tail = (Globals::g->tail + 1) & (QUEUESIZE-1);
 	}
 	else
 	{
@@ -505,62 +505,62 @@ qboolean HU_Responder(event_t *ev)
 
 	numplayers = 0;
 	for (i=0 ; i<MAXPLAYERS ; i++)
-		numplayers += ::g->playeringame[i];
+		numplayers += Globals::g->playeringame[i];
 
 	if (ev->data1 == KEY_RSHIFT)
 	{
-		::g->shiftdown = ev->type == ev_keydown;
+		Globals::g->shiftdown = ev->type == ev_keydown;
 		return false;
 	}
 	else if (ev->data1 == KEY_RALT || ev->data1 == KEY_LALT)
 	{
-		::g->altdown = ev->type == ev_keydown;
+		Globals::g->altdown = ev->type == ev_keydown;
 		return false;
 	}
 
 	if (ev->type != ev_keydown)
 		return false;
 
-	if (!::g->chat_on)
+	if (!Globals::g->chat_on)
 	{
 		if (ev->data1 == HU_MSGREFRESH)
 		{
-			::g->message_on = true;
-			::g->message_counter = HU_MSGTIMEOUT;
+			Globals::g->message_on = true;
+			Globals::g->message_counter = HU_MSGTIMEOUT;
 			eatkey = true;
 		}
-		/*else if (::g->netgame && ev->data1 == HU_INPUTTOGGLE)
+		/*else if (Globals::g->netgame && ev->data1 == HU_INPUTTOGGLE)
 		{
-			eatkey = ::g->chat_on = true;
-			HUlib_resetIText(&::g->w_chat);
+			eatkey = Globals::g->chat_on = true;
+			HUlib_resetIText(&Globals::g->w_chat);
 			HU_queueChatChar(HU_BROADCAST);
 		}*/
-		else if (::g->netgame && numplayers > 2)
+		else if (Globals::g->netgame && numplayers > 2)
 		{
 			for (i=0; i<MAXPLAYERS ; i++)
 			{
 				if (ev->data1 == destination_keys[i])
 				{
-					if (::g->playeringame[i] && i!=::g->consoleplayer)
+					if (Globals::g->playeringame[i] && i!=Globals::g->consoleplayer)
 					{
-						eatkey = ::g->chat_on = true;
-						HUlib_resetIText(&::g->w_chat);
+						eatkey = Globals::g->chat_on = true;
+						HUlib_resetIText(&Globals::g->w_chat);
 						HU_queueChatChar(i+1);
 						break;
 					}
-					else if (i == ::g->consoleplayer)
+					else if (i == Globals::g->consoleplayer)
 					{
-						::g->num_nobrainers++;
-						if (::g->num_nobrainers < 3)
-							::g->plr->message = HUSTR_TALKTOSELF1;
-						else if (::g->num_nobrainers < 6)
-							::g->plr->message = HUSTR_TALKTOSELF2;
-						else if (::g->num_nobrainers < 9)
-							::g->plr->message = HUSTR_TALKTOSELF3;
-						else if (::g->num_nobrainers < 32)
-							::g->plr->message = HUSTR_TALKTOSELF4;
+						Globals::g->num_nobrainers++;
+						if (Globals::g->num_nobrainers < 3)
+							Globals::g->plr->message = HUSTR_TALKTOSELF1;
+						else if (Globals::g->num_nobrainers < 6)
+							Globals::g->plr->message = HUSTR_TALKTOSELF2;
+						else if (Globals::g->num_nobrainers < 9)
+							Globals::g->plr->message = HUSTR_TALKTOSELF3;
+						else if (Globals::g->num_nobrainers < 32)
+							Globals::g->plr->message = HUSTR_TALKTOSELF4;
 						else
-							::g->plr->message = HUSTR_TALKTOSELF5;
+							Globals::g->plr->message = HUSTR_TALKTOSELF5;
 					}
 				}
 			}
@@ -570,7 +570,7 @@ qboolean HU_Responder(event_t *ev)
 	{
 		c = ev->data1;
 		// send a macro
-		if (::g->altdown)
+		if (Globals::g->altdown)
 		{
 			c = c - '0';
 			if (c > 9)
@@ -587,35 +587,35 @@ qboolean HU_Responder(event_t *ev)
 			HU_queueChatChar(KEY_ENTER);
 
 			// leave chat mode and notify that it was sent
-			::g->chat_on = false;
-			strcpy(::g->lastmessage, temp_chat_macros[c]);
-			::g->plr->message = ::g->lastmessage;
+			Globals::g->chat_on = false;
+			strcpy(Globals::g->lastmessage, temp_chat_macros[c]);
+			Globals::g->plr->message = Globals::g->lastmessage;
 			eatkey = true;
 		}
 		else
 		{
-			if (::g->shiftdown || (c >= 'a' && c <= 'z'))
+			if (Globals::g->shiftdown || (c >= 'a' && c <= 'z'))
 				c = shiftxform[c];
-			eatkey = HUlib_keyInIText(&::g->w_chat, c);
+			eatkey = HUlib_keyInIText(&Globals::g->w_chat, c);
 			if (eatkey)
 			{
 				// static unsigned char buf[20]; // DEBUG
 				HU_queueChatChar(c);
 
 				// sprintf(buf, "KEY: %d => %d", ev->data1, c);
-				//      ::g->plr->message = buf;
+				//      Globals::g->plr->message = buf;
 			}
 			if (c == KEY_ENTER)
 			{
-				::g->chat_on = false;
-				if (::g->w_chat.l.len)
+				Globals::g->chat_on = false;
+				if (Globals::g->w_chat.l.len)
 				{
-					strcpy(::g->lastmessage, ::g->w_chat.l.l);
-					::g->plr->message = ::g->lastmessage;
+					strcpy(Globals::g->lastmessage, Globals::g->w_chat.l.l);
+					Globals::g->plr->message = Globals::g->lastmessage;
 				}
 			}
 			else if (c == KEY_ESCAPE)
-				::g->chat_on = false;
+				Globals::g->chat_on = false;
 		}
 	}
 

@@ -37,6 +37,8 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <sys/types.h>
 
+#include <algorithm>
+
 // Store master volume settings in archived cvars, becausue we want them to apply
 // even if a user isn't signed in.
 // The range is from 0 to 15, which matches the setting in vanilla DOOM.
@@ -45,7 +47,7 @@ bool	globalNetworking	= false;
 bool	globalPauseTime		= false;
 int		PLAYERCOUNT			= 1;
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 bool	debugOutput			= true;
 #else
 bool	debugOutput			= false;
@@ -102,6 +104,7 @@ namespace DoomLib
 	};
 
 	const ExpansionData App_Expansion_Data_Local[] = {
+        {    ExpansionData::IWAD, shareware,        doom,            "DOOM",                                DOOMWADDIR"doom1.WAD",        NULL,                            "base/textures/DOOMICON.PNG"    , Doom_MapNames },
 		{	ExpansionData::IWAD, retail,		doom,			"DOOM",								DOOMWADDIR"DOOM.WAD",		NULL,							"base/textures/DOOMICON.PNG"	, Doom_MapNames },
 		{	ExpansionData::IWAD, commercial,	doom2,			"DOOM 2",							DOOMWADDIR"DOOM2.WAD",		NULL,							"base/textures/DOOM2ICON.PNG"	, Doom2_MapNames },
 		{	ExpansionData::IWAD, commercial,	pack_tnt,		"FINAL DOOM: TNT EVILUTION",		DOOMWADDIR"TNT.WAD",		NULL,							"base/textures/TNTICON.PNG"		, TNT_MapNames },
@@ -146,7 +149,7 @@ namespace DoomLib
 	DoomInterface					Interface;
 
 	int								idealExpansion = 0;
-	int								expansionSelected = 0;
+	int								expansionSelected = 2;
 	bool							expansionDirty = true;
 
 	bool							skipToLoad = false;
@@ -205,7 +208,7 @@ namespace DoomLib
 
 		for ( int i = 0; i < Interface.GetNumPlayers(); i++ ) {
 			DoomLib::SetPlayer(i);
-			::g->menuactive = false;
+			Globals::g->menuactive = false;
 		}
 
 		globalPauseTime = false;
@@ -246,8 +249,8 @@ void DoomLib::InitGlobals( void *ptr /* = NULL */ )
 	globaldata[currentplayer] = static_cast<Globals*>(ptr);
 
 	memset( globaldata[currentplayer], 0, sizeof(Globals) );
-	g = globaldata[currentplayer];
-	g->InitGlobals();
+    Globals::g.reset(globaldata[currentplayer]);
+    Globals::g->InitGlobals();
 	
 }
 
@@ -282,7 +285,7 @@ void DoomLib::InitControlRemap() {
 		return key;
 	} else {
 
-		if( ::g->menuactive && key == K_JOY2 ) {
+		if( Globals::g->menuactive && key == K_JOY2 ) {
 			return K_BACKSPACE;
 		}
 
@@ -293,14 +296,14 @@ void DoomLib::InitControlRemap() {
 
 void DoomLib::InitGame( int argc, char** argv )
 {
-	::g->myargc = argc;
-	::g->myargv = argv;
+	Globals::g->myargc = argc;
+	Globals::g->myargv = argv;
 
 	InitControlRemap();
 		
 
 
-	//D_DoomMain();
+	D_DoomMain();
 }
 
 bool DoomLib::Poll()
@@ -308,10 +311,10 @@ bool DoomLib::Poll()
 	return D_DoomMainPoll();
 }
 
-bool TryRunTics( idUserCmdMgr * userCmdMgr );
-bool DoomLib::Tic( idUserCmdMgr * userCmdMgr )
+bool TryRunTics( );
+bool DoomLib::Tic( )
 {
-	return TryRunTics( userCmdMgr );
+	return TryRunTics( );
 }
 
 void D_Wipe();
@@ -322,7 +325,7 @@ void DoomLib::Wipe()
 
 void DoomLib::Frame( int realoffset, int buffer )
 {
-	::g->realoffset = realoffset;
+	Globals::g->realoffset = realoffset;
 
 	// The render thread needs to read the player's screens[0] array,
 	// so updating it needs to be in a critical section.
@@ -330,51 +333,51 @@ void DoomLib::Frame( int realoffset, int buffer )
 	// suffers too much, we can try to narrow the scope.
 	// Just be careful, because the player's screen data is updated in many different
 	// places.
-	/*if ( 0 <= currentplayer && currentplayer <= 4 ) {
-		idScopedCriticalSection crit( playerScreenMutexes[currentplayer] );
+	if ( 0 <= currentplayer && currentplayer <= 4 ) {
+		//idScopedCriticalSection crit( playerScreenMutexes[currentplayer] );
 
 		D_RunFrame( true );
-	}*/
+	}
 }
 
 void DoomLib::Draw()
 {
-	R_RenderPlayerView (&::g->players[::g->displayplayer]);
+	R_RenderPlayerView (&Globals::g->players[Globals::g->displayplayer]);
 }
 
 angle_t GetViewAngle()
 {
-	return g->viewangle;
+    return Globals::g->viewangle;
 }
 
 void SetViewAngle( angle_t ang )
 {
-	g->viewangle = ang;
-	::g->viewxoffset = (finesine[g->viewangle>>ANGLETOFINESHIFT]*::g->realoffset) >> 8;
-	::g->viewyoffset = (finecosine[g->viewangle>>ANGLETOFINESHIFT]*::g->realoffset) >> 8;
+	Globals::g->viewangle = ang;
+	Globals::g->viewxoffset = (finesine[Globals::g->viewangle>>ANGLETOFINESHIFT]*Globals::g->realoffset) >> 8;
+	Globals::g->viewyoffset = (finecosine[Globals::g->viewangle>>ANGLETOFINESHIFT]*Globals::g->realoffset) >> 8;
 	
 }
 
 
 void SetViewX( fixed_t x )
 {
-	::g->viewx = x;
+	Globals::g->viewx = x;
 }
 
 void SetViewY( fixed_t y )
 {
-	::g->viewy = y;
+	Globals::g->viewy = y;
 }
 
 
 fixed_t GetViewX()
 {
-	return ::g->viewx + ::g->viewxoffset;
+	return Globals::g->viewx + Globals::g->viewxoffset;
 }
 
 fixed_t GetViewY()
 {
-	return ::g->viewy + ::g->viewyoffset;
+	return Globals::g->viewy + Globals::g->viewyoffset;
 }
 
 void DoomLib::Shutdown() {
@@ -385,8 +388,8 @@ void DoomLib::Shutdown() {
 	W_Shutdown();
 
 	// De-allocate the zone memory (never happened in original doom, until quit)
-	if ( ::g->mainzone ) {
-		free( ::g->mainzone );
+	if ( Globals::g->mainzone ) {
+		free( Globals::g->mainzone );
 	}
 
 	// Delete the globals
@@ -427,16 +430,16 @@ int DoomLib::GetPlayer()
 	return currentplayer; 
 }
 
-byte DoomLib::BuildSourceDest( int toNode ) {
-	byte sourceDest = 0;
-	sourceDest |= ::g->consoleplayer << 2;
+unsigned char DoomLib::BuildSourceDest( int toNode ) {
+	unsigned char sourceDest = 0;
+	sourceDest |= Globals::g->consoleplayer << 2;
 	sourceDest |= RemoteNodeToPlayerIndex( toNode );
 	return sourceDest;
 }
 
 void I_Printf(char *error, ...);
 
-void DoomLib::GetSourceDest( byte sourceDest, int* source, int* dest ) {
+void DoomLib::GetSourceDest( unsigned char sourceDest, int* source, int* dest ) {
 
 	int src = (sourceDest & 12) >> 2;
 	int dst = sourceDest & 3;
@@ -458,7 +461,7 @@ int DoomLib::RemoteNodeToPlayerIndex( int node ) {
 	//This needs to be called with the proper doom globals set so this calculation will work properly
 	
 	/*
-	int player = ::g->consoleplayer;
+	int player = Globals::g->consoleplayer;
 	if (player == 2 && node == 2 ) {
 		int suck = 0;
 	}
@@ -469,7 +472,7 @@ int DoomLib::RemoteNodeToPlayerIndex( int node ) {
 		return node+1;
 	}
 	return node;*/
-	return nodeMap[::g->consoleplayer][node];
+	return nodeMap[Globals::g->consoleplayer][node];
 
 }
 
@@ -481,7 +484,7 @@ int indexMap[4][4] = {
 };
 
 int DoomLib::PlayerIndexToRemoteNode( int index ) {
-	/*int player = ::g->consoleplayer;
+	/*int player = Globals::g->consoleplayer;
 	if( index == 0 ) {
 		return player;
 	}
@@ -489,7 +492,7 @@ int DoomLib::PlayerIndexToRemoteNode( int index ) {
 		return index-1;
 	}
 	return index;*/
-	return indexMap[::g->consoleplayer][index];
+	return indexMap[Globals::g->consoleplayer][index];
 }
 
 void I_Error (char *error, ...);
@@ -509,8 +512,8 @@ void DoomLib::PollNetwork() {
 		doomdata_t		sw;
 
 		while(1) {
-			int receivedSize = recvfrom( ::g->insocket, &sw, sizeof( doomdata_t ), MSG_DONTWAIT, &fromaddress, &fromlen );
-			//c = WSARecvFrom(::g->insocket, &buffer, 1, &num_recieved, &flags, (struct sockaddr*)&fromaddress, &fromlen, 0, 0);
+			int receivedSize = recvfrom( Globals::g->insocket, &sw, sizeof( doomdata_t ), MSG_DONTWAIT, &fromaddress, &fromlen );
+			//c = WSARecvFrom(Globals::g->insocket, &buffer, 1, &num_recieved, &flags, (struct sockaddr*)&fromaddress, &fromlen, 0, 0);
 
 			if ( receivedSize < 0 )
 			{

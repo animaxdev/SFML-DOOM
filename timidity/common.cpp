@@ -118,7 +118,7 @@ void close_file(idFile * fp)
 	delete fp;
 }
 
-/* This is meant for skipping a few bytes in a file or fifo. */
+/* This is meant for skipping a few unsigned chars in a file or fifo. */
 void skip(idFile * fp, size_t len)
 {
 	size_t c;
@@ -142,13 +142,13 @@ void *safe_malloc(size_t count)
 	if (count > (1<<21))
 	{
 		ctl->cmsg(CMSG_FATAL, VERB_NORMAL, 
-			"Strange, I feel like allocating %d bytes. This must be a bug.",
+			"Strange, I feel like allocating %d unsigned chars. This must be a bug.",
 			count);
 	}
 	else if ((p=Real_Tim_Malloc(count)))
 		return p;
 	else
-		ctl->cmsg(CMSG_FATAL, VERB_NORMAL, "Sorry. Couldn't malloc %d bytes.", count);
+		ctl->cmsg(CMSG_FATAL, VERB_NORMAL, "Sorry. Couldn't malloc %d unsigned chars.", count);
 
 	ctl->close();
 	//exit(10);

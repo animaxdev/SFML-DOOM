@@ -54,8 +54,8 @@ If you have questions concerning this license or the applicable additional terms
 //
 void R_InitSkyMap (void)
 {
-  // ::g->skyflatnum = R_FlatNumForName ( SKYFLATNAME );
-    ::g->skytexturemid = 100*FRACUNIT;
+  // Globals::g->skyflatnum = R_FlatNumForName ( SKYFLATNAME );
+    Globals::g->skytexturemid = 100*FRACUNIT;
 }
 
 

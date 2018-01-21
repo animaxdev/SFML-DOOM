@@ -289,7 +289,7 @@ P_InterceptVector
 
 //
 // P_LineOpening
-// Sets ::g->opentop and ::g->openbottom to the window
+// Sets Globals::g->opentop and Globals::g->openbottom to the window
 // through a two sided line.
 // OPTIMIZE: keep this precalculated
 //
@@ -303,7 +303,7 @@ void P_LineOpening (line_t* maputil_linedef)
     if (maputil_linedef->sidenum[1] == -1)
     {
 	// single sided line
-	::g->openrange = 0;
+	Globals::g->openrange = 0;
 	return;
     }
 	 
@@ -311,22 +311,22 @@ void P_LineOpening (line_t* maputil_linedef)
     back = maputil_linedef->backsector;
 	
     if (front->ceilingheight < back->ceilingheight)
-	::g->opentop = front->ceilingheight;
+	Globals::g->opentop = front->ceilingheight;
     else
-	::g->opentop = back->ceilingheight;
+	Globals::g->opentop = back->ceilingheight;
 
     if (front->floorheight > back->floorheight)
     {
-	::g->openbottom = front->floorheight;
-	::g->lowfloor = back->floorheight;
+	Globals::g->openbottom = front->floorheight;
+	Globals::g->lowfloor = back->floorheight;
     }
     else
     {
-	::g->openbottom = back->floorheight;
-	::g->lowfloor = front->floorheight;
+	Globals::g->openbottom = back->floorheight;
+	Globals::g->lowfloor = front->floorheight;
     }
 	
-    ::g->openrange = ::g->opentop - ::g->openbottom;
+    Globals::g->openrange = Globals::g->opentop - Globals::g->openbottom;
 }
 
 
@@ -337,7 +337,7 @@ void P_LineOpening (line_t* maputil_linedef)
 
 //
 // P_UnsetThingPosition
-// Unlinks a thing from block map and ::g->sectors.
+// Unlinks a thing from block map and Globals::g->sectors.
 // On each position change, BLOCKMAP and other
 // lookups maintaining lists ot things inside
 // these structures need to be updated.
@@ -362,7 +362,7 @@ void P_UnsetThingPosition (mobj_t* thing)
 	
     if ( ! (thing->flags & MF_NOBLOCKMAP) )
     {
-	// inert things don't need to be in ::g->blockmap
+	// inert things don't need to be in Globals::g->blockmap
 	// unlink from block map
 	if (thing->bnext)
 	    thing->bnext->bprev = thing->bprev;
@@ -371,13 +371,13 @@ void P_UnsetThingPosition (mobj_t* thing)
 	    thing->bprev->bnext = thing->bnext;
 	else
 	{
-	    blockx = (thing->x - ::g->bmaporgx)>>MAPBLOCKSHIFT;
-	    blocky = (thing->y - ::g->bmaporgy)>>MAPBLOCKSHIFT;
+	    blockx = (thing->x - Globals::g->bmaporgx)>>MAPBLOCKSHIFT;
+	    blocky = (thing->y - Globals::g->bmaporgy)>>MAPBLOCKSHIFT;
 
-	    if (blockx>=0 && blockx < ::g->bmapwidth
-		&& blocky>=0 && blocky < ::g->bmapheight)
+	    if (blockx>=0 && blockx < Globals::g->bmapwidth
+		&& blocky>=0 && blocky < Globals::g->bmapheight)
 	    {
-		::g->blocklinks[blocky*::g->bmapwidth+blockx] = thing->bnext;
+		Globals::g->blocklinks[blocky*Globals::g->bmapwidth+blockx] = thing->bnext;
 	    }
 	}
     }
@@ -419,19 +419,19 @@ P_SetThingPosition (mobj_t* thing)
     }
 
     
-    // link into ::g->blockmap
+    // link into Globals::g->blockmap
     if ( ! (thing->flags & MF_NOBLOCKMAP) )
     {
-	// inert things don't need to be in ::g->blockmap		
-	blockx = (thing->x - ::g->bmaporgx)>>MAPBLOCKSHIFT;
-	blocky = (thing->y - ::g->bmaporgy)>>MAPBLOCKSHIFT;
+	// inert things don't need to be in Globals::g->blockmap		
+	blockx = (thing->x - Globals::g->bmaporgx)>>MAPBLOCKSHIFT;
+	blocky = (thing->y - Globals::g->bmaporgy)>>MAPBLOCKSHIFT;
 
 	if (blockx>=0
-	    && blockx < ::g->bmapwidth
+	    && blockx < Globals::g->bmapwidth
 	    && blocky>=0
-	    && blocky < ::g->bmapheight)
+	    && blocky < Globals::g->bmapheight)
 	{
-	    link = &::g->blocklinks[blocky*::g->bmapwidth+blockx];
+	    link = &Globals::g->blocklinks[blocky*Globals::g->bmapwidth+blockx];
 	    thing->bprev = NULL;
 	    thing->bnext = *link;
 	    if (*link)
@@ -460,9 +460,9 @@ P_SetThingPosition (mobj_t* thing)
 
 //
 // P_BlockLinesIterator
-// The ::g->validcount flags are used to avoid checking ::g->lines
+// The Globals::g->validcount flags are used to avoid checking Globals::g->lines
 // that are marked in multiple mapblocks,
-// so increment ::g->validcount before the first call
+// so increment Globals::g->validcount before the first call
 // to P_BlockLinesIterator, then make one or more calls
 // to it.
 //
@@ -478,24 +478,24 @@ P_BlockLinesIterator
 	
     if (x<0
 	|| y<0
-	|| x>=::g->bmapwidth
-	|| y>=::g->bmapheight)
+	|| x>=Globals::g->bmapwidth
+	|| y>=Globals::g->bmapheight)
     {
 	return true;
     }
     
-    offset = y*::g->bmapwidth+x;
+    offset = y*Globals::g->bmapwidth+x;
 	
-    offset = *(::g->blockmap+offset);
+    offset = *(Globals::g->blockmap+offset);
 
-    for ( list = ::g->blockmaplump+offset ; *list != -1 ; list++)
+    for ( list = Globals::g->blockmaplump+offset ; *list != -1 ; list++)
     {
-	ld = &::g->lines[*list];
+	ld = &Globals::g->lines[*list];
 
-	if (ld->validcount == ::g->validcount)
+	if (ld->validcount == Globals::g->validcount)
 	    continue; 	// line has already been checked
 
-	ld->validcount = ::g->validcount;
+	ld->validcount = Globals::g->validcount;
 
 	if ( !func(ld) )
 	    return false;
@@ -517,14 +517,14 @@ P_BlockThingsIterator
 	
     if ( x<0
 	 || y<0
-	 || x>=::g->bmapwidth
-	 || y>=::g->bmapheight)
+	 || x>=Globals::g->bmapwidth
+	 || y>=Globals::g->bmapheight)
     {
 	return true;
     }
     
 
-    for (mobj = ::g->blocklinks[y*::g->bmapwidth+x] ;
+    for (mobj = Globals::g->blocklinks[y*Globals::g->bmapwidth+x] ;
 	 mobj ;
 	 mobj = mobj->bnext)
     {
@@ -543,13 +543,13 @@ P_BlockThingsIterator
 
 //
 // PIT_AddLineIntercepts.
-// Looks for ::g->lines in the given block
-// that intercept the given ::g->trace
-// to add to the ::g->intercepts list.
+// Looks for Globals::g->lines in the given block
+// that intercept the given Globals::g->trace
+// to add to the Globals::g->intercepts list.
 //
 // A line is crossed if its endpoints
-// are on opposite ::g->sides of the ::g->trace.
-// Returns true if ::g->earlyout and a solid line hit.
+// are on opposite Globals::g->sides of the Globals::g->trace.
+// Returns true if Globals::g->earlyout and a solid line hit.
 //
 qboolean
 PIT_AddLineIntercepts (line_t* ld)
@@ -560,18 +560,18 @@ PIT_AddLineIntercepts (line_t* ld)
     divline_t		dl;
 	
     // avoid precision problems with two routines
-    if ( ::g->trace.dx > FRACUNIT*16
-	 || ::g->trace.dy > FRACUNIT*16
-	 || ::g->trace.dx < -FRACUNIT*16
-	 || ::g->trace.dy < -FRACUNIT*16)
+    if ( Globals::g->trace.dx > FRACUNIT*16
+	 || Globals::g->trace.dy > FRACUNIT*16
+	 || Globals::g->trace.dx < -FRACUNIT*16
+	 || Globals::g->trace.dy < -FRACUNIT*16)
     {
-	s1 = P_PointOnDivlineSide (ld->v1->x, ld->v1->y, &::g->trace);
-	s2 = P_PointOnDivlineSide (ld->v2->x, ld->v2->y, &::g->trace);
+	s1 = P_PointOnDivlineSide (ld->v1->x, ld->v1->y, &Globals::g->trace);
+	s2 = P_PointOnDivlineSide (ld->v2->x, ld->v2->y, &Globals::g->trace);
     }
     else
     {
-	s1 = P_PointOnLineSide (::g->trace.x, ::g->trace.y, ld);
-	s2 = P_PointOnLineSide (::g->trace.x+::g->trace.dx, ::g->trace.y+::g->trace.dy, ld);
+	s1 = P_PointOnLineSide (Globals::g->trace.x, Globals::g->trace.y, ld);
+	s2 = P_PointOnLineSide (Globals::g->trace.x+Globals::g->trace.dx, Globals::g->trace.y+Globals::g->trace.dy, ld);
     }
     
     if (s1 == s2)
@@ -579,13 +579,13 @@ PIT_AddLineIntercepts (line_t* ld)
     
     // hit the line
     P_MakeDivline (ld, &dl);
-    frac = P_InterceptVector (&::g->trace, &dl);
+    frac = P_InterceptVector (&Globals::g->trace, &dl);
 
     if (frac < 0)
 	return true;	// behind source
 	
     // try to early out the check
-    if (::g->earlyout
+    if (Globals::g->earlyout
 	&& frac < FRACUNIT
 	&& !ld->backsector)
     {
@@ -593,10 +593,10 @@ PIT_AddLineIntercepts (line_t* ld)
     }
     
 	
-    ::g->intercept_p->frac = frac;
-    ::g->intercept_p->isaline = true;
-    ::g->intercept_p->d.line = ld;
-    ::g->intercept_p++;
+    Globals::g->intercept_p->frac = frac;
+    Globals::g->intercept_p->isaline = true;
+    Globals::g->intercept_p->d.line = ld;
+    Globals::g->intercept_p++;
 
     return true;	// continue
 }
@@ -622,7 +622,7 @@ qboolean PIT_AddThingIntercepts (mobj_t* thing)
     
     fixed_t		frac;
 	
-    tracepositive = (::g->trace.dx ^ ::g->trace.dy)>0;
+    tracepositive = (Globals::g->trace.dx ^ Globals::g->trace.dy)>0;
 		
     // check a corner to corner crossection for hit
     if (tracepositive)
@@ -642,8 +642,8 @@ qboolean PIT_AddThingIntercepts (mobj_t* thing)
 	y2 = thing->y + thing->radius;			
     }
     
-    s1 = P_PointOnDivlineSide (x1, y1, &::g->trace);
-    s2 = P_PointOnDivlineSide (x2, y2, &::g->trace);
+    s1 = P_PointOnDivlineSide (x1, y1, &Globals::g->trace);
+    s2 = P_PointOnDivlineSide (x2, y2, &Globals::g->trace);
 
     if (s1 == s2)
 	return true;		// line isn't crossed
@@ -653,15 +653,15 @@ qboolean PIT_AddThingIntercepts (mobj_t* thing)
     dl.dx = x2-x1;
     dl.dy = y2-y1;
     
-    frac = P_InterceptVector (&::g->trace, &dl);
+    frac = P_InterceptVector (&Globals::g->trace, &dl);
 
     if (frac < 0)
 	return true;		// behind source
 
-    ::g->intercept_p->frac = frac;
-    ::g->intercept_p->isaline = false;
-    ::g->intercept_p->d.thing = thing;
-    ::g->intercept_p++;
+    Globals::g->intercept_p->frac = frac;
+    Globals::g->intercept_p->isaline = false;
+    Globals::g->intercept_p->d.thing = thing;
+    Globals::g->intercept_p++;
 
     return true;		// keep going
 }
@@ -670,7 +670,7 @@ qboolean PIT_AddThingIntercepts (mobj_t* thing)
 //
 // P_TraverseIntercepts
 // Returns true if the traverser function returns true
-// for all ::g->lines.
+// for all Globals::g->lines.
 // 
 qboolean
 P_TraverseIntercepts
@@ -682,14 +682,14 @@ P_TraverseIntercepts
     intercept_t*	scan;
     intercept_t*	in;
 	
-    count = ::g->intercept_p - ::g->intercepts;
+    count = Globals::g->intercept_p - Globals::g->intercepts;
     
     in = 0;			// shut up compiler warning
 	
     while (count--)
     {
         dist = std::numeric_limits<int>::max();
-	for (scan = ::g->intercepts ; scan < ::g->intercept_p ; scan++)
+	for (scan = Globals::g->intercepts ; scan < Globals::g->intercept_p ; scan++)
 	{
 	    if (scan->frac < dist)
 	    {
@@ -704,11 +704,11 @@ P_TraverseIntercepts
 #if 0  // UNUSED
     {
 	// don't check these yet, there may be others inserted
-	in = scan = ::g->intercepts;
-	for ( scan = ::g->intercepts ; scan<::g->intercept_p ; scan++)
+	in = scan = Globals::g->intercepts;
+	for ( scan = Globals::g->intercepts ; scan<Globals::g->intercept_p ; scan++)
 	    if (scan->frac > maxfrac)
 		*in++ = *scan;
-	::g->intercept_p = in;
+	Globals::g->intercept_p = in;
 	return false;
     }
 #endif
@@ -730,7 +730,7 @@ P_TraverseIntercepts
 // Traces a line from x1,y1 to x2,y2,
 // calling the traverser function for each.
 // Returns true if the traverser function returns true
-// for all ::g->lines.
+// for all Globals::g->lines.
 //
 qboolean
 P_PathTraverse
@@ -762,29 +762,29 @@ P_PathTraverse
 
     int		count;
 		
-    ::g->earlyout = flags & PT_EARLYOUT;
+    Globals::g->earlyout = flags & PT_EARLYOUT;
 		
-    ::g->validcount++;
-    ::g->intercept_p = ::g->intercepts;
+    Globals::g->validcount++;
+    Globals::g->intercept_p = Globals::g->intercepts;
 	
-    if ( ((x1-::g->bmaporgx)&(MAPBLOCKSIZE-1)) == 0)
+    if ( ((x1-Globals::g->bmaporgx)&(MAPBLOCKSIZE-1)) == 0)
 	x1 += FRACUNIT;	// don't side exactly on a line
     
-    if ( ((y1-::g->bmaporgy)&(MAPBLOCKSIZE-1)) == 0)
+    if ( ((y1-Globals::g->bmaporgy)&(MAPBLOCKSIZE-1)) == 0)
 	y1 += FRACUNIT;	// don't side exactly on a line
 
-    ::g->trace.x = x1;
-    ::g->trace.y = y1;
-    ::g->trace.dx = x2 - x1;
-    ::g->trace.dy = y2 - y1;
+    Globals::g->trace.x = x1;
+    Globals::g->trace.y = y1;
+    Globals::g->trace.dx = x2 - x1;
+    Globals::g->trace.dy = y2 - y1;
 
-    x1 -= ::g->bmaporgx;
-    y1 -= ::g->bmaporgy;
+    x1 -= Globals::g->bmaporgx;
+    y1 -= Globals::g->bmaporgy;
     xt1 = x1>>MAPBLOCKSHIFT;
     yt1 = y1>>MAPBLOCKSHIFT;
 
-    x2 -= ::g->bmaporgx;
-    y2 -= ::g->bmaporgy;
+    x2 -= Globals::g->bmaporgx;
+    y2 -= Globals::g->bmaporgy;
     xt2 = x2>>MAPBLOCKSHIFT;
     yt2 = y2>>MAPBLOCKSHIFT;
 

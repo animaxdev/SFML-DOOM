@@ -220,7 +220,7 @@ void T_MoveFloor(floormove_t* floor)
 		      floor->floordestheight,
 		      floor->crush,0,floor->direction);
     
-    if (!(::g->leveltime&7))
+    if (!(Globals::g->leveltime&7))
 	S_StartSound( &floor->sector->soundorg,
 		     sfx_stnmov);
     
@@ -276,7 +276,7 @@ EV_DoFloor
     rtn = 0;
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
-	sec = &::g->sectors[secnum];
+	sec = &Globals::g->sectors[secnum];
 		
 	// ALREADY MOVING?  IF SO, KEEP GOING...
 	if (sec->specialdata)
@@ -388,16 +388,16 @@ EV_DoFloor
 		  {
 		      side = getSide(secnum,i,0);
 		      if (side->bottomtexture >= 0)
-			  if (::g->s_textureheight[side->bottomtexture] < 
+			  if (Globals::g->s_textureheight[side->bottomtexture] < 
 			      minsize)
 			      minsize = 
-				  ::g->s_textureheight[side->bottomtexture];
+				  Globals::g->s_textureheight[side->bottomtexture];
 		      side = getSide(secnum,i,1);
 		      if (side->bottomtexture >= 0)
-			  if (::g->s_textureheight[side->bottomtexture] < 
+			  if (Globals::g->s_textureheight[side->bottomtexture] < 
 			      minsize)
 			      minsize = 
-				 ::g->s_textureheight[side->bottomtexture];
+				 Globals::g->s_textureheight[side->bottomtexture];
 		  }
 	      }
 	      floor->floordestheight =
@@ -417,7 +417,7 @@ EV_DoFloor
 	    {
 		if ( twoSided(secnum, i) )
 		{
-		    if (getSide(secnum,i,0)->sector-::g->sectors == secnum)
+		    if (getSide(secnum,i,0)->sector-Globals::g->sectors == secnum)
 		    {
 			sec = getSector(secnum,i,1);
 
@@ -479,7 +479,7 @@ EV_BuildStairs
     rtn = 0;
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
-	sec = &::g->sectors[secnum];
+	sec = &Globals::g->sectors[secnum];
 		
 	// ALREADY MOVING?  IF SO, KEEP GOING...
 	if (sec->specialdata)
@@ -522,13 +522,13 @@ EV_BuildStairs
 		    continue;
 					
 		tsec = (sec->lines[i])->frontsector;
-		newsecnum = tsec-::g->sectors;
+		newsecnum = tsec-Globals::g->sectors;
 		
 		if (secnum != newsecnum)
 		    continue;
 
 		tsec = (sec->lines[i])->backsector;
-		newsecnum = tsec - ::g->sectors;
+		newsecnum = tsec - Globals::g->sectors;
 
 		if (tsec->floorpic != texture)
 		    continue;

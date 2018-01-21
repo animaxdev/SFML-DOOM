@@ -457,7 +457,7 @@ fail:
 		}
 #ifndef LITTLE_ENDIAN
 		else
-			/* convert to machine byte order */
+			/* convert to machine unsigned char order */
 		{
 			 int32_t i=sp->data_length/2;
 			int16_t *tmp=(int16_t *)sp->data,s;
@@ -528,7 +528,7 @@ fail:
 			sp->volume=1.0;
 #endif
 
-		sp->data_length /= 2; /* These are in bytes. Convert into samples. */
+		sp->data_length /= 2; /* These are in unsigned chars. Convert into samples. */
 		sp->loop_start /= 2;
 		sp->loop_end /= 2;
 

@@ -40,7 +40,7 @@ If you have questions concerning this license or the applicable additional terms
 // DHM - Nerve :: Enable demo recording for game clips
 #define _DEMO_RECORDING
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 	#define safeOutputDebug(x) printf( "%s", x );
 #else
 	#define safeOutputDebug(x)

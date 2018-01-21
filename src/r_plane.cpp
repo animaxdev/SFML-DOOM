@@ -54,12 +54,12 @@ If you have questions concerning this license or the applicable additional terms
 
 //
 // Clip values are the solid pixel bounding the range.
-//  ::g->floorclip starts out SCREENHEIGHT
-//  ::g->ceilingclip starts out -1
+//  Globals::g->floorclip starts out SCREENHEIGHT
+//  Globals::g->ceilingclip starts out -1
 //
 
 //
-// ::g->spanstart holds the start of a plane span
+// Globals::g->spanstart holds the start of a plane span
 // initialized to 0 at start
 //
 
@@ -85,12 +85,12 @@ void R_InitPlanes (void)
 // R_MapPlane
 //
 // Uses global vars:
-//  ::g->planeheight
-//  ::g->ds_source
-//  ::g->basexscale
-//  ::g->baseyscale
-//  ::g->viewx
-//  ::g->viewy
+//  Globals::g->planeheight
+//  Globals::g->ds_source
+//  Globals::g->basexscale
+//  Globals::g->baseyscale
+//  Globals::g->viewx
+//  Globals::g->viewy
 //
 // BASIC PRIMITIVE
 //
@@ -106,36 +106,36 @@ R_MapPlane
     unsigned	index;
 	
 //#ifdef RANGECHECK
-    if ( x2 < x1 || x1<0 || x2>=::g->viewwidth || y>::g->viewheight )
+    if ( x2 < x1 || x1<0 || x2>=Globals::g->viewwidth || y>Globals::g->viewheight )
     {
 		//I_Error ("R_MapPlane: %i, %i at %i",x1,x2,y);
 		return;
     }
 //#endif
 
-    if (::g->planeheight != ::g->cachedheight[y])
+    if (Globals::g->planeheight != Globals::g->cachedheight[y])
     {
-	::g->cachedheight[y] = ::g->planeheight;
-	distance = ::g->cacheddistance[y] = FixedMul (::g->planeheight, ::g->yslope[y]);
-	::g->ds_xstep = ::g->cachedxstep[y] = FixedMul (distance,::g->basexscale);
-	::g->ds_ystep = ::g->cachedystep[y] = FixedMul (distance,::g->baseyscale);
+	Globals::g->cachedheight[y] = Globals::g->planeheight;
+	distance = Globals::g->cacheddistance[y] = FixedMul (Globals::g->planeheight, Globals::g->yslope[y]);
+	Globals::g->ds_xstep = Globals::g->cachedxstep[y] = FixedMul (distance,Globals::g->basexscale);
+	Globals::g->ds_ystep = Globals::g->cachedystep[y] = FixedMul (distance,Globals::g->baseyscale);
     }
     else
     {
-	distance = ::g->cacheddistance[y];
-	::g->ds_xstep = ::g->cachedxstep[y];
-	::g->ds_ystep = ::g->cachedystep[y];
+	distance = Globals::g->cacheddistance[y];
+	Globals::g->ds_xstep = Globals::g->cachedxstep[y];
+	Globals::g->ds_ystep = Globals::g->cachedystep[y];
     }
 	
 	extern angle_t GetViewAngle();
-    length = FixedMul (distance,::g->distscale[x1]);
-    angle = (GetViewAngle() + ::g->xtoviewangle[x1])>>ANGLETOFINESHIFT;
+    length = FixedMul (distance,Globals::g->distscale[x1]);
+    angle = (GetViewAngle() + Globals::g->xtoviewangle[x1])>>ANGLETOFINESHIFT;
 	extern fixed_t GetViewX(); extern fixed_t GetViewY();
-    ::g->ds_xfrac = GetViewX() + FixedMul(finecosine[angle], length);
-    ::g->ds_yfrac = -GetViewY() - FixedMul(finesine[angle], length);
+    Globals::g->ds_xfrac = GetViewX() + FixedMul(finecosine[angle], length);
+    Globals::g->ds_yfrac = -GetViewY() - FixedMul(finesine[angle], length);
 
-    if (::g->fixedcolormap)
-	::g->ds_colormap = ::g->fixedcolormap;
+    if (Globals::g->fixedcolormap)
+	Globals::g->ds_colormap = Globals::g->fixedcolormap;
     else
     {
 	index = distance >> LIGHTZSHIFT;
@@ -143,24 +143,24 @@ R_MapPlane
 	if (index >= MAXLIGHTZ )
 	    index = MAXLIGHTZ-1;
 
-	::g->ds_colormap = ::g->planezlight[index];
+	Globals::g->ds_colormap = Globals::g->planezlight[index];
     }
 	
-    ::g->ds_y = y;
-    ::g->ds_x1 = x1;
-    ::g->ds_x2 = x2;
+    Globals::g->ds_y = y;
+    Globals::g->ds_x1 = x1;
+    Globals::g->ds_x2 = x2;
 
     // high or low detail
     spanfunc (
-		::g->ds_xfrac,
-		::g->ds_yfrac,
-		::g->ds_y,
-		::g->ds_x1,
-		::g->ds_x2,
-		::g->ds_xstep,
-		::g->ds_ystep,
-		::g->ds_colormap,
-		::g->ds_source );	
+		Globals::g->ds_xfrac,
+		Globals::g->ds_yfrac,
+		Globals::g->ds_y,
+		Globals::g->ds_x1,
+		Globals::g->ds_x2,
+		Globals::g->ds_xstep,
+		Globals::g->ds_ystep,
+		Globals::g->ds_colormap,
+		Globals::g->ds_source );	
 }
 
 
@@ -174,25 +174,25 @@ void R_ClearPlanes (void)
     angle_t	angle;
     
     // opening / clipping determination
-    for (i=0 ; i < ::g->viewwidth ; i++)
+    for (i=0 ; i < Globals::g->viewwidth ; i++)
     {
-	::g->floorclip[i] = ::g->viewheight;
-	::g->ceilingclip[i] = -1;
+	Globals::g->floorclip[i] = Globals::g->viewheight;
+	Globals::g->ceilingclip[i] = -1;
     }
 
-	::g->lastvisplane = ::g->visplanes;
-    ::g->lastopening = ::g->openings;
+	Globals::g->lastvisplane = Globals::g->visplanes;
+    Globals::g->lastopening = Globals::g->openings;
 
     // texture calculation
-    memset (::g->cachedheight, 0, sizeof(::g->cachedheight));
+    memset (Globals::g->cachedheight, 0, sizeof(Globals::g->cachedheight));
 
     // left to right mapping
 	extern angle_t GetViewAngle();
     angle = (GetViewAngle()-ANG90)>>ANGLETOFINESHIFT;
 	
     // scale will be unit scale at SCREENWIDTH/2 distance
-    ::g->basexscale = FixedDiv (finecosine[angle],::g->centerxfrac);
-    ::g->baseyscale = -FixedDiv (finesine[angle],::g->centerxfrac);
+    Globals::g->basexscale = FixedDiv (finecosine[angle],Globals::g->centerxfrac);
+    Globals::g->baseyscale = -FixedDiv (finesine[angle],Globals::g->centerxfrac);
 }
 
 
@@ -204,28 +204,28 @@ void R_ClearPlanes (void)
 visplane_t* R_FindPlane( fixed_t height, int picnum, int lightlevel ) {
     visplane_t*	check;
 	
-    if (picnum == ::g->skyflatnum) {
+    if (picnum == Globals::g->skyflatnum) {
 		height = 0;			// all skys map together
 		lightlevel = 0;
 	}
 	
-	for (check=::g->visplanes; check < ::g->lastvisplane; check++) {
+	for (check=Globals::g->visplanes; check < Globals::g->lastvisplane; check++) {
 		if (height == check->height && picnum == check->picnum && lightlevel == check->lightlevel) {
 			break;
 		}
 	}
 
-	if (check < ::g->lastvisplane)
+	if (check < Globals::g->lastvisplane)
 		return check;
 		
-    //if (::g->lastvisplane - ::g->visplanes == MAXVISPLANES)
+    //if (Globals::g->lastvisplane - Globals::g->visplanes == MAXVISPLANES)
 		//I_Error ("R_FindPlane: no more visplanes");
-	if ( ::g->lastvisplane - ::g->visplanes == MAXVISPLANES ) {
-		check = ::g->visplanes;
+	if ( Globals::g->lastvisplane - Globals::g->visplanes == MAXVISPLANES ) {
+		check = Globals::g->visplanes;
 		return check;
 	}
 		
-    ::g->lastvisplane++;
+    Globals::g->lastvisplane++;
 
     check->height = height;
     check->picnum = picnum;
@@ -289,16 +289,16 @@ R_CheckPlane
 		return pl;		
 	}
 	
-	if ( ::g->lastvisplane - ::g->visplanes == MAXVISPLANES ) {
+	if ( Globals::g->lastvisplane - Globals::g->visplanes == MAXVISPLANES ) {
 		return pl;
 	}
 
     // make a new visplane
-    ::g->lastvisplane->height = pl->height;
-    ::g->lastvisplane->picnum = pl->picnum;
-    ::g->lastvisplane->lightlevel = pl->lightlevel;
+    Globals::g->lastvisplane->height = pl->height;
+    Globals::g->lastvisplane->picnum = pl->picnum;
+    Globals::g->lastvisplane->lightlevel = pl->lightlevel;
     
-    pl = ::g->lastvisplane++;
+    pl = Globals::g->lastvisplane++;
     pl->minx = start;
     pl->maxx = stop;
 
@@ -321,23 +321,23 @@ R_MakeSpans
 {
     while (t1 < t2 && t1<=b1)
     {
-	R_MapPlane (t1,::g->spanstart[t1],x-1);
+	R_MapPlane (t1,Globals::g->spanstart[t1],x-1);
 	t1++;
     }
     while (b1 > b2 && b1>=t1)
     {
-	R_MapPlane (b1,::g->spanstart[b1],x-1);
+	R_MapPlane (b1,Globals::g->spanstart[b1],x-1);
 	b1--;
     }
 	
     while (t2 < t1 && t2<=b2)
     {
-	::g->spanstart[t2] = x;
+	Globals::g->spanstart[t2] = x;
 	t2++;
     }
     while (b2 > b1 && b2>=t2)
     {
-	::g->spanstart[b2] = x;
+	Globals::g->spanstart[b2] = x;
 	b2--;
     }
 }
@@ -357,60 +357,60 @@ void R_DrawPlanes (void)
     int			angle;
 				
 #ifdef RANGECHECK
-    if (::g->ds_p - ::g->drawsegs > MAXDRAWSEGS)
-	I_Error ("R_DrawPlanes: ::g->drawsegs overflow (%i)",
-		 ::g->ds_p - ::g->drawsegs);
+    if (Globals::g->ds_p - Globals::g->drawsegs > MAXDRAWSEGS)
+	I_Error ("R_DrawPlanes: Globals::g->drawsegs overflow (%i)",
+		 Globals::g->ds_p - Globals::g->drawsegs);
     
-    if (::g->lastvisplane - ::g->visplanes > MAXVISPLANES)
+    if (Globals::g->lastvisplane - Globals::g->visplanes > MAXVISPLANES)
 	I_Error ("R_DrawPlanes: visplane overflow (%i)",
-		 ::g->lastvisplane - ::g->visplanes);
+		 Globals::g->lastvisplane - Globals::g->visplanes);
     
-    if (::g->lastopening - ::g->openings > MAXOPENINGS)
+    if (Globals::g->lastopening - Globals::g->openings > MAXOPENINGS)
 	I_Error ("R_DrawPlanes: opening overflow (%i)",
-		 ::g->lastopening - ::g->openings);
+		 Globals::g->lastopening - Globals::g->openings);
 #endif
 
-    for (pl = ::g->visplanes ; pl < ::g->lastvisplane ; pl++)
+    for (pl = Globals::g->visplanes ; pl < Globals::g->lastvisplane ; pl++)
     {
 	if (pl->minx > pl->maxx)
 	    continue;
 
 	
 	// sky flat
-	if (pl->picnum == ::g->skyflatnum)
+	if (pl->picnum == Globals::g->skyflatnum)
 	{
-	    ::g->dc_iscale = ::g->pspriteiscale>>::g->detailshift;
+	    Globals::g->dc_iscale = Globals::g->pspriteiscale>>Globals::g->detailshift;
 	    
 	    // Sky is allways drawn full bright,
-	    //  i.e. ::g->colormaps[0] is used.
+	    //  i.e. Globals::g->colormaps[0] is used.
 	    // Because of this hack, sky is not affected
 	    //  by INVUL inverse mapping.
-	    ::g->dc_colormap = ::g->colormaps;
-	    ::g->dc_texturemid = ::g->skytexturemid;
+	    Globals::g->dc_colormap = Globals::g->colormaps;
+	    Globals::g->dc_texturemid = Globals::g->skytexturemid;
 	    for (x=pl->minx ; x <= pl->maxx ; x++)
 	    {
-		::g->dc_yl = pl->top[x];
-		::g->dc_yh = pl->bottom[x];
+		Globals::g->dc_yl = pl->top[x];
+		Globals::g->dc_yh = pl->bottom[x];
 
-		if (::g->dc_yl <= ::g->dc_yh)
+		if (Globals::g->dc_yl <= Globals::g->dc_yh)
 		{
 			extern angle_t GetViewAngle();
-		    angle = (GetViewAngle() + ::g->xtoviewangle[x])>>ANGLETOSKYSHIFT;
-		    ::g->dc_x = x;
-		    ::g->dc_source = R_GetColumn(::g->skytexture, angle);
-		    colfunc ( ::g->dc_colormap, ::g->dc_source );
+		    angle = (GetViewAngle() + Globals::g->xtoviewangle[x])>>ANGLETOSKYSHIFT;
+		    Globals::g->dc_x = x;
+		    Globals::g->dc_source = R_GetColumn(Globals::g->skytexture, angle);
+		    colfunc ( Globals::g->dc_colormap, Globals::g->dc_source );
 		}
 	    }
 	    continue;
 	}
 	
 	// regular flat
-	::g->ds_source = (byte*)W_CacheLumpNum(::g->firstflat +
-				   ::g->flattranslation[pl->picnum],
+	Globals::g->ds_source = (unsigned char*)W_CacheLumpNum(Globals::g->firstflat +
+				   Globals::g->flattranslation[pl->picnum],
 				   PU_CACHE_SHARED);
 	
-	::g->planeheight = abs(pl->height-::g->viewz);
-	light = (pl->lightlevel >> LIGHTSEGSHIFT)+::g->extralight;
+	Globals::g->planeheight = abs(pl->height-Globals::g->viewz);
+	light = (pl->lightlevel >> LIGHTSEGSHIFT)+Globals::g->extralight;
 
 	if (light >= LIGHTLEVELS)
 	    light = LIGHTLEVELS-1;
@@ -418,7 +418,7 @@ void R_DrawPlanes (void)
 	if (light < 0)
 	    light = 0;
 
-	::g->planezlight = ::g->zlight[light];
+	Globals::g->planezlight = Globals::g->zlight[light];
 
 	pl->top[pl->maxx+1] = 0xffff;
 	pl->top[pl->minx-1] = 0xffff;

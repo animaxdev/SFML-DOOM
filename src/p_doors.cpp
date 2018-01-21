@@ -220,7 +220,7 @@ EV_DoLockedDoor
 	if (!p->cards[it_bluecard] && !p->cards[it_blueskull])
 	{
 	    p->message = PD_BLUEO;
-		if (p == &::g->players[::g->consoleplayer])
+		if (p == &Globals::g->players[Globals::g->consoleplayer])
 			S_StartSound(NULL,sfx_oof);
 	    return 0;
 	}
@@ -233,7 +233,7 @@ EV_DoLockedDoor
 	if (!p->cards[it_redcard] && !p->cards[it_redskull])
 	{
 	    p->message = PD_REDO;
-		if (p == &::g->players[::g->consoleplayer])
+		if (p == &Globals::g->players[Globals::g->consoleplayer])
 			S_StartSound(NULL,sfx_oof);
 	    return 0;
 	}
@@ -247,7 +247,7 @@ EV_DoLockedDoor
 	    !p->cards[it_yellowskull])
 	{
 	    p->message = PD_YELLOWO;
-		if (p == &::g->players[::g->consoleplayer])
+		if (p == &Globals::g->players[Globals::g->consoleplayer])
 			S_StartSound(NULL,sfx_oof);
 	    return 0;
 	}
@@ -272,7 +272,7 @@ EV_DoDoor
     
     while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
     {
-	sec = &::g->sectors[secnum];
+	sec = &Globals::g->sectors[secnum];
 	if (sec->specialdata)
 	    continue;
 		
@@ -359,7 +359,7 @@ EV_VerticalDoor
     vldoor_t*	door;
     int		side;
 	
-    side = 0;	// only front ::g->sides can be used
+    side = 0;	// only front Globals::g->sides can be used
 
     //	Check for locks
     player = thing->player;
@@ -374,7 +374,7 @@ EV_VerticalDoor
 	if (!player->cards[it_bluecard] && !player->cards[it_blueskull])
 	{
 	    player->message = PD_BLUEK;
-		if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+		if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 			S_StartSound(player->mo,sfx_oof);
 	    return;
 	}
@@ -389,7 +389,7 @@ EV_VerticalDoor
 	    !player->cards[it_yellowskull])
 	{
 	    player->message = PD_YELLOWK;
-		if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+		if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 			S_StartSound(player->mo,sfx_oof);
 	    return;
 	}
@@ -403,7 +403,7 @@ EV_VerticalDoor
 	if (!player->cards[it_redcard] && !player->cards[it_redskull])
 	{
 	    player->message = PD_REDK;
-		if (globalNetworking || (player == &::g->players[::g->consoleplayer]))
+		if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer]))
 			S_StartSound(player->mo,sfx_oof);
 	    return;
 	}
@@ -411,8 +411,8 @@ EV_VerticalDoor
     }
 	
     // if the sector has an active thinker, use it
-    sec = ::g->sides[ line->sidenum[side^1]] .sector;
-    secnum = sec-::g->sectors;
+    sec = Globals::g->sides[ line->sidenum[side^1]] .sector;
+    secnum = sec-Globals::g->sectors;
 
     if (sec->specialdata)
     {
@@ -438,7 +438,7 @@ EV_VerticalDoor
     }
 	
     // for proper sound
-	if (globalNetworking || (player == &::g->players[::g->consoleplayer])) {
+	if (globalNetworking || (player == &Globals::g->players[Globals::g->consoleplayer])) {
 		switch(line->special)
 		{
 		case 117:	// BLAZING DOOR RAISE

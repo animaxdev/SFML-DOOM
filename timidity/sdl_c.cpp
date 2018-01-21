@@ -53,7 +53,7 @@ static void ctl_close(void);
 static int ctl_read(int *valp);
 static int cmsg(int type, int verbosity_level, char *fmt, ...);
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 #define safeOutputDebug(x) printf( "%s", x )
 #else
 #define safeOutputDebug(x)
@@ -94,11 +94,11 @@ extern void SendDebugMsg(const char*);
 extern bool debugOutput;
 static int cmsg(int type, int verbosity_level, char *fmt, ...)
 {
-#ifdef _DEBUG
+#ifndef NDEBUG
 	va_list ap;
 
 	va_start(ap, fmt);
-	idStr::vsnPrintf(timidity_error, TIMIDITY_ERROR_MAX_CHARS - 1, fmt, ap);
+	vsnprintf(timidity_error, TIMIDITY_ERROR_MAX_CHARS - 1, fmt, ap);
 	va_end(ap);
 
 	strcat( timidity_error, "\n" );

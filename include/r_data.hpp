@@ -37,7 +37,7 @@ If you have questions concerning this license or the applicable additional terms
 #endif
 
 // Retrieve column data for span blitting.
-byte*
+unsigned char*
 R_GetColumn
 ( int		tex,
   int		col );

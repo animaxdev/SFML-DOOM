@@ -39,7 +39,7 @@ If you have questions concerning this license or the applicable additional terms
 
 
 
-// Pads ::g->save_p to a 4-byte boundary
+// Pads Globals::g->save_p to a 4-unsigned char boundary
 //  so that the load/save works on SGI&Gecko.
 
 
@@ -55,20 +55,20 @@ void P_ArchivePlayers (void)
 		
     for (i=0 ; i<MAXPLAYERS ; i++)
     {
-	if (!::g->playeringame[i])
+	if (!Globals::g->playeringame[i])
 	    continue;
 	
 	//PADSAVEP();
 
-	dest = (player_t *)::g->save_p;
-	memcpy (dest,&::g->players[i],sizeof(player_t));
-	::g->save_p += sizeof(player_t);
+	dest = (player_t *)Globals::g->save_p;
+	memcpy (dest,&Globals::g->players[i],sizeof(player_t));
+	Globals::g->save_p += sizeof(player_t);
 	for (j=0 ; j<NUMPSPRITES ; j++)
 	{
 	    if (dest->psprites[j].state)
 	    {
 		dest->psprites[j].state 
-			= (state_t *)(dest->psprites[j].state-::g->states);
+			= (state_t *)(dest->psprites[j].state-Globals::g->states);
 	    }
 	}
     }
@@ -86,25 +86,25 @@ void P_UnArchivePlayers (void)
 	
     for (i=0 ; i<MAXPLAYERS ; i++)
     {
-	if (!::g->playeringame[i])
+	if (!Globals::g->playeringame[i])
 	    continue;
 	
 	//PADSAVEP();
 
-	memcpy (&::g->players[i],::g->save_p, sizeof(player_t));
-	::g->save_p += sizeof(player_t);
+	memcpy (&Globals::g->players[i],Globals::g->save_p, sizeof(player_t));
+	Globals::g->save_p += sizeof(player_t);
 	
 	// will be set when unarc thinker
-	::g->players[i].mo = NULL;	
-	::g->players[i].message = NULL;
-	::g->players[i].attacker = NULL;
+	Globals::g->players[i].mo = NULL;	
+	Globals::g->players[i].message = NULL;
+	Globals::g->players[i].attacker = NULL;
 
 	for (j=0 ; j<NUMPSPRITES ; j++)
 	{
-	    if (::g->players[i]. psprites[j].state)
+	    if (Globals::g->players[i]. psprites[j].state)
 	    {
-//        ::g->players[i]. psprites[j].state
-//            = &::g->states[ (int)::g->players[i].psprites[j].state ];
+//        Globals::g->players[i]. psprites[j].state
+//            = &Globals::g->states[ (int)Globals::g->players[i].psprites[j].state ];
 	    }
 	}
     }
@@ -123,10 +123,10 @@ void P_ArchiveWorld (void)
     side_t*		si;
     short*		put;
 	
-    put = (short *)::g->save_p;
+    put = (short *)Globals::g->save_p;
     
-    // do ::g->sectors
-    for (i=0, sec = ::g->sectors ; i < ::g->numsectors ; i++,sec++)
+    // do Globals::g->sectors
+    for (i=0, sec = Globals::g->sectors ; i < Globals::g->numsectors ; i++,sec++)
     {
 	*put++ = sec->floorheight >> FRACBITS;
 	*put++ = sec->ceilingheight >> FRACBITS;
@@ -138,8 +138,8 @@ void P_ArchiveWorld (void)
     }
 
     
-    // do ::g->lines
-    for (i=0, li = ::g->lines ; i < ::g->numlines ; i++,li++)
+    // do Globals::g->lines
+    for (i=0, li = Globals::g->lines ; i < Globals::g->numlines ; i++,li++)
     {
 	*put++ = li->flags;
 	*put++ = li->special;
@@ -149,7 +149,7 @@ void P_ArchiveWorld (void)
 	    if (li->sidenum[j] == -1)
 		continue;
 	    
-	    si = &::g->sides[li->sidenum[j]];
+	    si = &Globals::g->sides[li->sidenum[j]];
 
 	    *put++ = si->textureoffset >> FRACBITS;
 	    *put++ = si->rowoffset >> FRACBITS;
@@ -160,10 +160,10 @@ void P_ArchiveWorld (void)
     }
 
 	// Doom 2 level 30 requires some global pointers, wheee!
-	*put++ = ::g->braintargeton;
-	*put++ = ::g->easy;
+	*put++ = Globals::g->braintargeton;
+	*put++ = Globals::g->easy;
 
-    ::g->save_p = (byte *)put;
+    Globals::g->save_p = (unsigned char *)put;
 }
 
 
@@ -180,10 +180,10 @@ void P_UnArchiveWorld (void)
     side_t*		si;
     short*		get;
 	
-    get = (short *)::g->save_p;
+    get = (short *)Globals::g->save_p;
     
-    // do ::g->sectors
-    for (i=0, sec = ::g->sectors ; i < ::g->numsectors ; i++,sec++)
+    // do Globals::g->sectors
+    for (i=0, sec = Globals::g->sectors ; i < Globals::g->numsectors ; i++,sec++)
     {
 	sec->floorheight = *get++ << FRACBITS;
 	sec->ceilingheight = *get++ << FRACBITS;
@@ -196,8 +196,8 @@ void P_UnArchiveWorld (void)
 	sec->soundtarget = 0;
     }
     
-    // do ::g->lines
-    for (i=0, li = ::g->lines ; i < ::g->numlines ; i++,li++)
+    // do Globals::g->lines
+    for (i=0, li = Globals::g->lines ; i < Globals::g->numlines ; i++,li++)
     {
 	li->flags = *get++;
 	li->special = *get++;
@@ -206,7 +206,7 @@ void P_UnArchiveWorld (void)
 	{
 	    if (li->sidenum[j] == -1)
 		continue;
-	    si = &::g->sides[li->sidenum[j]];
+	    si = &Globals::g->sides[li->sidenum[j]];
 	    si->textureoffset = *get++ << FRACBITS;
 	    si->rowoffset = *get++ << FRACBITS;
 	    si->toptexture = *get++;
@@ -216,10 +216,10 @@ void P_UnArchiveWorld (void)
     }
 
 	// Doom 2 level 30 requires some global pointers, wheee!
-	::g->braintargeton = *get++;
-	::g->easy = *get++;
+	Globals::g->braintargeton = *get++;
+	Globals::g->easy = *get++;
 
-    ::g->save_p = (byte *)get;	
+    Globals::g->save_p = (unsigned char *)get;	
 }
 
 
@@ -235,7 +235,7 @@ int GetMOIndex( mobj_t* findme ) {
 	mobj_t*		mobj;
 	int			index = 0;
 
-	for (th = ::g->thinkercap.next ; th != &::g->thinkercap ; th=th->next)
+	for (th = Globals::g->thinkercap.next ; th != &Globals::g->thinkercap ; th=th->next)
 	{
 		if (th->function.acp1 == (actionf_p1)P_MobjThinker) {
 			index++;
@@ -258,7 +258,7 @@ mobj_t* GetMO( int index ) {
 		return NULL;
 	}
 
-	for (th = ::g->thinkercap.next ; th != &::g->thinkercap ; th=th->next)
+	for (th = Globals::g->thinkercap.next ; th != &Globals::g->thinkercap ; th=th->next)
 	{
 		if (th->function.acp1 == (actionf_p1)P_MobjThinker) {
 			testindex++;
@@ -291,70 +291,70 @@ void P_ArchiveThinkers (void)
 	int i;
 	
 	// save off the current thinkers
-	//I_Printf( "Savegame on leveltime %d\n====================\n", ::g->leveltime );
+	//I_Printf( "Savegame on leveltime %d\n====================\n", Globals::g->leveltime );
 
-	for (th = ::g->thinkercap.next ; th != &::g->thinkercap ; th=th->next)
+	for (th = Globals::g->thinkercap.next ; th != &Globals::g->thinkercap ; th=th->next)
 	{
 		//mobj_t*	test = (mobj_t*)th;
 		//I_Printf( "%3d: %x == function\n", index++, th->function.acp1 );
 
 		if (th->function.acp1 == (actionf_p1)P_MobjThinker)
 		{
-			*::g->save_p++ = tc_mobj;
+			*Globals::g->save_p++ = tc_mobj;
 //            PADSAVEP();
 
-			mobj = (mobj_t *)::g->save_p;
+			mobj = (mobj_t *)Globals::g->save_p;
 			memcpy (mobj, th, sizeof(*mobj));
-			::g->save_p += sizeof(*mobj);
-			mobj->state = (state_t *)(mobj->state - ::g->states);
+			Globals::g->save_p += sizeof(*mobj);
+			mobj->state = (state_t *)(mobj->state - Globals::g->states);
 
 			if (mobj->player)
-				mobj->player = (player_t *)((mobj->player-::g->players) + 1);
+				mobj->player = (player_t *)((mobj->player-Globals::g->players) + 1);
 
 			// Save out 'target'
 			int moIndex = GetMOIndex( mobj->target );
-			*::g->save_p++ = moIndex >> 8;
-			*::g->save_p++ = moIndex;
+			*Globals::g->save_p++ = moIndex >> 8;
+			*Globals::g->save_p++ = moIndex;
 
 			// Save out 'tracer'
 			moIndex = GetMOIndex( mobj->tracer );
-			*::g->save_p++ = moIndex >> 8;
-			*::g->save_p++ = moIndex;
+			*Globals::g->save_p++ = moIndex >> 8;
+			*Globals::g->save_p++ = moIndex;
 
 			moIndex = GetMOIndex( mobj->snext );
-			*::g->save_p++ = moIndex >> 8;
-			*::g->save_p++ = moIndex;
+			*Globals::g->save_p++ = moIndex >> 8;
+			*Globals::g->save_p++ = moIndex;
 
 			moIndex = GetMOIndex( mobj->sprev );
-			*::g->save_p++ = moIndex >> 8;
-			*::g->save_p++ = moIndex;
+			*Globals::g->save_p++ = moIndex >> 8;
+			*Globals::g->save_p++ = moIndex;
 
 			// Is this the head of a sector list?
 			if ( mobj->subsector->sector->thinglist == (mobj_t*)th ) {
-				*::g->save_p++ = 1;
+				*Globals::g->save_p++ = 1;
 			}
 			else {
-				*::g->save_p++ = 0;
+				*Globals::g->save_p++ = 0;
 			}
 
 			moIndex = GetMOIndex( mobj->bnext );
-			*::g->save_p++ = moIndex >> 8;
-			*::g->save_p++ = moIndex;
+			*Globals::g->save_p++ = moIndex >> 8;
+			*Globals::g->save_p++ = moIndex;
 
 			moIndex = GetMOIndex( mobj->bprev );
-			*::g->save_p++ = moIndex >> 8;
-			*::g->save_p++ = moIndex;
+			*Globals::g->save_p++ = moIndex >> 8;
+			*Globals::g->save_p++ = moIndex;
 
 			// Is this the head of a block list?
-			int	blockx = (mobj->x - ::g->bmaporgx)>>MAPBLOCKSHIFT;
-			int	blocky = (mobj->y - ::g->bmaporgy)>>MAPBLOCKSHIFT;
-			if ( blockx >= 0 && blockx < ::g->bmapwidth && blocky >= 0 && blocky < ::g->bmapheight 
-				&& (mobj_t*)th == ::g->blocklinks[blocky*::g->bmapwidth+blockx] ) {
+			int	blockx = (mobj->x - Globals::g->bmaporgx)>>MAPBLOCKSHIFT;
+			int	blocky = (mobj->y - Globals::g->bmaporgy)>>MAPBLOCKSHIFT;
+			if ( blockx >= 0 && blockx < Globals::g->bmapwidth && blocky >= 0 && blocky < Globals::g->bmapheight 
+				&& (mobj_t*)th == Globals::g->blocklinks[blocky*Globals::g->bmapwidth+blockx] ) {
 
-					*::g->save_p++ = 1;
+					*Globals::g->save_p++ = 1;
 			}
 			else {
-				*::g->save_p++ = 0;
+				*Globals::g->save_p++ = 0;
 			}
 			continue;
 		}
@@ -362,123 +362,123 @@ void P_ArchiveThinkers (void)
 		if (th->function.acv == (actionf_v)NULL)
 		{
 			for (i = 0; i < MAXCEILINGS;i++)
-				if (::g->activeceilings[i] == (ceiling_t *)th)
+				if (Globals::g->activeceilings[i] == (ceiling_t *)th)
 					break;
 
 			if (i<MAXCEILINGS)
 			{
-				*::g->save_p++ = tc_ceiling;
+				*Globals::g->save_p++ = tc_ceiling;
 //                PADSAVEP();
-				ceiling = (ceiling_t *)::g->save_p;
+				ceiling = (ceiling_t *)Globals::g->save_p;
 				memcpy (ceiling, th, sizeof(*ceiling));
-				::g->save_p += sizeof(*ceiling);
-				ceiling->sector = (sector_t *)(ceiling->sector - ::g->sectors);
+				Globals::g->save_p += sizeof(*ceiling);
+				ceiling->sector = (sector_t *)(ceiling->sector - Globals::g->sectors);
 			}
 			continue;
 		}
 
 		if (th->function.acp1 == (actionf_p1)T_MoveCeiling)
 		{
-			*::g->save_p++ = tc_ceiling;
+			*Globals::g->save_p++ = tc_ceiling;
 //            PADSAVEP();
-			ceiling = (ceiling_t *)::g->save_p;
+			ceiling = (ceiling_t *)Globals::g->save_p;
 			memcpy (ceiling, th, sizeof(*ceiling));
-			::g->save_p += sizeof(*ceiling);
-			ceiling->sector = (sector_t *)(ceiling->sector - ::g->sectors);
+			Globals::g->save_p += sizeof(*ceiling);
+			ceiling->sector = (sector_t *)(ceiling->sector - Globals::g->sectors);
 			continue;
 		}
 
 		if (th->function.acp1 == (actionf_p1)T_VerticalDoor)
 		{
-			*::g->save_p++ = tc_door;
+			*Globals::g->save_p++ = tc_door;
 //            PADSAVEP();
-			door = (vldoor_t *)::g->save_p;
+			door = (vldoor_t *)Globals::g->save_p;
 			memcpy (door, th, sizeof(*door));
-			::g->save_p += sizeof(*door);
-			door->sector = (sector_t *)(door->sector - ::g->sectors);
+			Globals::g->save_p += sizeof(*door);
+			door->sector = (sector_t *)(door->sector - Globals::g->sectors);
 			continue;
 		}
 
 		if (th->function.acp1 == (actionf_p1)T_MoveFloor)
 		{
-			*::g->save_p++ = tc_floor;
+			*Globals::g->save_p++ = tc_floor;
 //            PADSAVEP();
-			floor = (floormove_t *)::g->save_p;
+			floor = (floormove_t *)Globals::g->save_p;
 			memcpy (floor, th, sizeof(*floor));
-			::g->save_p += sizeof(*floor);
-			floor->sector = (sector_t *)(floor->sector - ::g->sectors);
+			Globals::g->save_p += sizeof(*floor);
+			floor->sector = (sector_t *)(floor->sector - Globals::g->sectors);
 			continue;
 		}
 
 		if (th->function.acp1 == (actionf_p1)T_PlatRaise)
 		{
-			*::g->save_p++ = tc_plat;
+			*Globals::g->save_p++ = tc_plat;
 //            PADSAVEP();
-			plat = (plat_t *)::g->save_p;
+			plat = (plat_t *)Globals::g->save_p;
 			memcpy (plat, th, sizeof(*plat));
-			::g->save_p += sizeof(*plat);
-			plat->sector = (sector_t *)(plat->sector - ::g->sectors);
+			Globals::g->save_p += sizeof(*plat);
+			plat->sector = (sector_t *)(plat->sector - Globals::g->sectors);
 			continue;
 		}
 
 		if (th->function.acp1 == (actionf_p1)T_FireFlicker)
 		{
-			*::g->save_p++ = tc_fire;
+			*Globals::g->save_p++ = tc_fire;
 //            PADSAVEP();
-			fire = (fireflicker_t *)::g->save_p;
+			fire = (fireflicker_t *)Globals::g->save_p;
 			memcpy (fire, th, sizeof(*fire));
-			::g->save_p += sizeof(*fire);
-			fire->sector = (sector_t *)(fire->sector - ::g->sectors);
+			Globals::g->save_p += sizeof(*fire);
+			fire->sector = (sector_t *)(fire->sector - Globals::g->sectors);
 			continue;
 		}
 
 		if (th->function.acp1 == (actionf_p1)T_LightFlash)
 		{
-			*::g->save_p++ = tc_flash;
+			*Globals::g->save_p++ = tc_flash;
 //            PADSAVEP();
-			flash = (lightflash_t *)::g->save_p;
+			flash = (lightflash_t *)Globals::g->save_p;
 			memcpy (flash, th, sizeof(*flash));
-			::g->save_p += sizeof(*flash);
-			flash->sector = (sector_t *)(flash->sector - ::g->sectors);
+			Globals::g->save_p += sizeof(*flash);
+			flash->sector = (sector_t *)(flash->sector - Globals::g->sectors);
 			continue;
 		}
 
 		if (th->function.acp1 == (actionf_p1)T_StrobeFlash)
 		{
-			*::g->save_p++ = tc_strobe;
+			*Globals::g->save_p++ = tc_strobe;
 //            PADSAVEP();
-			strobe = (strobe_t *)::g->save_p;
+			strobe = (strobe_t *)Globals::g->save_p;
 			memcpy (strobe, th, sizeof(*strobe));
-			::g->save_p += sizeof(*strobe);
-			strobe->sector = (sector_t *)(strobe->sector - ::g->sectors);
+			Globals::g->save_p += sizeof(*strobe);
+			strobe->sector = (sector_t *)(strobe->sector - Globals::g->sectors);
 			continue;
 		}
 
 		if (th->function.acp1 == (actionf_p1)T_Glow)
 		{
-			*::g->save_p++ = tc_glow;
+			*Globals::g->save_p++ = tc_glow;
 //            PADSAVEP();
-			glow = (glow_t *)::g->save_p;
+			glow = (glow_t *)Globals::g->save_p;
 			memcpy (glow, th, sizeof(*glow));
-			::g->save_p += sizeof(*glow);
-			glow->sector = (sector_t *)(glow->sector - ::g->sectors);
+			Globals::g->save_p += sizeof(*glow);
+			glow->sector = (sector_t *)(glow->sector - Globals::g->sectors);
 			continue;
 		}
 	}
 
 	// add a terminating marker
-	*::g->save_p++ = tc_end;
+	*Globals::g->save_p++ = tc_end;
 
 	sector_t* sec;
-    short* put = (short *)::g->save_p;
-	for (i=0, sec = ::g->sectors ; i < ::g->numsectors ; i++,sec++) {
+    short* put = (short *)Globals::g->save_p;
+	for (i=0, sec = Globals::g->sectors ; i < Globals::g->numsectors ; i++,sec++) {
 		*put++ = (short)GetMOIndex( sec->soundtarget );
 	}
 
-	::g->save_p = (byte *)put;
+	Globals::g->save_p = (unsigned char *)put;
 
 	// add a terminating marker
-	*::g->save_p++ = tc_end;
+	*Globals::g->save_p++ = tc_end;
 }
 
 
@@ -488,7 +488,7 @@ void P_ArchiveThinkers (void)
 //
 void P_UnArchiveThinkers (void)
 {
-	byte			tclass;
+	unsigned char			tclass;
 	thinker_t*		currentthinker;
 	thinker_t*		next;
 	mobj_t*			mobj;
@@ -517,8 +517,8 @@ void P_UnArchiveThinkers (void)
 	bool		mo_bhead[1024];
 
 	// remove all the current thinkers
-	currentthinker = ::g->thinkercap.next;
-	while (currentthinker != &::g->thinkercap)
+	currentthinker = Globals::g->thinkercap.next;
+	while (currentthinker != &Globals::g->thinkercap)
 	{
 		next = currentthinker->next;
 
@@ -535,27 +535,27 @@ void P_UnArchiveThinkers (void)
 	// read in saved thinkers
 	while (1)
 	{
-		tclass = *::g->save_p++;
+		tclass = *Globals::g->save_p++;
 		switch (tclass)
 		{
 		case tc_end:
 
 			// clear sector thing lists
-			ss = ::g->sectors;
-			for (int i=0 ; i < ::g->numsectors ; i++, ss++) {
+			ss = Globals::g->sectors;
+			for (int i=0 ; i < Globals::g->numsectors ; i++, ss++) {
 				ss->thinglist = NULL;
 			}
 
 			// clear blockmap thing lists
-			count = sizeof(*::g->blocklinks) * ::g->bmapwidth * ::g->bmapheight;
-			memset (::g->blocklinks, 0, count);
+			count = sizeof(*Globals::g->blocklinks) * Globals::g->bmapwidth * Globals::g->bmapheight;
+			memset (Globals::g->blocklinks, 0, count);
 
 			// Doom 2 level 30 requires some global pointers, wheee!
-			::g->numbraintargets = 0;
+			Globals::g->numbraintargets = 0;
 
 			// fixup mobj_t pointers now that all thinkers have been restored
 			mo_index = 0;
-			for (th = ::g->thinkercap.next ; th != &::g->thinkercap ; th=th->next) {
+			for (th = Globals::g->thinkercap.next ; th != &Globals::g->thinkercap ; th=th->next) {
 				if (th->function.acp1 == (actionf_p1)P_MobjThinker) {
 					mobj = (mobj_t*)th;
 
@@ -574,17 +574,17 @@ void P_UnArchiveThinkers (void)
 
 					if ( mo_bhead[mo_index] ) {
 						// Is this the head of a block list?
-						int	blockx = (mobj->x - ::g->bmaporgx)>>MAPBLOCKSHIFT;
-						int	blocky = (mobj->y - ::g->bmaporgy)>>MAPBLOCKSHIFT;
-						if ( blockx >= 0 && blockx < ::g->bmapwidth && blocky >= 0 && blocky < ::g->bmapheight ) {
-							::g->blocklinks[blocky*::g->bmapwidth+blockx] = mobj;
+						int	blockx = (mobj->x - Globals::g->bmaporgx)>>MAPBLOCKSHIFT;
+						int	blocky = (mobj->y - Globals::g->bmaporgy)>>MAPBLOCKSHIFT;
+						if ( blockx >= 0 && blockx < Globals::g->bmapwidth && blocky >= 0 && blocky < Globals::g->bmapheight ) {
+							Globals::g->blocklinks[blocky*Globals::g->bmapwidth+blockx] = mobj;
 						}
 					}
 
 					// Doom 2 level 30 requires some global pointers, wheee!
 					if ( mobj->type == MT_BOSSTARGET ) {
-						::g->braintargets[::g->numbraintargets] = mobj;
-						::g->numbraintargets++;
+						Globals::g->braintargets[Globals::g->numbraintargets] = mobj;
+						Globals::g->numbraintargets++;
 					}
 
 					mo_index++;
@@ -595,21 +595,21 @@ void P_UnArchiveThinkers (void)
 			sector_t*	sec;
 		    short*	get;
 
-			get = (short *)::g->save_p;
-			for (i=0, sec = ::g->sectors ; i < ::g->numsectors ; i++,sec++)
+			get = (short *)Globals::g->save_p;
+			for (i=0, sec = Globals::g->sectors ; i < Globals::g->numsectors ; i++,sec++)
 			{
 				sec->soundtarget = GetMO( *get++ );
 			}
-			::g->save_p = (byte *)get;
+			Globals::g->save_p = (unsigned char *)get;
 
-			tclass = *::g->save_p++;
+			tclass = *Globals::g->save_p++;
 			if ( tclass != tc_end ) {
 				I_Error( "Savegame error after loading sector soundtargets." );
 			}
 
 			// print the current thinkers
-			//I_Printf( "Loadgame on leveltime %d\n====================\n", ::g->leveltime );
-			for (th = ::g->thinkercap.next ; th != &::g->thinkercap ; th=th->next)
+			//I_Printf( "Loadgame on leveltime %d\n====================\n", Globals::g->leveltime );
+			for (th = Globals::g->thinkercap.next ; th != &Globals::g->thinkercap ; th=th->next)
 			{
 				//mobj_t*	test = (mobj_t*)th;
 				//I_Printf( "%3d: %x == function\n", index++, th->function.acp1 );
@@ -620,16 +620,16 @@ void P_UnArchiveThinkers (void)
 		case tc_mobj:
 //            PADSAVEP();
 			mobj = (mobj_t*)DoomLib::Z_Malloc(sizeof(*mobj), PU_LEVEL, NULL);
-			memcpy (mobj, ::g->save_p, sizeof(*mobj));
-			::g->save_p += sizeof(*mobj);
-//            mobj->state = &::g->states[(int)mobj->state];
+			memcpy (mobj, Globals::g->save_p, sizeof(*mobj));
+			Globals::g->save_p += sizeof(*mobj);
+//            mobj->state = &Globals::g->states[(int)mobj->state];
 
 			mobj->target = NULL;
 			mobj->tracer = NULL;
 
 			if (mobj->player)
 			{
-//                mobj->player = &::g->players[(int)mobj->player-1];
+//                mobj->player = &Globals::g->players[(int)mobj->player-1];
 				mobj->player->mo = mobj;
 			}
 
@@ -642,45 +642,45 @@ void P_UnArchiveThinkers (void)
 
 			// Read in 'target' and store for fixup
 			int a, b, foundIndex;
-			a = *::g->save_p++;
-			b = *::g->save_p++;
+			a = *Globals::g->save_p++;
+			b = *Globals::g->save_p++;
 			foundIndex = (a << 8) + b;
 			mo_targets[mo_index] = foundIndex;
 
 			// Read in 'tracer' and store for fixup
-			a = *::g->save_p++;
-			b = *::g->save_p++;
+			a = *Globals::g->save_p++;
+			b = *Globals::g->save_p++;
 			foundIndex = (a << 8) + b;
 			mo_tracers[mo_index] = foundIndex;
 
 			// Read in 'snext' and store for fixup
-			a = *::g->save_p++;
-			b = *::g->save_p++;
+			a = *Globals::g->save_p++;
+			b = *Globals::g->save_p++;
 			foundIndex = (a << 8) + b;
 			mo_snext[mo_index] = foundIndex;
 
 			// Read in 'sprev' and store for fixup
-			a = *::g->save_p++;
-			b = *::g->save_p++;
+			a = *Globals::g->save_p++;
+			b = *Globals::g->save_p++;
 			foundIndex = (a << 8) + b;
 			mo_sprev[mo_index] = foundIndex;
 
-			foundIndex = *::g->save_p++;
+			foundIndex = *Globals::g->save_p++;
 			mo_shead[mo_index] = foundIndex == 1;
 
 			// Read in 'bnext' and store for fixup
-			a = *::g->save_p++;
-			b = *::g->save_p++;
+			a = *Globals::g->save_p++;
+			b = *Globals::g->save_p++;
 			foundIndex = (a << 8) + b;
 			mo_bnext[mo_index] = foundIndex;
 
 			// Read in 'bprev' and store for fixup
-			a = *::g->save_p++;
-			b = *::g->save_p++;
+			a = *Globals::g->save_p++;
+			b = *Globals::g->save_p++;
 			foundIndex = (a << 8) + b;
 			mo_bprev[mo_index] = foundIndex;
 
-			foundIndex = *::g->save_p++;
+			foundIndex = *Globals::g->save_p++;
 			mo_bhead[mo_index] = foundIndex == 1;
 
 			mo_index++;
@@ -691,9 +691,9 @@ void P_UnArchiveThinkers (void)
 		case tc_ceiling:
 //            PADSAVEP();
 			ceiling = (ceiling_t*)DoomLib::Z_Malloc(sizeof(*ceiling), PU_LEVEL, NULL);
-			memcpy (ceiling, ::g->save_p, sizeof(*ceiling));
-			::g->save_p += sizeof(*ceiling);
-//            ceiling->sector = &::g->sectors[(int)ceiling->sector];
+			memcpy (ceiling, Globals::g->save_p, sizeof(*ceiling));
+			Globals::g->save_p += sizeof(*ceiling);
+//            ceiling->sector = &Globals::g->sectors[(int)ceiling->sector];
 			ceiling->sector->specialdata = ceiling;
 
 			if (ceiling->thinker.function.acp1)
@@ -706,9 +706,9 @@ void P_UnArchiveThinkers (void)
 		case tc_door:
 //            PADSAVEP();
 			door = (vldoor_t*)DoomLib::Z_Malloc(sizeof(*door), PU_LEVEL, NULL);
-			memcpy (door, ::g->save_p, sizeof(*door));
-			::g->save_p += sizeof(*door);
-//            door->sector = &::g->sectors[(int)door->sector];
+			memcpy (door, Globals::g->save_p, sizeof(*door));
+			Globals::g->save_p += sizeof(*door);
+//            door->sector = &Globals::g->sectors[(int)door->sector];
 			door->sector->specialdata = door;
 			door->thinker.function.acp1 = (actionf_p1)T_VerticalDoor;
 			P_AddThinker (&door->thinker);
@@ -717,9 +717,9 @@ void P_UnArchiveThinkers (void)
 		case tc_floor:
 //            PADSAVEP();
 			floor = (floormove_t*)DoomLib::Z_Malloc (sizeof(*floor), PU_LEVEL, NULL);
-			memcpy (floor, ::g->save_p, sizeof(*floor));
-			::g->save_p += sizeof(*floor);
-//            floor->sector = &::g->sectors[(int)floor->sector];
+			memcpy (floor, Globals::g->save_p, sizeof(*floor));
+			Globals::g->save_p += sizeof(*floor);
+//            floor->sector = &Globals::g->sectors[(int)floor->sector];
 			floor->sector->specialdata = floor;
 			floor->thinker.function.acp1 = (actionf_p1)T_MoveFloor;
 			P_AddThinker (&floor->thinker);
@@ -728,9 +728,9 @@ void P_UnArchiveThinkers (void)
 		case tc_plat:
 //            PADSAVEP();
 			plat = (plat_t*)DoomLib::Z_Malloc (sizeof(*plat), PU_LEVEL, NULL);
-			memcpy (plat, ::g->save_p, sizeof(*plat));
-			::g->save_p += sizeof(*plat);
-//            plat->sector = &::g->sectors[(int)plat->sector];
+			memcpy (plat, Globals::g->save_p, sizeof(*plat));
+			Globals::g->save_p += sizeof(*plat);
+//            plat->sector = &Globals::g->sectors[(int)plat->sector];
 			plat->sector->specialdata = plat;
 
 			if (plat->thinker.function.acp1)
@@ -743,9 +743,9 @@ void P_UnArchiveThinkers (void)
 		case tc_fire:
 //            PADSAVEP();
 			fire = (fireflicker_t*)DoomLib::Z_Malloc (sizeof(*fire), PU_LEVEL, NULL);
-			memcpy (fire, ::g->save_p, sizeof(*fire));
-			::g->save_p += sizeof(*fire);
-//            fire->sector = &::g->sectors[(int)fire->sector];
+			memcpy (fire, Globals::g->save_p, sizeof(*fire));
+			Globals::g->save_p += sizeof(*fire);
+//            fire->sector = &Globals::g->sectors[(int)fire->sector];
 			fire->thinker.function.acp1 = (actionf_p1)T_FireFlicker;
 			P_AddThinker (&fire->thinker);
 			break;
@@ -753,9 +753,9 @@ void P_UnArchiveThinkers (void)
 		case tc_flash:
 //            PADSAVEP();
 			flash = (lightflash_t*)DoomLib::Z_Malloc (sizeof(*flash), PU_LEVEL, NULL);
-			memcpy (flash, ::g->save_p, sizeof(*flash));
-			::g->save_p += sizeof(*flash);
-//            flash->sector = &::g->sectors[(int)flash->sector];
+			memcpy (flash, Globals::g->save_p, sizeof(*flash));
+			Globals::g->save_p += sizeof(*flash);
+//            flash->sector = &Globals::g->sectors[(int)flash->sector];
 			flash->thinker.function.acp1 = (actionf_p1)T_LightFlash;
 			P_AddThinker (&flash->thinker);
 			break;
@@ -763,9 +763,9 @@ void P_UnArchiveThinkers (void)
 		case tc_strobe:
 //            PADSAVEP();
 			strobe = (strobe_t*)DoomLib::Z_Malloc (sizeof(*strobe), PU_LEVEL, NULL);
-			memcpy (strobe, ::g->save_p, sizeof(*strobe));
-			::g->save_p += sizeof(*strobe);
-//            strobe->sector = &::g->sectors[(int)strobe->sector];
+			memcpy (strobe, Globals::g->save_p, sizeof(*strobe));
+			Globals::g->save_p += sizeof(*strobe);
+//            strobe->sector = &Globals::g->sectors[(int)strobe->sector];
 			strobe->thinker.function.acp1 = (actionf_p1)T_StrobeFlash;
 			P_AddThinker (&strobe->thinker);
 			break;
@@ -773,9 +773,9 @@ void P_UnArchiveThinkers (void)
 		case tc_glow:
 //            PADSAVEP();
 			glow = (glow_t*)DoomLib::Z_Malloc (sizeof(*glow), PU_LEVEL, NULL);
-			memcpy (glow, ::g->save_p, sizeof(*glow));
-			::g->save_p += sizeof(*glow);
-//            glow->sector = &::g->sectors[(int)glow->sector];
+			memcpy (glow, Globals::g->save_p, sizeof(*glow));
+			Globals::g->save_p += sizeof(*glow);
+//            glow->sector = &Globals::g->sectors[(int)glow->sector];
 			glow->thinker.function.acp1 = (actionf_p1)T_Glow;
 			P_AddThinker (&glow->thinker);
 			break;
@@ -817,106 +817,106 @@ void P_ArchiveSpecials (void)
     int			i;
 	
     // save off the current thinkers
-    for (th = ::g->thinkercap.next ; th != &::g->thinkercap ; th=th->next)
+    for (th = Globals::g->thinkercap.next ; th != &Globals::g->thinkercap ; th=th->next)
     {
 	if (th->function.acv == (actionf_v)NULL)
 	{
 	    for (i = 0; i < MAXCEILINGS;i++)
-		if (::g->activeceilings[i] == (ceiling_t *)th)
+		if (Globals::g->activeceilings[i] == (ceiling_t *)th)
 		    break;
 	    
 	    if (i<MAXCEILINGS)
 	    {
-		*::g->save_p++ = tc_ceiling;
+		*Globals::g->save_p++ = tc_ceiling;
 //        PADSAVEP();
-		ceiling = (ceiling_t *)::g->save_p;
+		ceiling = (ceiling_t *)Globals::g->save_p;
 		memcpy (ceiling, th, sizeof(*ceiling));
-		::g->save_p += sizeof(*ceiling);
-		ceiling->sector = (sector_t *)(ceiling->sector - ::g->sectors);
+		Globals::g->save_p += sizeof(*ceiling);
+		ceiling->sector = (sector_t *)(ceiling->sector - Globals::g->sectors);
 	    }
 	    continue;
 	}
 			
 	if (th->function.acp1 == (actionf_p1)T_MoveCeiling)
 	{
-	    *::g->save_p++ = tc_ceiling;
+	    *Globals::g->save_p++ = tc_ceiling;
 //        PADSAVEP();
-	    ceiling = (ceiling_t *)::g->save_p;
+	    ceiling = (ceiling_t *)Globals::g->save_p;
 	    memcpy (ceiling, th, sizeof(*ceiling));
-	    ::g->save_p += sizeof(*ceiling);
-	    ceiling->sector = (sector_t *)(ceiling->sector - ::g->sectors);
+	    Globals::g->save_p += sizeof(*ceiling);
+	    ceiling->sector = (sector_t *)(ceiling->sector - Globals::g->sectors);
 	    continue;
 	}
 			
 	if (th->function.acp1 == (actionf_p1)T_VerticalDoor)
 	{
-	    *::g->save_p++ = tc_door;
+	    *Globals::g->save_p++ = tc_door;
 //        PADSAVEP();
-	    door = (vldoor_t *)::g->save_p;
+	    door = (vldoor_t *)Globals::g->save_p;
 	    memcpy (door, th, sizeof(*door));
-	    ::g->save_p += sizeof(*door);
-	    door->sector = (sector_t *)(door->sector - ::g->sectors);
+	    Globals::g->save_p += sizeof(*door);
+	    door->sector = (sector_t *)(door->sector - Globals::g->sectors);
 	    continue;
 	}
 			
 	if (th->function.acp1 == (actionf_p1)T_MoveFloor)
 	{
-	    *::g->save_p++ = tc_floor;
+	    *Globals::g->save_p++ = tc_floor;
 //        PADSAVEP();
-	    floor = (floormove_t *)::g->save_p;
+	    floor = (floormove_t *)Globals::g->save_p;
 	    memcpy (floor, th, sizeof(*floor));
-	    ::g->save_p += sizeof(*floor);
-	    floor->sector = (sector_t *)(floor->sector - ::g->sectors);
+	    Globals::g->save_p += sizeof(*floor);
+	    floor->sector = (sector_t *)(floor->sector - Globals::g->sectors);
 	    continue;
 	}
 			
 	if (th->function.acp1 == (actionf_p1)T_PlatRaise)
 	{
-	    *::g->save_p++ = tc_plat;
+	    *Globals::g->save_p++ = tc_plat;
 //        PADSAVEP();
-	    plat = (plat_t *)::g->save_p;
+	    plat = (plat_t *)Globals::g->save_p;
 	    memcpy (plat, th, sizeof(*plat));
-	    ::g->save_p += sizeof(*plat);
-	    plat->sector = (sector_t *)(plat->sector - ::g->sectors);
+	    Globals::g->save_p += sizeof(*plat);
+	    plat->sector = (sector_t *)(plat->sector - Globals::g->sectors);
 	    continue;
 	}
 			
 	if (th->function.acp1 == (actionf_p1)T_LightFlash)
 	{
-	    *::g->save_p++ = tc_flash;
+	    *Globals::g->save_p++ = tc_flash;
 //        PADSAVEP();
-	    flash = (lightflash_t *)::g->save_p;
+	    flash = (lightflash_t *)Globals::g->save_p;
 	    memcpy (flash, th, sizeof(*flash));
-	    ::g->save_p += sizeof(*flash);
-	    flash->sector = (sector_t *)(flash->sector - ::g->sectors);
+	    Globals::g->save_p += sizeof(*flash);
+	    flash->sector = (sector_t *)(flash->sector - Globals::g->sectors);
 	    continue;
 	}
 			
 	if (th->function.acp1 == (actionf_p1)T_StrobeFlash)
 	{
-	    *::g->save_p++ = tc_strobe;
+	    *Globals::g->save_p++ = tc_strobe;
 //        PADSAVEP();
-	    strobe = (strobe_t *)::g->save_p;
+	    strobe = (strobe_t *)Globals::g->save_p;
 	    memcpy (strobe, th, sizeof(*strobe));
-	    ::g->save_p += sizeof(*strobe);
-	    strobe->sector = (sector_t *)(strobe->sector - ::g->sectors);
+	    Globals::g->save_p += sizeof(*strobe);
+	    strobe->sector = (sector_t *)(strobe->sector - Globals::g->sectors);
 	    continue;
 	}
 			
 	if (th->function.acp1 == (actionf_p1)T_Glow)
 	{
-	    *::g->save_p++ = tc_glow;
+	    *Globals::g->save_p++ = tc_glow;
 //        PADSAVEP();
-	    glow = (glow_t *)::g->save_p;
+	    glow = (glow_t *)Globals::g->save_p;
 	    memcpy (glow, th, sizeof(*glow));
-	    ::g->save_p += sizeof(*glow);
-	    glow->sector = (sector_t *)(glow->sector - ::g->sectors);
+	    Globals::g->save_p += sizeof(*glow);
+	    glow->sector = (sector_t *)(glow->sector - Globals::g->sectors);
 	    continue;
 	}
     }
 	
     // add a terminating marker
-    *::g->save_p++ = tc_endspecials;	
+    *Globals::g->save_p++ = tc_endspecials;	
 
 }
 
@@ -926,7 +926,7 @@ void P_ArchiveSpecials (void)
 //
 void P_UnArchiveSpecials (void)
 {
-    byte		tclass;
+    unsigned char		tclass;
     ceiling_t*		ceiling;
     vldoor_t*		door;
     floormove_t*	floor;
@@ -938,7 +938,7 @@ void P_UnArchiveSpecials (void)
     // read in saved thinkers
     while (1)
     {
-	tclass = *::g->save_p++;
+	tclass = *Globals::g->save_p++;
 	switch (tclass)
 	{
 	  case tc_endspecials:
@@ -947,9 +947,9 @@ void P_UnArchiveSpecials (void)
 	  case tc_ceiling:
 //        PADSAVEP();
 	    ceiling = (ceiling_t*)DoomLib::Z_Malloc(sizeof(*ceiling), PU_LEVEL, NULL);
-	    memcpy (ceiling, ::g->save_p, sizeof(*ceiling));
-	    ::g->save_p += sizeof(*ceiling);
-//        ceiling->sector = &::g->sectors[(int)ceiling->sector];
+	    memcpy (ceiling, Globals::g->save_p, sizeof(*ceiling));
+	    Globals::g->save_p += sizeof(*ceiling);
+//        ceiling->sector = &Globals::g->sectors[(int)ceiling->sector];
 	    ceiling->sector->specialdata = ceiling;
 
 	    if (ceiling->thinker.function.acp1)
@@ -962,9 +962,9 @@ void P_UnArchiveSpecials (void)
 	  case tc_door:
 //        PADSAVEP();
 	    door = (vldoor_t*)DoomLib::Z_Malloc(sizeof(*door), PU_LEVEL, NULL);
-	    memcpy (door, ::g->save_p, sizeof(*door));
-	    ::g->save_p += sizeof(*door);
-//        door->sector = &::g->sectors[(int)door->sector];
+	    memcpy (door, Globals::g->save_p, sizeof(*door));
+	    Globals::g->save_p += sizeof(*door);
+//        door->sector = &Globals::g->sectors[(int)door->sector];
 	    door->sector->specialdata = door;
 	    door->thinker.function.acp1 = (actionf_p1)T_VerticalDoor;
 	    P_AddThinker (&door->thinker);
@@ -973,9 +973,9 @@ void P_UnArchiveSpecials (void)
 	  case tc_floor:
 //        PADSAVEP();
 	    floor = (floormove_t*)DoomLib::Z_Malloc (sizeof(*floor), PU_LEVEL, NULL);
-	    memcpy (floor, ::g->save_p, sizeof(*floor));
-	    ::g->save_p += sizeof(*floor);
-//        floor->sector = &::g->sectors[(int)floor->sector];
+	    memcpy (floor, Globals::g->save_p, sizeof(*floor));
+	    Globals::g->save_p += sizeof(*floor);
+//        floor->sector = &Globals::g->sectors[(int)floor->sector];
 	    floor->sector->specialdata = floor;
 	    floor->thinker.function.acp1 = (actionf_p1)T_MoveFloor;
 	    P_AddThinker (&floor->thinker);
@@ -984,9 +984,9 @@ void P_UnArchiveSpecials (void)
 	  case tc_plat:
 //        PADSAVEP();
 	    plat = (plat_t*)DoomLib::Z_Malloc (sizeof(*plat), PU_LEVEL, NULL);
-	    memcpy (plat, ::g->save_p, sizeof(*plat));
-	    ::g->save_p += sizeof(*plat);
-//        plat->sector = &::g->sectors[(int)plat->sector];
+	    memcpy (plat, Globals::g->save_p, sizeof(*plat));
+	    Globals::g->save_p += sizeof(*plat);
+//        plat->sector = &Globals::g->sectors[(int)plat->sector];
 	    plat->sector->specialdata = plat;
 
 	    if (plat->thinker.function.acp1)
@@ -999,9 +999,9 @@ void P_UnArchiveSpecials (void)
 	  case tc_flash:
 //        PADSAVEP();
 	    flash = (lightflash_t*)DoomLib::Z_Malloc (sizeof(*flash), PU_LEVEL, NULL);
-	    memcpy (flash, ::g->save_p, sizeof(*flash));
-	    ::g->save_p += sizeof(*flash);
-//        flash->sector = &::g->sectors[(int)flash->sector];
+	    memcpy (flash, Globals::g->save_p, sizeof(*flash));
+	    Globals::g->save_p += sizeof(*flash);
+//        flash->sector = &Globals::g->sectors[(int)flash->sector];
 	    flash->thinker.function.acp1 = (actionf_p1)T_LightFlash;
 	    P_AddThinker (&flash->thinker);
 	    break;
@@ -1009,9 +1009,9 @@ void P_UnArchiveSpecials (void)
 	  case tc_strobe:
 //        PADSAVEP();
 	    strobe = (strobe_t*)DoomLib::Z_Malloc (sizeof(*strobe), PU_LEVEL, NULL);
-	    memcpy (strobe, ::g->save_p, sizeof(*strobe));
-	    ::g->save_p += sizeof(*strobe);
-//        strobe->sector = &::g->sectors[(int)strobe->sector];
+	    memcpy (strobe, Globals::g->save_p, sizeof(*strobe));
+	    Globals::g->save_p += sizeof(*strobe);
+//        strobe->sector = &Globals::g->sectors[(int)strobe->sector];
 	    strobe->thinker.function.acp1 = (actionf_p1)T_StrobeFlash;
 	    P_AddThinker (&strobe->thinker);
 	    break;
@@ -1019,9 +1019,9 @@ void P_UnArchiveSpecials (void)
 	  case tc_glow:
 //        PADSAVEP();
 	    glow = (glow_t*)DoomLib::Z_Malloc (sizeof(*glow), PU_LEVEL, NULL);
-	    memcpy (glow, ::g->save_p, sizeof(*glow));
-	    ::g->save_p += sizeof(*glow);
-//        glow->sector = &::g->sectors[(int)glow->sector];
+	    memcpy (glow, Globals::g->save_p, sizeof(*glow));
+	    Globals::g->save_p += sizeof(*glow);
+//        glow->sector = &Globals::g->sectors[(int)glow->sector];
 	    glow->thinker.function.acp1 = (actionf_p1)T_Glow;
 	    P_AddThinker (&glow->thinker);
 	    break;

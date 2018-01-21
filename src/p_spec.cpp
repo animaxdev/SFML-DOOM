@@ -131,7 +131,7 @@ void P_InitPicAnims (void)
 
 
 	//	Init animation
-	::g->lastanim = ::g->anims;
+	Globals::g->lastanim = Globals::g->anims;
 	for (i=0 ; animdefs[i].istexture != (qboolean)-1 ; i++)
 	{
 		if (animdefs[i].istexture)
@@ -140,28 +140,28 @@ void P_InitPicAnims (void)
 			if (R_CheckTextureNumForName(animdefs[i].startname) == -1)
 				continue;	
 
-			::g->lastanim->picnum = R_TextureNumForName (animdefs[i].endname);
-			::g->lastanim->basepic = R_TextureNumForName (animdefs[i].startname);
+			Globals::g->lastanim->picnum = R_TextureNumForName (animdefs[i].endname);
+			Globals::g->lastanim->basepic = R_TextureNumForName (animdefs[i].startname);
 		}
 		else
 		{
 			if (W_CheckNumForName(animdefs[i].startname) == -1)
 				continue;
 
-			::g->lastanim->picnum = R_FlatNumForName (animdefs[i].endname);
-			::g->lastanim->basepic = R_FlatNumForName (animdefs[i].startname);
+			Globals::g->lastanim->picnum = R_FlatNumForName (animdefs[i].endname);
+			Globals::g->lastanim->basepic = R_FlatNumForName (animdefs[i].startname);
 		}
 
-		::g->lastanim->istexture = animdefs[i].istexture;
-		::g->lastanim->numpics = ::g->lastanim->picnum - ::g->lastanim->basepic + 1;
+		Globals::g->lastanim->istexture = animdefs[i].istexture;
+		Globals::g->lastanim->numpics = Globals::g->lastanim->picnum - Globals::g->lastanim->basepic + 1;
 
-		if (::g->lastanim->numpics < 2)
+		if (Globals::g->lastanim->numpics < 2)
 			I_Error ("P_InitPicAnims: bad cycle from %s to %s",
 			animdefs[i].startname,
 			animdefs[i].endname);
 
-		::g->lastanim->speed = animdefs[i].speed;
-		::g->lastanim++;
+		Globals::g->lastanim->speed = animdefs[i].speed;
+		Globals::g->lastanim++;
 	}
 
 }
@@ -186,7 +186,7 @@ getSide
  int		line,
  int		side )
 {
-	return &::g->sides[ (::g->sectors[currentSector].lines[line])->sidenum[side] ];
+	return &Globals::g->sides[ (Globals::g->sectors[currentSector].lines[line])->sidenum[side] ];
 }
 
 
@@ -202,7 +202,7 @@ getSector
  int		line,
  int		side )
 {
-	return ::g->sides[ (::g->sectors[currentSector].lines[line])->sidenum[side] ].sector;
+	return Globals::g->sides[ (Globals::g->sectors[currentSector].lines[line])->sidenum[side] ].sector;
 }
 
 
@@ -216,7 +216,7 @@ twoSided
 ( int	sector,
  int	line )
 {
-	return (::g->sectors[sector].lines[line])->flags & ML_TWOSIDED;
+	return (Globals::g->sectors[sector].lines[line])->flags & ML_TWOSIDED;
 }
 
 
@@ -302,7 +302,7 @@ fixed_t	P_FindHighestFloorSurrounding(sector_t *sec)
 // FIND NEXT HIGHEST FLOOR IN SURROUNDING SECTORS
 // Note: this should be doable w/o a fixed array.
 
-// 20 adjoining ::g->sectors max!
+// 20 adjoining Globals::g->sectors max!
 
 fixed_t
 P_FindNextHighestFloor
@@ -415,8 +415,8 @@ P_FindSectorFromLineTag
 {
 	int	i;
 
-	for (i = start+1; i < ::g->numsectors; i++)
-		if (::g->sectors[i].tag == line->tag)
+	for (i = start+1; i < Globals::g->numsectors; i++)
+		if (Globals::g->sectors[i].tag == line->tag)
 			return i;
 
 	return -1;
@@ -458,7 +458,7 @@ P_FindMinSurroundingLight
 //
 // EVENTS
 // Events are operations triggered by using, crossing,
-// or shooting special ::g->lines, or by timed thinkers.
+// or shooting special Globals::g->lines, or by timed thinkers.
 //
 
 //
@@ -475,7 +475,7 @@ P_CrossSpecialLine
 	line_t*	line;
 	int		ok;
 
-	line = &::g->lines[linenum];
+	line = &Globals::g->lines[linenum];
 
 	//	Triggers that other things can activate
 	if (!thing->player)
@@ -604,7 +604,7 @@ P_CrossSpecialLine
 
 	case 30:
 		// Raise floor to shortest texture height
-		//  on either side of ::g->lines.
+		//  on either side of Globals::g->lines.
 		EV_DoFloor(line,raiseToTexture);
 		line->special = 0;
 		break;
@@ -655,7 +655,7 @@ P_CrossSpecialLine
 	case 52:
 		// EXIT!
 		// DHM - Nerve :: Don't exit level in death match, timelimit and fraglimit only
-		if ( !::g->deathmatch && ::g->gameaction != ga_completed ) {
+		if ( !Globals::g->deathmatch && Globals::g->gameaction != ga_completed ) {
 			G_ExitLevel();
 		}
 		break;
@@ -740,7 +740,7 @@ P_CrossSpecialLine
 
 	case 124:
 		// Secret EXIT
-		if ( !::g->deathmatch && ::g->gameaction != ga_completed ) {
+		if ( !Globals::g->deathmatch && Globals::g->gameaction != ga_completed ) {
 			G_SecretExitLevel ();
 		}
 		break;
@@ -880,7 +880,7 @@ P_CrossSpecialLine
 
 	case 96:
 		// Raise floor to shortest texture height
-		// on either side of ::g->lines.
+		// on either side of Globals::g->lines.
 		EV_DoFloor(line,raiseToTexture);
 		break;
 
@@ -1005,14 +1005,14 @@ void P_PlayerInSpecialSector (player_t* player)
 	case 5:
 		// HELLSLIME DAMAGE
 		if (!player->powers[pw_ironfeet])
-			if (!(::g->leveltime&0x1f))
+			if (!(Globals::g->leveltime&0x1f))
 				P_DamageMobj (player->mo, NULL, NULL, 10);
 		break;
 
 	case 7:
 		// NUKAGE DAMAGE
 		if (!player->powers[pw_ironfeet])
-			if (!(::g->leveltime&0x1f))
+			if (!(Globals::g->leveltime&0x1f))
 				P_DamageMobj (player->mo, NULL, NULL, 5);
 		break;
 
@@ -1023,7 +1023,7 @@ void P_PlayerInSpecialSector (player_t* player)
 		if (!player->powers[pw_ironfeet]
 		|| (P_Random()<5) )
 		{
-			if (!(::g->leveltime&0x1f))
+			if (!(Globals::g->leveltime&0x1f))
 				P_DamageMobj (player->mo, NULL, NULL, 20);
 		}
 		break;
@@ -1034,7 +1034,7 @@ void P_PlayerInSpecialSector (player_t* player)
 		sector->special = 0;
 
 
-		if ( !::g->demoplayback && ( ::g->usergame && !::g->netgame ) ) {
+		if ( !Globals::g->demoplayback && ( Globals::g->usergame && !Globals::g->netgame ) ) {
 			// DHM - Nerve :: Let's give achievements in real time in Doom 2
 			/*if ( !common->IsMultiplayer() ) {
 				switch( DoomLib::GetGameSKU() ) {
@@ -1068,7 +1068,7 @@ void P_PlayerInSpecialSector (player_t* player)
 		// EXIT SUPER DAMAGE! (for E1M8 finale)
 		player->cheats &= ~CF_GODMODE;
 
-		if (!(::g->leveltime&0x1f))
+		if (!(Globals::g->leveltime&0x1f))
 			P_DamageMobj (player->mo, NULL, NULL, 20);
 
 		if (player->health <= 10)
@@ -1095,11 +1095,11 @@ int PlayerFrags( int playernum ) {
 
 	for( int i=0 ; i<MAXPLAYERS ; i++) {
 		if ( i != playernum ) {
-			frags += ::g->players[playernum].frags[i];
+			frags += Globals::g->players[playernum].frags[i];
 		}
 	}
 
-	frags -= ::g->players[playernum].frags[playernum];
+	frags -= Globals::g->players[playernum].frags[playernum];
 
 	return frags;
 }
@@ -1113,20 +1113,20 @@ void P_UpdateSpecials (void)
 
 
 	//	LEVEL TIMER
-	if (::g->levelTimer == true)
+	if (Globals::g->levelTimer == true)
 	{
-		::g->levelTimeCount--;
-		if (!::g->levelTimeCount)
+		Globals::g->levelTimeCount--;
+		if (!Globals::g->levelTimeCount)
 			G_ExitLevel();
 	}
 
 	// DHM - Nerve :: FRAG COUNT
-	if ( ::g->deathmatch && ::g->levelFragCount > 0 ) {
+	if ( Globals::g->deathmatch && Globals::g->levelFragCount > 0 ) {
 		bool fragCountHit = false;
 
 		for ( int i=0; i<MAXPLAYERS; i++ ) {
-			if ( ::g->playeringame[i] ) {
-				if ( PlayerFrags(i) >= ::g->levelFragCount ) {
+			if ( Globals::g->playeringame[i] ) {
+				if ( PlayerFrags(i) >= Globals::g->levelFragCount ) {
 					fragCountHit = true;
 				}
 			}
@@ -1138,28 +1138,28 @@ void P_UpdateSpecials (void)
 	}
 
 	//	ANIMATE FLATS AND TEXTURES GLOBALLY
-	for (anim = ::g->anims ; anim < ::g->lastanim ; anim++)
+	for (anim = Globals::g->anims ; anim < Globals::g->lastanim ; anim++)
 	{
 		for (i=anim->basepic ; i<anim->basepic+anim->numpics ; i++)
 		{
-			pic = anim->basepic + ( (::g->leveltime/anim->speed + i)%anim->numpics );
+			pic = anim->basepic + ( (Globals::g->leveltime/anim->speed + i)%anim->numpics );
 			if (anim->istexture)
-				::g->texturetranslation[i] = pic;
+				Globals::g->texturetranslation[i] = pic;
 			else
-				::g->flattranslation[i] = pic;
+				Globals::g->flattranslation[i] = pic;
 		}
 	}
 
 
 	//	ANIMATE LINE SPECIALS
-	for (i = 0; i < ::g->numlinespecials; i++)
+	for (i = 0; i < Globals::g->numlinespecials; i++)
 	{
-		line = ::g->linespeciallist[i];
+		line = Globals::g->linespeciallist[i];
 		switch(line->special)
 		{
 		case 48:
 			// EFFECT FIRSTCOL SCROLL +
-			::g->sides[line->sidenum[0]].textureoffset += FRACUNIT;
+			Globals::g->sides[line->sidenum[0]].textureoffset += FRACUNIT;
 			break;
 		}
 	}
@@ -1167,30 +1167,30 @@ void P_UpdateSpecials (void)
 
 	//	DO BUTTONS
 	for (i = 0; i < MAXBUTTONS; i++)
-		if (::g->buttonlist[i].btimer)
+		if (Globals::g->buttonlist[i].btimer)
 		{
-			::g->buttonlist[i].btimer--;
-			if (!::g->buttonlist[i].btimer)
+			Globals::g->buttonlist[i].btimer--;
+			if (!Globals::g->buttonlist[i].btimer)
 			{
-				switch(::g->buttonlist[i].where)
+				switch(Globals::g->buttonlist[i].where)
 				{
 				case top:
-					::g->sides[::g->buttonlist[i].line->sidenum[0]].toptexture =
-						::g->buttonlist[i].btexture;
+					Globals::g->sides[Globals::g->buttonlist[i].line->sidenum[0]].toptexture =
+						Globals::g->buttonlist[i].btexture;
 					break;
 
 				case middle:
-					::g->sides[::g->buttonlist[i].line->sidenum[0]].midtexture =
-						::g->buttonlist[i].btexture;
+					Globals::g->sides[Globals::g->buttonlist[i].line->sidenum[0]].midtexture =
+						Globals::g->buttonlist[i].btexture;
 					break;
 
 				case bottom:
-					::g->sides[::g->buttonlist[i].line->sidenum[0]].bottomtexture =
-						::g->buttonlist[i].btexture;
+					Globals::g->sides[Globals::g->buttonlist[i].line->sidenum[0]].bottomtexture =
+						Globals::g->buttonlist[i].btexture;
 					break;
 				}
-				S_StartSound((mobj_t *)&::g->buttonlist[i].soundorg,sfx_swtchn);
-				memset(&::g->buttonlist[i],0,sizeof(button_t));
+				S_StartSound((mobj_t *)&Globals::g->buttonlist[i].soundorg,sfx_swtchn);
+				memset(&Globals::g->buttonlist[i],0,sizeof(button_t));
 			}
 		}
 
@@ -1215,7 +1215,7 @@ int EV_DoDonut(line_t*	line)
 	rtn = 0;
 	while ((secnum = P_FindSectorFromLineTag(line,secnum)) >= 0)
 	{
-		s1 = &::g->sectors[secnum];
+		s1 = &Globals::g->sectors[secnum];
 
 		// ALREADY MOVING?  IF SO, KEEP GOING...
 		if (s1->specialdata)
@@ -1287,49 +1287,49 @@ void P_SpawnSpecials (void)
 
 
 	// See if -TIMER needs to be used.
-	::g->levelTimer = false;
+	Globals::g->levelTimer = false;
 
 	i = M_CheckParm("-avg");
-	if (i && ::g->deathmatch)
+	if (i && Globals::g->deathmatch)
 	{
-		::g->levelTimer = true;
-		::g->levelTimeCount = 20 * 60 * TICRATE;
+		Globals::g->levelTimer = true;
+		Globals::g->levelTimeCount = 20 * 60 * TICRATE;
 	}
 
 	//i = M_CheckParm("-timer");
-	//if (i && ::g->deathmatch)
+	//if (i && Globals::g->deathmatch)
 #ifdef ID_ENABLE_DOOM_CLASSIC_NETWORKING
 	const int timeLimit = session->GetActingGameStateLobbyBase().GetMatchParms().gameTimeLimit;
 #else
 	const int timeLimit = 0;
 #endif
-	if (timeLimit != 0 && g->deathmatch)
+	if (timeLimit != 0 && Globals::g->deathmatch)
 	{
 		int	time;
-		//time = atoi(::g->myargv[i+1]) * 60 * 35;
+		//time = atoi(Globals::g->myargv[i+1]) * 60 * 35;
 		time = timeLimit * 60 * TICRATE;
-		::g->levelTimer = true;
-		::g->levelTimeCount = time;
+		Globals::g->levelTimer = true;
+		Globals::g->levelTimeCount = time;
 	}
 
 	//i = M_CheckParm("-fraglimit");
-	//if (i && ::g->deathmatch)
+	//if (i && Globals::g->deathmatch)
 #ifdef ID_ENABLE_DOOM_CLASSIC_NETWORKING
 	const int fragLimit = gameLocal->GetMatchParms().GetScoreLimit();
 #else
 	const int fragLimit = 0;
 #endif
-	if (fragLimit != 0 && ::g->deathmatch)
+	if (fragLimit != 0 && Globals::g->deathmatch)
 	{
-		//::g->levelFragCount = atoi(::g->myargv[i+1]);
-		::g->levelFragCount = fragLimit;
+		//Globals::g->levelFragCount = atoi(Globals::g->myargv[i+1]);
+		Globals::g->levelFragCount = fragLimit;
 	} else {
-		::g->levelFragCount = 0;
+		Globals::g->levelFragCount = 0;
 	}
 
 	//	Init special SECTORs.
-	sector = ::g->sectors;
-	for (i=0 ; i < ::g->numsectors ; i++, sector++)
+	sector = Globals::g->sectors;
+	for (i=0 ; i < Globals::g->numsectors ; i++, sector++)
 	{
 		if (!sector->special)
 			continue;
@@ -1363,7 +1363,7 @@ void P_SpawnSpecials (void)
 			break;
 		case 9:
 			// SECRET SECTOR
-			::g->totalsecret++;
+			Globals::g->totalsecret++;
 			break;
 
 		case 10:
@@ -1394,15 +1394,15 @@ void P_SpawnSpecials (void)
 
 
 	//	Init line EFFECTs
-	::g->numlinespecials = 0;
-	for (i = 0;i < ::g->numlines; i++)
+	Globals::g->numlinespecials = 0;
+	for (i = 0;i < Globals::g->numlines; i++)
 	{
-		switch(::g->lines[i].special)
+		switch(Globals::g->lines[i].special)
 		{
 		case 48:
 			// EFFECT FIRSTCOL SCROLL+
-			::g->linespeciallist[::g->numlinespecials] = &::g->lines[i];
-			::g->numlinespecials++;
+			Globals::g->linespeciallist[Globals::g->numlinespecials] = &Globals::g->lines[i];
+			Globals::g->numlinespecials++;
 			break;
 		}
 	}
@@ -1410,13 +1410,13 @@ void P_SpawnSpecials (void)
 
 	//	Init other misc stuff
 	for (i = 0;i < MAXCEILINGS;i++)
-		::g->activeceilings[i] = NULL;
+		Globals::g->activeceilings[i] = NULL;
 
 	for (i = 0;i < MAXPLATS;i++)
-		::g->activeplats[i] = NULL;
+		Globals::g->activeplats[i] = NULL;
 
 	for (i = 0;i < MAXBUTTONS;i++)
-		memset(&::g->buttonlist[i],0,sizeof(button_t));
+		memset(&Globals::g->buttonlist[i],0,sizeof(button_t));
 
 	// UNUSED: no horizonal sliders.
 	//	P_InitSlidingDoorFrames();

@@ -59,7 +59,7 @@ If you have questions concerning this license or the applicable additional terms
 
 void STlib_init(void)
 {
-    ::g->sttminus = (patch_t *) W_CacheLumpName("STTMINUS", PU_STATIC_SHARED);
+    Globals::g->sttminus = (patch_t *) W_CacheLumpName("STTMINUS", PU_STATIC_SHARED);
 }
 
 
@@ -146,7 +146,7 @@ STlib_drawNum
 
     // draw a minus sign if necessary
     if (neg)
-	V_DrawPatch(x - 8, n->y, FG, ::g->sttminus);
+	V_DrawPatch(x - 8, n->y, FG, Globals::g->sttminus);
 }
 
 

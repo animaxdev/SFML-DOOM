@@ -154,24 +154,24 @@ void HUlib_eraseTextLine(hu_textline_t* l)
     // and the text must either need updating or refreshing
     // (because of a recent change back from the automap)
 
-    if (!::g->automapactive &&
-	::g->viewwindowx && l->needsupdate)
+    if (!Globals::g->automapactive &&
+	Globals::g->viewwindowx && l->needsupdate)
     {
 	lh = SHORT(l->f[0]->height) + 1;
 	for (y=l->y,yoffset=y*SCREENWIDTH ; y<l->y+lh ; y++,yoffset+=SCREENWIDTH)
 	{
-	    if (y < ::g->viewwindowy || y >= ::g->viewwindowy + ::g->viewheight)
+	    if (y < Globals::g->viewwindowy || y >= Globals::g->viewwindowy + Globals::g->viewheight)
 		R_VideoErase(yoffset, SCREENWIDTH); // erase entire line
 	    else
 	    {
-		R_VideoErase(yoffset, ::g->viewwindowx); // erase left border
-		R_VideoErase(yoffset + ::g->viewwindowx + ::g->viewwidth, ::g->viewwindowx);
+		R_VideoErase(yoffset, Globals::g->viewwindowx); // erase left border
+		R_VideoErase(yoffset + Globals::g->viewwindowx + Globals::g->viewwidth, Globals::g->viewwindowx);
 		// erase right border
 	    }
 	}
     }
 
-    ::g->lastautomapactive = ::g->automapactive;
+    Globals::g->lastautomapactive = Globals::g->automapactive;
     if (l->needsupdate) l->needsupdate--;
 
 }
@@ -244,7 +244,7 @@ void HUlib_drawSText(hu_stext_t* s)
     {
 	idx = s->cl - i;
 	if (idx < 0)
-	    idx += s->h; // handle queue of ::g->lines
+	    idx += s->h; // handle queue of Globals::g->lines
 	
 	l = &s->l[idx];
 

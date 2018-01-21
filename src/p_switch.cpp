@@ -113,17 +113,17 @@ void P_InitSwitchList(void)
 	
     episode = 1;
 
-	if (::g->gamemode == registered || ::g->gamemode == retail)
+	if (Globals::g->gamemode == registered || Globals::g->gamemode == retail)
 		episode = 2;
-    else if ( ::g->gamemode == commercial )
+    else if ( Globals::g->gamemode == commercial )
 	    episode = 3;
 		
     for (index = 0,i = 0;i < MAXSWITCHES;i++)
     {
 		if (!alphSwitchList[i].episode)
 		{
-			::g->numswitches = index/2;
-			::g->switchlist[index] = -1;
+			Globals::g->numswitches = index/2;
+			Globals::g->switchlist[index] = -1;
 			break;
 		}
 		
@@ -141,8 +141,8 @@ void P_InitSwitchList(void)
 		    
 			value = R_TextureNumForName(alphSwitchList[i].name1);
 	#endif
-			::g->switchlist[index++] = R_TextureNumForName(alphSwitchList[i].name1);
-			::g->switchlist[index++] = R_TextureNumForName(alphSwitchList[i].name2);
+			Globals::g->switchlist[index++] = R_TextureNumForName(alphSwitchList[i].name1);
+			Globals::g->switchlist[index++] = R_TextureNumForName(alphSwitchList[i].name2);
 		}
     }
 }
@@ -163,8 +163,8 @@ P_StartButton
     // See if button is already pressed
     for (i = 0;i < MAXBUTTONS;i++)
     {
-	if (::g->buttonlist[i].btimer
-	    && ::g->buttonlist[i].line == line)
+	if (Globals::g->buttonlist[i].btimer
+	    && Globals::g->buttonlist[i].line == line)
 	{
 	    
 	    return;
@@ -175,13 +175,13 @@ P_StartButton
     
     for (i = 0;i < MAXBUTTONS;i++)
     {
-	if (!::g->buttonlist[i].btimer)
+	if (!Globals::g->buttonlist[i].btimer)
 	{
-	    ::g->buttonlist[i].line = line;
-	    ::g->buttonlist[i].where = w;
-	    ::g->buttonlist[i].btexture = texture;
-	    ::g->buttonlist[i].btimer = time;
-	    ::g->buttonlist[i].degensoundorg = &line->frontsector->soundorg;
+	    Globals::g->buttonlist[i].line = line;
+	    Globals::g->buttonlist[i].where = w;
+	    Globals::g->buttonlist[i].btexture = texture;
+	    Globals::g->buttonlist[i].btimer = time;
+	    Globals::g->buttonlist[i].degensoundorg = &line->frontsector->soundorg;
 	    return;
 	}
     }
@@ -211,9 +211,9 @@ P_ChangeSwitchTexture
     if (!useAgain)
 	line->special = 0;
 
-    texTop = ::g->sides[line->sidenum[0]].toptexture;
-    texMid = ::g->sides[line->sidenum[0]].midtexture;
-    texBot = ::g->sides[line->sidenum[0]].bottomtexture;
+    texTop = Globals::g->sides[line->sidenum[0]].toptexture;
+    texMid = Globals::g->sides[line->sidenum[0]].midtexture;
+    texBot = Globals::g->sides[line->sidenum[0]].bottomtexture;
 	
     sound = sfx_swtchn;
 
@@ -221,39 +221,39 @@ P_ChangeSwitchTexture
     if (line->special == 11)                
 	sound = sfx_swtchx;
 	
-    for (i = 0;i < ::g->numswitches*2;i++)
+    for (i = 0;i < Globals::g->numswitches*2;i++)
     {
-	if (::g->switchlist[i] == texTop)
+	if (Globals::g->switchlist[i] == texTop)
 	{
-	    S_StartSound(::g->buttonlist->soundorg,sound);
-	    ::g->sides[line->sidenum[0]].toptexture = ::g->switchlist[i^1];
+	    S_StartSound(Globals::g->buttonlist->soundorg,sound);
+	    Globals::g->sides[line->sidenum[0]].toptexture = Globals::g->switchlist[i^1];
 
 	    if (useAgain)
-		P_StartButton(line,top,::g->switchlist[i],BUTTONTIME);
+		P_StartButton(line,top,Globals::g->switchlist[i],BUTTONTIME);
 
 	    return;
 	}
 	else
 	{
-	    if (::g->switchlist[i] == texMid)
+	    if (Globals::g->switchlist[i] == texMid)
 	    {
-		S_StartSound(::g->buttonlist->soundorg,sound);
-		::g->sides[line->sidenum[0]].midtexture = ::g->switchlist[i^1];
+		S_StartSound(Globals::g->buttonlist->soundorg,sound);
+		Globals::g->sides[line->sidenum[0]].midtexture = Globals::g->switchlist[i^1];
 
 		if (useAgain)
-		    P_StartButton(line, middle,::g->switchlist[i],BUTTONTIME);
+		    P_StartButton(line, middle,Globals::g->switchlist[i],BUTTONTIME);
 
 		return;
 	    }
 	    else
 	    {
-		if (::g->switchlist[i] == texBot)
+		if (Globals::g->switchlist[i] == texBot)
 		{
-		    S_StartSound(::g->buttonlist->soundorg,sound);
-		    ::g->sides[line->sidenum[0]].bottomtexture = ::g->switchlist[i^1];
+		    S_StartSound(Globals::g->buttonlist->soundorg,sound);
+		    Globals::g->sides[line->sidenum[0]].bottomtexture = Globals::g->switchlist[i^1];
 
 		    if (useAgain)
-			P_StartButton(line, bottom,::g->switchlist[i],BUTTONTIME);
+			P_StartButton(line, bottom,Globals::g->switchlist[i],BUTTONTIME);
 
 		    return;
 		}
@@ -270,7 +270,7 @@ P_ChangeSwitchTexture
 //
 // P_UseSpecialLine
 // Called when a thing uses a special line.
-// Only the front ::g->sides of ::g->lines are usable.
+// Only the front Globals::g->sides of Globals::g->lines are usable.
 //
 qboolean
 P_UseSpecialLine
@@ -280,7 +280,7 @@ P_UseSpecialLine
 {               
 
     // Err...
-    // Use the back ::g->sides of VERY SPECIAL ::g->lines...
+    // Use the back Globals::g->sides of VERY SPECIAL Globals::g->lines...
     if (side)
     {
 	switch(line->special)
@@ -359,7 +359,7 @@ P_UseSpecialLine
       case 11:
 	// Exit level
 	// DHM - Nerve :: Not in deathmatch, stay in level until timelimit or fraglimit
-	if ( !::g->deathmatch && ::g->gameaction != ga_completed ) {
+	if ( !Globals::g->deathmatch && Globals::g->gameaction != ga_completed ) {
 		P_ChangeSwitchTexture(line,0);
 		G_ExitLevel ();
 	}
@@ -433,7 +433,7 @@ P_UseSpecialLine
 	
       case 51:
 	// Secret EXIT
-	if ( !::g->deathmatch && ::g->gameaction != ga_completed ) {
+	if ( !Globals::g->deathmatch && Globals::g->gameaction != ga_completed ) {
 		P_ChangeSwitchTexture(line,0);
 		G_SecretExitLevel ();
 	}

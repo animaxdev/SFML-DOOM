@@ -97,7 +97,7 @@ static void compute_sample_increment( int32_t tempo,  int32_t divisions)
 		sample_increment, sample_correction);
 }
 
-/* Read variable-length number (7 bits per byte, MSB first) */
+/* Read variable-length number (7 bits per unsigned char, MSB first) */
 static  int32_t getvl(void)
 {
 	 int32_t l=0;
@@ -196,7 +196,7 @@ static MidiEventList *read_midi_event(void)
 		else
 		{
 			a=me;
-			if (a & 0x80) /* status byte */
+			if (a & 0x80) /* status unsigned char */
 			{
 				lastchan=a & 0x0F;
 				laststatus=(a>>4) & 0x07;
@@ -611,7 +611,7 @@ MidiEvent *read_midi_file(idFile * mfp,  int32_t *count,  int32_t *sp)
 	if (len > 6)
 	{
 		ctl->cmsg(CMSG_WARNING, VERB_NORMAL, 
-			"%s: MIDI file header size %ld bytes", 
+			"%s: MIDI file header size %ld unsigned chars", 
 			current_filename, len);
 		skip_local(len-6); /* skip_local the excess */
 	}
@@ -706,7 +706,7 @@ MidiEvent *read_midi_buffer(unsigned char* buffer, size_t length,  int32_t *coun
 	if (len > 6)
 	{
 		ctl->cmsg(CMSG_WARNING, VERB_NORMAL, 
-			"%s: MIDI file header size %ld bytes", 
+			"%s: MIDI file header size %ld unsigned chars", 
 			current_filename, len);
 		skip_local(len-6); /* skip_local the excess */
 	}

@@ -80,11 +80,11 @@ namespace {
 //
 // NETWORKING
 //
-int	DOOMPORT = 1002;	// DHM - Nerve :: On original XBox, ports 1000 - 1255 saved you a byte on every packet.  360 too?
+int	DOOMPORT = 1002;	// DHM - Nerve :: On original XBox, ports 1000 - 1255 saved you a unsigned char on every packet.  360 too?
 
 
 unsigned long GetServerIP() {
-	//return ::g->sendaddress[::g->doomcom.consoleplayer].sin_addr.s_addr;
+	//return Globals::g->sendaddress[Globals::g->doomcom.consoleplayer].sin_addr.s_addr;
     return 0;
 }
 
@@ -152,44 +152,44 @@ void I_InitNetwork (void)
 	//int a = 0;
 	//    struct hostent*	hostentry;	// host information entry
 
-	memset (&::g->doomcom, 0, sizeof(::g->doomcom) );
+	memset (&Globals::g->doomcom, 0, sizeof(Globals::g->doomcom) );
 
 	// set up for network
 	i = M_CheckParm ("-dup");
-	if (i && i< ::g->myargc-1)
+	if (i && i< Globals::g->myargc-1)
 	{
-		::g->doomcom.ticdup = ::g->myargv[i+1][0]-'0';
-		if (::g->doomcom.ticdup < 1)
-			::g->doomcom.ticdup = 1;
-		if (::g->doomcom.ticdup > 9)
-			::g->doomcom.ticdup = 9;
+		Globals::g->doomcom.ticdup = Globals::g->myargv[i+1][0]-'0';
+		if (Globals::g->doomcom.ticdup < 1)
+			Globals::g->doomcom.ticdup = 1;
+		if (Globals::g->doomcom.ticdup > 9)
+			Globals::g->doomcom.ticdup = 9;
 	}
 	else
-		::g->doomcom.ticdup = 1;
+		Globals::g->doomcom.ticdup = 1;
 
 	if (M_CheckParm ("-extratic"))
-		::g->doomcom.extratics = 1;
+		Globals::g->doomcom.extratics = 1;
 	else
-		::g->doomcom.extratics = 0;
+		Globals::g->doomcom.extratics = 0;
 
 	p = M_CheckParm ("-port");
-	if (p && p < ::g->myargc-1)
+	if (p && p < Globals::g->myargc-1)
 	{
-		DOOMPORT = atoi (::g->myargv[p+1]);
+		DOOMPORT = atoi (Globals::g->myargv[p+1]);
 		I_Printf ("using alternate port %i\n",DOOMPORT);
 	}
 
 	// parse network game options,
-	//  -net <::g->consoleplayer> <host> <host> ...
+	//  -net <Globals::g->consoleplayer> <host> <host> ...
 	i = M_CheckParm ("-net");
 	if (!i || !I_TrySetupNetwork())
 	{
 		// single player game
-		::g->netgame = false;
-		::g->doomcom.id = DOOMCOM_ID;
-		::g->doomcom.numplayers = ::g->doomcom.numnodes = 1;
-		::g->doomcom.deathmatch = false;
-		::g->doomcom.consoleplayer = 0;
+		Globals::g->netgame = false;
+		Globals::g->doomcom.id = DOOMCOM_ID;
+		Globals::g->doomcom.numplayers = Globals::g->doomcom.numnodes = 1;
+		Globals::g->doomcom.deathmatch = false;
+		Globals::g->doomcom.consoleplayer = 0;
 		return;
 	}
 
@@ -197,29 +197,29 @@ void I_InitNetwork (void)
 	netget = PacketGet;
 
 #ifdef ID_ENABLE_DOOM_CLASSIC_NETWORKING
-	::g->netgame = true;
+	Globals::g->netgame = true;
 
 	{
 		++i; // skip the '-net'
-		::g->doomcom.numnodes = 0;
-		::g->doomcom.consoleplayer = atoi( ::g->myargv[i] );
+		Globals::g->doomcom.numnodes = 0;
+		Globals::g->doomcom.consoleplayer = atoi( Globals::g->myargv[i] );
 		// skip the console number
 		++i;
-		::g->doomcom.numnodes = 0;
-		for (; i < ::g->myargc; ++i)
+		Globals::g->doomcom.numnodes = 0;
+		for (; i < Globals::g->myargc; ++i)
 		{
-			::g->sendaddress[::g->doomcom.numnodes].sin_family = AF_INET;
-			::g->sendaddress[::g->doomcom.numnodes].sin_port = htons(DOOMPORT);
+			Globals::g->sendaddress[Globals::g->doomcom.numnodes].sin_family = AF_INET;
+			Globals::g->sendaddress[Globals::g->doomcom.numnodes].sin_port = htons(DOOMPORT);
 			
 			// Pull out the port number.
-			const std::string ipAddressWithPort( ::g->myargv[i] );
+			const std::string ipAddressWithPort( Globals::g->myargv[i] );
 			const std::size_t colonPosition = ipAddressWithPort.find_last_of(':');
 			std::string ipOnly;
 
 			if( colonPosition != std::string::npos && colonPosition + 1 < ipAddressWithPort.size() ) {
 				const std::string portOnly( ipAddressWithPort.substr( colonPosition + 1 ) );
 
-				::g->sendaddress[::g->doomcom.numnodes].sin_port = htons( atoi( portOnly.c_str() ) );
+				Globals::g->sendaddress[Globals::g->doomcom.numnodes].sin_port = htons( atoi( portOnly.c_str() ) );
 
 				ipOnly = ipAddressWithPort.substr( 0, colonPosition );
 			} else {
@@ -234,24 +234,24 @@ void I_InitNetwork (void)
 				session->QuitMatch();
 				common->AddDialog( GDM_OPPONENT_CONNECTION_LOST, DIALOG_ACCEPT, NULL, NULL, false );
 			}
-			::g->sendaddress[::g->doomcom.numnodes].sin_addr.s_addr = ipAddress;
-			::g->doomcom.numnodes++;
+			Globals::g->sendaddress[Globals::g->doomcom.numnodes].sin_addr.s_addr = ipAddress;
+			Globals::g->doomcom.numnodes++;
 		}
 		
-		::g->doomcom.id = DOOMCOM_ID;
-		::g->doomcom.numplayers = ::g->doomcom.numnodes;
+		Globals::g->doomcom.id = DOOMCOM_ID;
+		Globals::g->doomcom.numplayers = Globals::g->doomcom.numnodes;
 	}
 
 	if ( globalNetworking ) {
 		// Setup sockets
-		::g->insocket = UDPsocket ();
-		BindToLocalPort (::g->insocket,htons(DOOMPORT));
+		Globals::g->insocket = UDPsocket ();
+		BindToLocalPort (Globals::g->insocket,htons(DOOMPORT));
 		
 		// PS3 call to enable non-blocking mode
 		int nonblocking = 1; // Non-zero is nonblocking mode.
-		setsockopt( ::g->insocket, SOL_SOCKET, SO_NBIO, &nonblocking, sizeof(nonblocking));
+		setsockopt( Globals::g->insocket, SOL_SOCKET, SO_NBIO, &nonblocking, sizeof(nonblocking));
 
-		::g->sendsocket = UDPsocket ();
+		Globals::g->sendsocket = UDPsocket ();
 
 		I_Printf( "[+] Setting up sockets for player %d\n", DoomLib::GetPlayer() );
 	}
@@ -265,15 +265,15 @@ void I_ShutdownNetwork( void ) {
 
 void I_NetCmd (void)
 {
-	if (::g->doomcom.command == CMD_SEND)
+	if (Globals::g->doomcom.command == CMD_SEND)
 	{
 		netsend ();
 	}
-	else if (::g->doomcom.command == CMD_GET)
+	else if (Globals::g->doomcom.command == CMD_GET)
 	{
 		netget ();
 	}
 	else
-		I_Error ("Bad net cmd: %i\n",::g->doomcom.command); 
+		I_Error ("Bad net cmd: %i\n",Globals::g->doomcom.command); 
 }
 

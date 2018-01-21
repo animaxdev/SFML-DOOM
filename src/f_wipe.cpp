@@ -77,29 +77,29 @@ wipe_initMelt
     int i, r;
     
     // copy start screen to main screen
-    memcpy(::g->wipe_scr, ::g->wipe_scr_start, width*height);
+    memcpy(Globals::g->wipe_scr, Globals::g->wipe_scr_start, width*height);
     
     // makes this wipe faster (in theory)
     // to have stuff in column-major format
-    wipe_shittyColMajorXform((short*)::g->wipe_scr_start, width/2, height);
-    wipe_shittyColMajorXform((short*)::g->wipe_scr_end, width/2, height);
+    wipe_shittyColMajorXform((short*)Globals::g->wipe_scr_start, width/2, height);
+    wipe_shittyColMajorXform((short*)Globals::g->wipe_scr_end, width/2, height);
     
     // setup initial column positions
-    // (::g->wipe_y<0 => not ready to scroll yet)
-    ::g->wipe_y = (int *) DoomLib::Z_Malloc(width*sizeof(int), PU_STATIC, 0);
+    // (Globals::g->wipe_y<0 => not ready to scroll yet)
+    Globals::g->wipe_y = (int *) DoomLib::Z_Malloc(width*sizeof(int), PU_STATIC, 0);
 
-    ::g->wipe_y[0] = -(M_Random()%16);
+    Globals::g->wipe_y[0] = -(M_Random()%16);
 
 	for (i=1;i<width;i++)
 	{
 		r = (M_Random()%3) - 1;
 
-		::g->wipe_y[i] = ::g->wipe_y[i-1] + r;
+		Globals::g->wipe_y[i] = Globals::g->wipe_y[i-1] + r;
 
-		if (::g->wipe_y[i] > 0)
-			::g->wipe_y[i] = 0;
-		else if (::g->wipe_y[i] == -16)
-			::g->wipe_y[i] = -15;
+		if (Globals::g->wipe_y[i] > 0)
+			Globals::g->wipe_y[i] = 0;
+		else if (Globals::g->wipe_y[i] == -16)
+			Globals::g->wipe_y[i] = -15;
 	}
 
     return 0;
@@ -121,20 +121,20 @@ int wipe_doMelt( int width, int height, int ticks ) {
 	{
 		for (i=0;i<width;i++)
 		{
-			if (::g->wipe_y[i]<0) {
+			if (Globals::g->wipe_y[i]<0) {
 
-				::g->wipe_y[i]++;
+				Globals::g->wipe_y[i]++;
 				done = false;
 			}
-			else if (::g->wipe_y[i] < height) {
+			else if (Globals::g->wipe_y[i] < height) {
 
-				dy = (::g->wipe_y[i] < 16 * GLOBAL_IMAGE_SCALER) ? ::g->wipe_y[i]+1 : 8 * GLOBAL_IMAGE_SCALER;
+				dy = (Globals::g->wipe_y[i] < 16 * GLOBAL_IMAGE_SCALER) ? Globals::g->wipe_y[i]+1 : 8 * GLOBAL_IMAGE_SCALER;
 
-				if (::g->wipe_y[i]+dy >= height)
-					dy = height - ::g->wipe_y[i];
+				if (Globals::g->wipe_y[i]+dy >= height)
+					dy = height - Globals::g->wipe_y[i];
 
-				s = &((short *)::g->wipe_scr_end)[i*height+::g->wipe_y[i]];
-				d = &((short *)::g->wipe_scr)[::g->wipe_y[i]*width+i];
+				s = &((short *)Globals::g->wipe_scr_end)[i*height+Globals::g->wipe_y[i]];
+				d = &((short *)Globals::g->wipe_scr)[Globals::g->wipe_y[i]*width+i];
 
 				idx = 0;
 				for (j=dy;j;j--)
@@ -143,13 +143,13 @@ int wipe_doMelt( int width, int height, int ticks ) {
 					idx += width;
 				}
 
-				::g->wipe_y[i] += dy;
+				Globals::g->wipe_y[i] += dy;
 
-				s = &((short *)::g->wipe_scr_start)[i*height];
-				d = &((short *)::g->wipe_scr)[::g->wipe_y[i]*width+i];
+				s = &((short *)Globals::g->wipe_scr_start)[i*height];
+				d = &((short *)Globals::g->wipe_scr)[Globals::g->wipe_y[i]*width+i];
 
 				idx = 0;
-				for (j=height-::g->wipe_y[i];j;j--)
+				for (j=height-Globals::g->wipe_y[i];j;j--)
 				{
 					d[idx] = *(s++);
 					idx += width;
@@ -169,8 +169,8 @@ wipe_exitMelt
   int	height,
   int	ticks )
 {
-    Z_Free(::g->wipe_y);
-	::g->wipe_y = NULL;
+    Z_Free(Globals::g->wipe_y);
+	Globals::g->wipe_y = NULL;
     return 0;
 }
 
@@ -181,8 +181,8 @@ wipe_StartScreen
   int	width,
   int	height )
 {
-    ::g->wipe_scr_start = ::g->screens[2];
-    I_ReadScreen(::g->wipe_scr_start);
+    Globals::g->wipe_scr_start = Globals::g->screens[2];
+    I_ReadScreen(Globals::g->wipe_scr_start);
     return 0;
 }
 
@@ -193,9 +193,9 @@ wipe_EndScreen
   int	width,
   int	height )
 {
-    ::g->wipe_scr_end = ::g->screens[3];
-    I_ReadScreen(::g->wipe_scr_end);
-    V_DrawBlock(x, y, 0, width, height, ::g->wipe_scr_start); // restore start scr.
+    Globals::g->wipe_scr_end = Globals::g->screens[3];
+    I_ReadScreen(Globals::g->wipe_scr_end);
+    V_DrawBlock(x, y, 0, width, height, Globals::g->wipe_scr_start); // restore start scr.
     return 0;
 }
 
@@ -210,10 +210,10 @@ wipe_ScreenWipe
 	int rc;
 
 	// initial stuff
-	if (!::g->go)
+	if (!Globals::g->go)
 	{
-		::g->go = 1;
-		::g->wipe_scr = ::g->screens[0];
+		Globals::g->go = 1;
+		Globals::g->wipe_scr = Globals::g->screens[0];
 
 		wipe_initMelt(width, height, ticks);
 	}
@@ -226,10 +226,10 @@ wipe_ScreenWipe
 	// final stuff
 	if (rc)
 	{
-		::g->go = 0;
+		Globals::g->go = 0;
 		wipe_exitMelt(width, height, ticks);
 	}
 
-	return !::g->go;
+	return !Globals::g->go;
 }
 

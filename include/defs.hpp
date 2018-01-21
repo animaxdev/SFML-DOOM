@@ -78,10 +78,10 @@ If you have questions concerning this license or the applicable additional terms
 #define F_PANINC	4
 #define M_ZOOMIN        ((int) (1.02*FRACUNIT))
 #define M_ZOOMOUT       ((int) (FRACUNIT/1.02))
-#define FTOM(x) FixedMul(((x)<<16),::g->scale_ftom)
-#define MTOF(x) (FixedMul((x),::g->scale_mtof)>>16)
-#define CXMTOF(x)  (::g->f_x + MTOF((x)-::g->m_x))
-#define CYMTOF(y)  (::g->f_y + (::g->f_h - MTOF((y)-::g->m_y)))
+#define FTOM(x) FixedMul(((x)<<16),Globals::g->scale_ftom)
+#define MTOF(x) (FixedMul((x),Globals::g->scale_mtof)>>16)
+#define CXMTOF(x)  (Globals::g->f_x + MTOF((x)-Globals::g->m_x))
+#define CYMTOF(y)  (Globals::g->f_y + (Globals::g->f_h - MTOF((y)-Globals::g->m_y)))
 #define LINE_NEVERSEE ML_DONTDRAW
 #define NUMPLYRLINES (sizeof(player_arrow)/sizeof(mline_t))
 #define NUMCHEATPLYRLINES (sizeof(cheat_player_arrow)/sizeof(mline_t))
@@ -90,10 +90,10 @@ If you have questions concerning this license or the applicable additional terms
 #define DOOUTCODE(oc, mx, my) \
 	(oc) = 0; \
 	if ((my) < 0) (oc) |= TOP; \
-	else if ((my) >= ::g->f_h) (oc) |= BOTTOM; \
+	else if ((my) >= Globals::g->f_h) (oc) |= BOTTOM; \
 	if ((mx) < 0) (oc) |= LEFT; \
-	else if ((mx) >= ::g->f_w) (oc) |= RIGHT;
-#define PUTDOT(xx,yy,cc) ::g->fb[(yy)*::g->f_w+(xx)]=(cc)
+	else if ((mx) >= Globals::g->f_w) (oc) |= RIGHT;
+#define PUTDOT(xx,yy,cc) Globals::g->fb[(yy)*Globals::g->f_w+(xx)]=(cc)
 // am_map.defs end // 
 //  d_main.defs begin // 
 #define	BGCOLOR		7
@@ -115,7 +115,7 @@ If you have questions concerning this license or the applicable additional terms
 // f_finale.defs end // 
 //  g_game.defs begin // 
 #define SAVESTRINGSIZE	64
-#define MAXPLMOVE		(::g->forwardmove[1]) 
+#define MAXPLMOVE		(Globals::g->forwardmove[1]) 
 #define TURBOTHRESHOLD	0x32
 #define SLOWTURNTICS	6 
 #define NUMKEYS		256 
@@ -124,19 +124,19 @@ If you have questions concerning this license or the applicable additional terms
 #define DEMOMARKER		0x80
 // g_game.defs end // 
 //  hu_lib.defs begin // 
-#define noterased ::g->viewwindowx
+#define noterased Globals::g->viewwindowx
 // hu_lib.defs end // 
 //  hu_stuff.defs begin // 
-#define HU_TITLE	(mapnames[(::g->gameepisode-1)*9+::g->gamemap-1])
-#define HU_TITLE2	(mapnames2[::g->gamemap-1])
-#define HU_TITLEP	(mapnamesp[::g->gamemap-1])
-#define HU_TITLET	(mapnamest[::g->gamemap-1])
+#define HU_TITLE	(mapnames[(Globals::g->gameepisode-1)*9+Globals::g->gamemap-1])
+#define HU_TITLE2	(mapnames2[Globals::g->gamemap-1])
+#define HU_TITLEP	(mapnamesp[Globals::g->gamemap-1])
+#define HU_TITLET	(mapnamest[Globals::g->gamemap-1])
 #define HU_TITLEHEIGHT	1
 #define HU_TITLEX	0
-#define HU_TITLEY	(167 - SHORT(::g->hu_font[0]->height))
+#define HU_TITLEY	(167 - SHORT(Globals::g->hu_font[0]->height))
 #define HU_INPUTTOGGLE	K_T
 #define HU_INPUTX	HU_MSGX
-#define HU_INPUTY	(HU_MSGY + HU_MSGHEIGHT*(SHORT(::g->hu_font[0]->height) +1))
+#define HU_INPUTY	(HU_MSGY + HU_MSGHEIGHT*(SHORT(Globals::g->hu_font[0]->height) +1))
 #define HU_INPUTWIDTH	64
 #define HU_INPUTHEIGHT	1
 #define QUEUESIZE		128
@@ -219,7 +219,7 @@ If you have questions concerning this license or the applicable additional terms
 #define BFGCELLS		40		
 // p_pspr.defs end // 
 //  p_saveg.defs begin // 
-#define PADSAVEP()	::g->save_p += (4 - ((int) ::g->save_p & 3)) & 3
+#define PADSAVEP()	Globals::g->save_p += (4 - ((int) Globals::g->save_p & 3)) & 3
 // p_saveg.defs end // 
 //  p_setup.defs begin // 
 #define MAX_DEATHMATCH_STARTS	10
@@ -277,7 +277,7 @@ If you have questions concerning this license or the applicable additional terms
 #define ST_X2				104
 #define ST_FX  			143
 #define ST_FY  			169
-#define ST_TALLNUMWIDTH		(::g->tallnum[0]->width)
+#define ST_TALLNUMWIDTH		(Globals::g->tallnum[0]->width)
 #define ST_NUMPAINFACES		5
 #define ST_NUMSTRAIGHTFACES	3
 #define ST_NUMTURNFACES		2
@@ -380,7 +380,7 @@ If you have questions concerning this license or the applicable additional terms
 #define ST_OUTWIDTH			52 
 #define ST_OUTHEIGHT		1
 #define ST_MAPWIDTH	\
-	(strlen(mapnames[(::g->gameepisode-1)*9+(::g->gamemap-1)]))
+	(strlen(mapnames[(Globals::g->gameepisode-1)*9+(Globals::g->gamemap-1)]))
 #define ST_MAPTITLEX \
 	(SCREENWIDTH - ST_MAPWIDTH * ST_CHATFONTWIDTH)
 #define ST_MAPTITLEY		0
@@ -411,7 +411,7 @@ If you have questions concerning this license or the applicable additional terms
 #define SP_TIMEX		16
 #define SP_TIMEY		(ORIGINAL_HEIGHT-32)
 #define NG_STATSY		50
-#define NG_STATSX		(32 + SHORT(::g->star->width)/2 + 32*!::g->dofrags)
+#define NG_STATSX		(32 + SHORT(Globals::g->star->width)/2 + 32*!Globals::g->dofrags)
 #define NG_SPACINGX    		64
 #define DM_MATRIXX		42
 #define DM_MATRIXY		68

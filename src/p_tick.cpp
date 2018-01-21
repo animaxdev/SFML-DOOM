@@ -54,7 +54,7 @@ If you have questions concerning this license or the applicable additional terms
 //
 void P_InitThinkers (void)
 {
-    ::g->thinkercap.prev = ::g->thinkercap.next  = &::g->thinkercap;
+    Globals::g->thinkercap.prev = Globals::g->thinkercap.next  = &Globals::g->thinkercap;
 }
 
 
@@ -66,10 +66,10 @@ void P_InitThinkers (void)
 //
 void P_AddThinker (thinker_t* thinker)
 {
-    ::g->thinkercap.prev->next = thinker;
-    thinker->next = &::g->thinkercap;
-    thinker->prev = ::g->thinkercap.prev;
-    ::g->thinkercap.prev = thinker;
+    Globals::g->thinkercap.prev->next = thinker;
+    thinker->next = &Globals::g->thinkercap;
+    thinker->prev = Globals::g->thinkercap.prev;
+    Globals::g->thinkercap.prev = thinker;
 }
 
 
@@ -104,8 +104,8 @@ void P_RunThinkers (void)
 {
     thinker_t*	currentthinker;
 
-    currentthinker = ::g->thinkercap.next;
-    while (currentthinker != &::g->thinkercap)
+    currentthinker = Globals::g->thinkercap.next;
+    while (currentthinker != &Globals::g->thinkercap)
     {
 		 if ( currentthinker->function.acv == (actionf_v)(-1) )
 		 {
@@ -128,34 +128,34 @@ void P_RunThinkers (void)
 //
 // P_Ticker
 //
-extern byte demoversion;
+extern unsigned char demoversion;
 
 void P_Ticker (void)
 {
     int		i;
     
     // run the tic
-    if (::g->paused)
+    if (Globals::g->paused)
 		return;
 
 	// don't think during wipe
-	if ( !::g->netgame && (!::g->demoplayback || demoversion == VERSION ) && ::g->wipe ) {
+	if ( !Globals::g->netgame && (!Globals::g->demoplayback || demoversion == VERSION ) && Globals::g->wipe ) {
 		return;
 	}
 
     // pause if in menu and at least one tic has been run
-    if ( !::g->netgame
-	 && ::g->menuactive
-	 && !::g->demoplayback
-	 && ::g->players[::g->consoleplayer].viewz != 1)
+    if ( !Globals::g->netgame
+	 && Globals::g->menuactive
+	 && !Globals::g->demoplayback
+	 && Globals::g->players[Globals::g->consoleplayer].viewz != 1)
     {
 	return;
     }
 
 
 	for (i=0 ; i<MAXPLAYERS ; i++) {
-		if (::g->playeringame[i]) {
-		    P_PlayerThink (&::g->players[i]);
+		if (Globals::g->playeringame[i]) {
+		    P_PlayerThink (&Globals::g->players[i]);
 		}
 	}
 
@@ -164,6 +164,6 @@ void P_Ticker (void)
     P_RespawnSpecials ();
 
     // for par times
-    ::g->leveltime++;	
+    Globals::g->leveltime++;	
 }
 

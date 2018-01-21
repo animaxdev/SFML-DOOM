@@ -84,7 +84,7 @@ If you have questions concerning this license or the applicable additional terms
 
 // Blocky mode, has default, 0 = high, 1 = normal
 
-// temp for ::g->screenblocks (0-9)
+// temp for Globals::g->screenblocks (0-9)
 
 // -1 = no quicksave slot picked!
 
@@ -187,7 +187,7 @@ void M_WriteText(int x, int y, char *string);
 int  M_StringWidth(char *string);
 int  M_StringHeight(char *string);
 void M_StartControlPanel(void);
-void M_StartMessage(char *string,messageRoutine_t routine,qboolean input);
+void M_StartMessage(char *string,Globals::messageRoutine_t routine,qboolean input);
 void M_StopMessage(void);
 void M_ClearMenus (void);
 
@@ -273,14 +273,14 @@ void M_ReadSaveStrings(void)
 //        handle = fileSystem->OpenFileRead ( name, false );
 //        if (handle == NULL)
 //        {
-//            strcpy(&::g->savegamestrings[i][0],EMPTYSTRING);
-//            ::g->LoadMenu[i].status = 0;
+//            strcpy(&Globals::g->savegamestrings[i][0],EMPTYSTRING);
+//            Globals::g->LoadMenu[i].status = 0;
 //            continue;
 //        }
-//        count = handle->Read( &::g->savegamestrings[i], SAVESTRINGSIZE );
+//        count = handle->Read( &Globals::g->savegamestrings[i], SAVESTRINGSIZE );
 //        fileSystem->CloseFile( handle );
-//        strcpy( ::g->savegamepaths[i], name );
-//        ::g->LoadMenu[i].status = 1;
+//        strcpy( Globals::g->savegamepaths[i], name );
+//        Globals::g->LoadMenu[i].status = 1;
 	}
 }
 
@@ -295,8 +295,8 @@ void M_DrawLoad(void)
 	V_DrawPatchDirect (72,28,0,(patch_t*)W_CacheLumpName("M_LOADG",PU_CACHE_SHARED));
 	for (i = 0;i < load_end; i++)
 	{
-		M_DrawSaveLoadBorder(::g->LoadDef.x,::g->LoadDef.y+LINEHEIGHT*i);
-		M_WriteText(::g->LoadDef.x,::g->LoadDef.y+LINEHEIGHT*i,::g->savegamestrings[i]);
+		M_DrawSaveLoadBorder(Globals::g->LoadDef.x,Globals::g->LoadDef.y+LINEHEIGHT*i);
+		M_WriteText(Globals::g->LoadDef.x,Globals::g->LoadDef.y+LINEHEIGHT*i,Globals::g->savegamestrings[i]);
 	}
 }
 
@@ -327,10 +327,10 @@ void M_DrawSaveLoadBorder(int x,int y)
 //
 void M_LoadSelect(int choice)
 {
-	if( ::g->gamemode != commercial ) {
-		G_LoadGame ( ::g->savegamepaths[ choice ] );
+	if( Globals::g->gamemode != commercial ) {
+		G_LoadGame ( Globals::g->savegamepaths[ choice ] );
 	} else {
-		strcpy( DoomLib::loadGamePath, ::g->savegamepaths[ choice ] );
+		strcpy( DoomLib::loadGamePath, Globals::g->savegamepaths[ choice ] );
 		DoomLib::SetCurrentExpansion( DoomLib::idealExpansion );
 		DoomLib::skipToLoad = true;
 	}
@@ -340,7 +340,7 @@ void M_LoadSelect(int choice)
 
 void M_LoadExpansion(int choice)
 {
-	::g->exp = choice;
+	Globals::g->exp = choice;
 
 	if( choice == 0 ) {
 		DoomLib::SetIdealExpansion( doom2 );
@@ -348,7 +348,7 @@ void M_LoadExpansion(int choice)
 		DoomLib::SetIdealExpansion( pack_nerve );
 	}
 
-	M_SetupNextMenu(&::g->LoadDef);
+	M_SetupNextMenu(&Globals::g->LoadDef);
 	M_ReadSaveStrings();
 }
 
@@ -357,16 +357,16 @@ void M_LoadExpansion(int choice)
 //
 void M_LoadGame (int choice)
 {
-	if (::g->netgame)
+	if (Globals::g->netgame)
 	{
 //        M_StartMessage(LOADNET,NULL,false);
 		return;
 	}
 
-	if (::g->gamemode == commercial) {
-		M_SetupNextMenu(&::g->LoadExpDef);
+	if (Globals::g->gamemode == commercial) {
+		M_SetupNextMenu(&Globals::g->LoadExpDef);
 	} else{
-		M_SetupNextMenu(&::g->LoadDef);
+		M_SetupNextMenu(&Globals::g->LoadDef);
 		M_ReadSaveStrings();
 	}
 	
@@ -383,14 +383,14 @@ void M_DrawSave(void)
 	V_DrawPatchDirect (72,28,0,(patch_t*)W_CacheLumpName("M_SAVEG",PU_CACHE_SHARED));
 	for (i = 0;i < load_end; i++)
 	{
-		M_DrawSaveLoadBorder(::g->LoadDef.x,::g->LoadDef.y+LINEHEIGHT*i);
-		M_WriteText(::g->LoadDef.x,::g->LoadDef.y+LINEHEIGHT*i,::g->savegamestrings[i]);
+		M_DrawSaveLoadBorder(Globals::g->LoadDef.x,Globals::g->LoadDef.y+LINEHEIGHT*i);
+		M_WriteText(Globals::g->LoadDef.x,Globals::g->LoadDef.y+LINEHEIGHT*i,Globals::g->savegamestrings[i]);
 	}
 
-	if (::g->saveStringEnter)
+	if (Globals::g->saveStringEnter)
 	{
-		i = M_StringWidth(::g->savegamestrings[::g->saveSlot]);
-		M_WriteText(::g->LoadDef.x + i,::g->LoadDef.y+LINEHEIGHT*::g->saveSlot,"_");
+		i = M_StringWidth(Globals::g->savegamestrings[Globals::g->saveSlot]);
+		M_WriteText(Globals::g->LoadDef.x + i,Globals::g->LoadDef.y+LINEHEIGHT*Globals::g->saveSlot,"_");
 	}
 }
 
@@ -399,12 +399,12 @@ void M_DrawSave(void)
 //
 void M_DoSave(int slot)
 {
-	G_SaveGame (slot,::g->savegamestrings[slot]);
+	G_SaveGame (slot,Globals::g->savegamestrings[slot]);
 	M_ClearMenus ();
 
 	// PICK QUICKSAVE SLOT YET?
-	if (::g->quickSaveSlot == -2)
-		::g->quickSaveSlot = slot;
+	if (Globals::g->quickSaveSlot == -2)
+		Globals::g->quickSaveSlot = slot;
 }
 
 //
@@ -420,22 +420,22 @@ void M_SaveSelect(int choice)
 	const char* s;
 	const ExpansionData* exp = DoomLib::GetCurrentExpansion();
 
-	switch ( ::g->gamemode )
+	switch ( Globals::g->gamemode )
 	{
 	case shareware:
 	case registered:
 	case retail:
-		s = (exp->mapNames[(::g->gameepisode-1)*9+::g->gamemap-1]);
+		s = (exp->mapNames[(Globals::g->gameepisode-1)*9+Globals::g->gamemap-1]);
 		break;
 	case commercial:
 	default:
-		s = (exp->mapNames[::g->gamemap-1]);
+		s = (exp->mapNames[Globals::g->gamemap-1]);
 		break;
 	}
 
-	::g->saveSlot = choice;	
-	strcpy(::g->savegamestrings[::g->saveSlot], s);
-	M_DoSave(::g->saveSlot);
+	Globals::g->saveSlot = choice;	
+	strcpy(Globals::g->savegamestrings[Globals::g->saveSlot], s);
+	M_DoSave(Globals::g->saveSlot);
 }
 
 //
@@ -443,24 +443,24 @@ void M_SaveSelect(int choice)
 //
 void M_SaveGame (int choice)
 {
-	if (!::g->usergame)
+	if (!Globals::g->usergame)
 	{
 //        M_StartMessage(SAVEDEAD,NULL,false);
 		return;
 	}
-	else if( ::g->plyr && ::g->plyr->mo && ::g->plyr->mo->health <= 0 ) {
+	else if( Globals::g->plyr && Globals::g->plyr->mo && Globals::g->plyr->mo->health <= 0 ) {
 //        M_StartMessage("you can't save if you're dead!\n\npress any button",NULL,false);
 		return;
 	}
 
 
-	if (::g->gamestate != GS_LEVEL)
+	if (Globals::g->gamestate != GS_LEVEL)
 		return;
 
 	// Reset back to what expansion we are currently playing.
 	DoomLib::SetIdealExpansion( DoomLib::expansionSelected );
 
-	M_SetupNextMenu(&::g->SaveDef);
+	M_SetupNextMenu(&Globals::g->SaveDef);
 	M_ReadSaveStrings();
 }
 
@@ -474,32 +474,32 @@ void M_QuickSaveResponse(int ch)
 {
 	if (ch == KEY_ENTER)
 	{
-		M_DoSave(::g->quickSaveSlot);
+		M_DoSave(Globals::g->quickSaveSlot);
 		S_StartSound(NULL,sfx_swtchx);
 	}
 }
 
 void M_QuickSave(void)
 {
-	if (!::g->usergame)
+	if (!Globals::g->usergame)
 	{
 		S_StartSound(NULL,sfx_oof);
 		return;
 	}
 
-	if (::g->gamestate != GS_LEVEL)
+	if (Globals::g->gamestate != GS_LEVEL)
 		return;
 
-	if (::g->quickSaveSlot < 0)
+	if (Globals::g->quickSaveSlot < 0)
 	{
 		M_StartControlPanel();
 		M_ReadSaveStrings();
-		M_SetupNextMenu(&::g->SaveDef);
-		::g->quickSaveSlot = -2;	// means to pick a slot now
+		M_SetupNextMenu(&Globals::g->SaveDef);
+		Globals::g->quickSaveSlot = -2;	// means to pick a slot now
 		return;
 	}
-//    sprintf(::g->tempstring,QSPROMPT,::g->savegamestrings[::g->quickSaveSlot]);
-	M_StartMessage(::g->tempstring,M_QuickSaveResponse,true);
+//    sprintf(Globals::g->tempstring,QSPROMPT,Globals::g->savegamestrings[Globals::g->quickSaveSlot]);
+	M_StartMessage(Globals::g->tempstring,M_QuickSaveResponse,true);
 }
 
 
@@ -511,7 +511,7 @@ void M_QuickLoadResponse(int ch)
 {
 	if (ch == KEY_ENTER)
 	{
-		M_LoadSelect(::g->quickSaveSlot);
+		M_LoadSelect(Globals::g->quickSaveSlot);
 		S_StartSound(NULL,sfx_swtchx);
 	}
 }
@@ -519,19 +519,19 @@ void M_QuickLoadResponse(int ch)
 
 void M_QuickLoad(void)
 {
-	if (::g->netgame)
+	if (Globals::g->netgame)
 	{
 //        M_StartMessage(QLOADNET,NULL,false);
 		return;
 	}
 
-	if (::g->quickSaveSlot < 0)
+	if (Globals::g->quickSaveSlot < 0)
 	{
 //        M_StartMessage(QSAVESPOT,NULL,false);
 		return;
 	}
-//    sprintf(::g->tempstring,QLPROMPT,::g->savegamestrings[::g->quickSaveSlot]);
-	M_StartMessage(::g->tempstring,M_QuickLoadResponse,true);
+//    sprintf(Globals::g->tempstring,QLPROMPT,Globals::g->savegamestrings[Globals::g->quickSaveSlot]);
+	M_StartMessage(Globals::g->tempstring,M_QuickLoadResponse,true);
 }
 
 
@@ -543,8 +543,8 @@ void M_QuickLoad(void)
 //
 void M_DrawReadThis1(void)
 {
-	::g->inhelpscreens = true;
-	switch ( ::g->gamemode )
+	Globals::g->inhelpscreens = true;
+	switch ( Globals::g->gamemode )
 	{
 	case commercial:
 		V_DrawPatchDirect (0,0,0,(patch_t*)W_CacheLumpName("HELP",PU_CACHE_SHARED));
@@ -567,8 +567,8 @@ void M_DrawReadThis1(void)
 //
 void M_DrawReadThis2(void)
 {
-	::g->inhelpscreens = true;
-	switch ( ::g->gamemode )
+	Globals::g->inhelpscreens = true;
+	switch ( Globals::g->gamemode )
 	{
 	case retail:
 	case commercial:
@@ -593,16 +593,16 @@ void M_DrawSound(void)
 {
 	V_DrawPatchDirect (60,38,0,(patch_t*)W_CacheLumpName("M_SVOL",PU_CACHE_SHARED));
 
-//    M_DrawThermo( ::g->SoundDef.x,::g->SoundDef.y+LINEHEIGHT*(sfx_vol+1),
+//    M_DrawThermo( Globals::g->SoundDef.x,Globals::g->SoundDef.y+LINEHEIGHT*(sfx_vol+1),
 //        16, s_volume_sound.GetInteger() );
 //
-//    M_DrawThermo(::g->SoundDef.x,::g->SoundDef.y+LINEHEIGHT*(music_vol+1),
+//    M_DrawThermo(Globals::g->SoundDef.x,Globals::g->SoundDef.y+LINEHEIGHT*(music_vol+1),
 //        16, s_volume_midi.GetInteger() );
 }
 
 void M_Sound(int choice)
 {
-	M_SetupNextMenu(&::g->SoundDef);
+	M_SetupNextMenu(&Globals::g->SoundDef);
 }
 
 void M_SfxVol(int choice)
@@ -666,16 +666,16 @@ void M_DrawNewGame(void)
 
 void M_NewGame(int choice)
 {
-	if (::g->netgame && !::g->demoplayback)
+	if (Globals::g->netgame && !Globals::g->demoplayback)
 	{
 //        M_StartMessage(NEWGAME,NULL,false);
 		return;
 	}
 
-	if ( ::g->gamemode == commercial )
-		M_SetupNextMenu(&::g->ExpDef); 
+	if ( Globals::g->gamemode == commercial )
+		M_SetupNextMenu(&Globals::g->ExpDef); 
 	else
-		M_SetupNextMenu(&::g->EpiDef);
+		M_SetupNextMenu(&Globals::g->EpiDef);
 }
 
 
@@ -693,7 +693,7 @@ void M_VerifyNightmare(int ch)
 	if (ch != KEY_ENTER)
 		return;
 
-	G_DeferedInitNew((skill_t)nightmare,::g->epi+1, 1);
+	G_DeferedInitNew((skill_t)nightmare,Globals::g->epi+1, 1);
 	M_ClearMenus ();
 }
 
@@ -706,35 +706,35 @@ void M_ChooseSkill(int choice)
 		return;
 	}
 	*/
-	if ( ::g->gamemode != commercial ) {
+	if ( Globals::g->gamemode != commercial ) {
 		static int startLevel = 1;
-		G_DeferedInitNew((skill_t)choice,::g->epi+1, startLevel);
+		G_DeferedInitNew((skill_t)choice,Globals::g->epi+1, startLevel);
 		M_ClearMenus ();
 	} else {
 		DoomLib::SetCurrentExpansion( DoomLib::idealExpansion );
 		DoomLib::skipToNew = true;
 		DoomLib::chosenSkill = choice;
-		DoomLib::chosenEpisode = ::g->epi+1;
+		DoomLib::chosenEpisode = Globals::g->epi+1;
 	}
 }
 
 void M_Episode(int choice)
 {
 	// Yet another hack...
-	if ( (::g->gamemode == registered)
+	if ( (Globals::g->gamemode == registered)
 		&& (choice > 2))
 	{
 		I_PrintfE("M_Episode: 4th episode requires UltimateDOOM\n");
 		choice = 0;
 	}
 
-	::g->epi = choice;
-	M_SetupNextMenu(&::g->NewDef);
+	Globals::g->epi = choice;
+	M_SetupNextMenu(&Globals::g->NewDef);
 }
 
 void M_Expansion(int choice)
 {
-	::g->exp = choice;
+	Globals::g->exp = choice;
 
 	if( choice == 0 ) {
 		DoomLib::SetIdealExpansion( doom2 );
@@ -742,7 +742,7 @@ void M_Expansion(int choice)
 		DoomLib::SetIdealExpansion( pack_nerve );
 	}
 
-	M_SetupNextMenu(&::g->NewDef);
+	M_SetupNextMenu(&Globals::g->NewDef);
 }
 
 //
@@ -771,32 +771,32 @@ void M_DrawOptions(void)
 {
 	V_DrawPatchDirect (108,15,0,(patch_t*)W_CacheLumpName("M_OPTTTL",PU_CACHE_SHARED));
 
-	//V_DrawPatchDirect (::g->OptionsDef.x + 175,::g->OptionsDef.y+LINEHEIGHT*detail,0,
-	//	(patch_t*)W_CacheLumpName(detailNames[::g->detailLevel],PU_CACHE_SHARED));
+	//V_DrawPatchDirect (Globals::g->OptionsDef.x + 175,Globals::g->OptionsDef.y+LINEHEIGHT*detail,0,
+	//	(patch_t*)W_CacheLumpName(detailNames[Globals::g->detailLevel],PU_CACHE_SHARED));
 
 //    int fullscreenOnOff = r_fullscreen.GetInteger() >= 1 ? 1 : 0;
 //
-//    V_DrawPatchDirect (::g->OptionsDef.x + 150,::g->OptionsDef.y+LINEHEIGHT*endgame,0,
+//    V_DrawPatchDirect (Globals::g->OptionsDef.x + 150,Globals::g->OptionsDef.y+LINEHEIGHT*endgame,0,
 //        (patch_t*)W_CacheLumpName(msgNames[fullscreenOnOff],PU_CACHE_SHARED));
 //
-//    V_DrawPatchDirect (::g->OptionsDef.x + 120,::g->OptionsDef.y+LINEHEIGHT*scrnsize,0,
+//    V_DrawPatchDirect (Globals::g->OptionsDef.x + 120,Globals::g->OptionsDef.y+LINEHEIGHT*scrnsize,0,
 //        (patch_t*)W_CacheLumpName(msgNames[in_useJoystick.GetInteger()],PU_CACHE_SHARED));
 //
-//    V_DrawPatchDirect (::g->OptionsDef.x + 120,::g->OptionsDef.y+LINEHEIGHT*messages,0,
+//    V_DrawPatchDirect (Globals::g->OptionsDef.x + 120,Globals::g->OptionsDef.y+LINEHEIGHT*messages,0,
 //        (patch_t*)W_CacheLumpName(msgNames[m_show_messages.GetInteger()],PU_CACHE_SHARED));
 //
 //    extern idCVar in_mouseSpeed;
 //    const int roundedMouseSpeed = M_GetMouseSpeedForMenu( in_mouseSpeed.GetFloat() );
 
-//    M_DrawThermo( ::g->OptionsDef.x, ::g->OptionsDef.y + LINEHEIGHT * ( mousesens + 1 ), 16, roundedMouseSpeed );
+//    M_DrawThermo( Globals::g->OptionsDef.x, Globals::g->OptionsDef.y + LINEHEIGHT * ( mousesens + 1 ), 16, roundedMouseSpeed );
 
-	//M_DrawThermo(::g->OptionsDef.x,::g->OptionsDef.y+LINEHEIGHT*(scrnsize+1),
-	//	9,::g->screenSize);
+	//M_DrawThermo(Globals::g->OptionsDef.x,Globals::g->OptionsDef.y+LINEHEIGHT*(scrnsize+1),
+	//	9,Globals::g->screenSize);
 }
 
 void M_Options(int choice)
 {
-	M_SetupNextMenu(&::g->OptionsDef);
+	M_SetupNextMenu(&Globals::g->OptionsDef);
 }
 
 
@@ -811,11 +811,11 @@ void M_ChangeMessages(int choice)
 //    m_show_messages.SetBool( !m_show_messages.GetBool() );
 //
 //    if (!m_show_messages.GetBool())
-//        ::g->players[::g->consoleplayer].message = MSGOFF;
+//        Globals::g->players[Globals::g->consoleplayer].message = MSGOFF;
 //    else
-//        ::g->players[::g->consoleplayer].message = MSGON ;
+//        Globals::g->players[Globals::g->consoleplayer].message = MSGON ;
 
-	::g->message_dontfuckwithme = true;
+	Globals::g->message_dontfuckwithme = true;
 }
 
 //
@@ -827,7 +827,7 @@ void M_ChangeGPad(int choice)
 	choice = 0;
 //    in_useJoystick.SetBool( !in_useJoystick.GetBool() );
 
-	::g->message_dontfuckwithme = true;
+	Globals::g->message_dontfuckwithme = true;
 }
 
 //
@@ -847,7 +847,7 @@ void M_EndGameResponse(int ch)
 	if (ch != KEY_ENTER)
 		return;
 
-	::g->currentMenu->lastOn = ::g->itemOn;
+	Globals::g->currentMenu->lastOn = Globals::g->itemOn;
 	M_ClearMenus ();
 	D_StartTitle ();
 }
@@ -855,13 +855,13 @@ void M_EndGameResponse(int ch)
 void M_EndGame(int choice)
 {
 	choice = 0;
-	if (!::g->usergame)
+	if (!Globals::g->usergame)
 	{
 		S_StartSound(NULL,sfx_oof);
 		return;
 	}
 
-	if (::g->netgame)
+	if (Globals::g->netgame)
 	{
 //        M_StartMessage(NETEND,NULL,false);
 		return;
@@ -889,7 +889,7 @@ void M_ReadThis2(int choice)
 void M_FinishReadThis(int choice)
 {
 	choice = 0;
-	M_SetupNextMenu(&::g->MainDef);
+	M_SetupNextMenu(&Globals::g->MainDef);
 }
 
 
@@ -906,7 +906,7 @@ void M_QuitResponse(int ch)
 
 void M_QuitDOOM(int choice)
 {
-	M_SetupNextMenu(&::g->QuitDef);
+	M_SetupNextMenu(&Globals::g->QuitDef);
 	//M_StartMessage("are you sure?\npress A to quit, or B to cancel",M_QuitResponse,true);
 	//common->SwitchToGame( DOOM3_BFG );
 }
@@ -917,7 +917,7 @@ void M_ExitGame(int choice)
 }
 
 void M_CancelExit(int choice) {
-	M_SetupNextMenu(&::g->MainDef);
+	M_SetupNextMenu(&Globals::g->MainDef);
 }
 
 void M_GameSelection(int choice)
@@ -956,19 +956,19 @@ void M_ChangeSensitivity(int choice)
 void M_ChangeDetail(int choice)
 {
 	choice = 0;
-	::g->detailLevel = 1 - ::g->detailLevel;
+	Globals::g->detailLevel = 1 - Globals::g->detailLevel;
 
 	// FIXME - does not work. Remove anyway?
 	I_PrintfE("M_ChangeDetail: low detail mode n.a.\n");
 
 	return;
 
-	/*R_SetViewSize (::g->screenblocks, ::g->detailLevel);
+	/*R_SetViewSize (Globals::g->screenblocks, Globals::g->detailLevel);
 
-	if (!::g->detailLevel)
-	::g->players[::g->consoleplayer].message = DETAILHI;
+	if (!Globals::g->detailLevel)
+	Globals::g->players[Globals::g->consoleplayer].message = DETAILHI;
 	else
-	::g->players[::g->consoleplayer].message = DETAILLO;*/
+	Globals::g->players[Globals::g->consoleplayer].message = DETAILLO;*/
 }
 
 
@@ -979,23 +979,23 @@ void M_SizeDisplay(int choice)
 	switch(choice)
 	{
 	case 0:
-		if (::g->screenSize > 7)
+		if (Globals::g->screenSize > 7)
 		{
-			::g->screenblocks--;
-			::g->screenSize--;
+			Globals::g->screenblocks--;
+			Globals::g->screenSize--;
 		}
 		break;
 	case 1:
-		if (::g->screenSize < 8)
+		if (Globals::g->screenSize < 8)
 		{
-			::g->screenblocks++;
-			::g->screenSize++;
+			Globals::g->screenblocks++;
+			Globals::g->screenSize++;
 		}
 		break;
 	}
 
 
-	R_SetViewSize (::g->screenblocks, ::g->detailLevel);
+	R_SetViewSize (Globals::g->screenblocks, Globals::g->detailLevel);
 }
 
 
@@ -1052,15 +1052,15 @@ M_DrawSelCell
 void
 M_StartMessage
 ( char*		string,
- messageRoutine_t routine,
+ Globals::messageRoutine_t routine,
  qboolean	input )
 {
-	::g->messageLastMenuActive = ::g->menuactive;
-	::g->messageToPrint = 1;
-	::g->messageString = string;
-	::g->messageRoutine = (messageRoutine_t)routine;
-	::g->messageNeedsInput = input;
-	::g->menuactive = true;
+	Globals::g->messageLastMenuActive = Globals::g->menuactive;
+	Globals::g->messageToPrint = 1;
+	Globals::g->messageString = string;
+	Globals::g->messageRoutine = (Globals::messageRoutine_t)routine;
+	Globals::g->messageNeedsInput = input;
+	Globals::g->menuactive = true;
 	return;
 }
 
@@ -1068,14 +1068,14 @@ M_StartMessage
 
 void M_StopMessage(void)
 {
-	::g->menuactive = ::g->messageLastMenuActive;
-	::g->messageToPrint = 0;
+	Globals::g->menuactive = Globals::g->messageLastMenuActive;
+	Globals::g->messageToPrint = 0;
 }
 
 
 
 //
-// Find string width from ::g->hu_font chars
+// Find string width from Globals::g->hu_font chars
 //
 int M_StringWidth(char* string)
 {
@@ -1089,7 +1089,7 @@ int M_StringWidth(char* string)
 		if (c < 0 || c >= HU_FONTSIZE)
 			w += 4;
 		else
-			w += SHORT (::g->hu_font[c]->width);
+			w += SHORT (Globals::g->hu_font[c]->width);
 	}
 
 	return w;
@@ -1098,13 +1098,13 @@ int M_StringWidth(char* string)
 
 
 //
-//      Find string height from ::g->hu_font chars
+//      Find string height from Globals::g->hu_font chars
 //
 int M_StringHeight(char* string)
 {
 	unsigned int             i;
 	int             h;
-	int             height = SHORT(::g->hu_font[0]->height);
+	int             height = SHORT(Globals::g->hu_font[0]->height);
 
 	h = height;
 	for (i = 0;i < strlen(string);i++)
@@ -1116,7 +1116,7 @@ int M_StringHeight(char* string)
 
 
 //
-//      Write a string using the ::g->hu_font
+//      Write a string using the Globals::g->hu_font
 //
 void
 M_WriteText
@@ -1154,10 +1154,10 @@ M_WriteText
 			continue;
 		}
 
-		w = SHORT (::g->hu_font[c]->width);
+		w = SHORT (Globals::g->hu_font[c]->width);
 		if (cx+w > SCREENWIDTH)
 			break;
-		V_DrawPatchDirect(cx, cy, 0, ::g->hu_font[c]);
+		V_DrawPatchDirect(cx, cy, 0, Globals::g->hu_font[c]);
 		cx+=w;
 	}
 }
@@ -1178,83 +1178,83 @@ qboolean M_Responder (event_t* ev)
 
 	ch = -1;
 
-	if (ev->type == ev_joystick && ::g->joywait < I_GetTime())
+	if (ev->type == ev_joystick && Globals::g->joywait < I_GetTime())
 	{
 		if (ev->data3 == -1)
 		{
 			ch = KEY_UPARROW;
-			::g->joywait = I_GetTime() + 5;
+			Globals::g->joywait = I_GetTime() + 5;
 		}
 		else if (ev->data3 == 1)
 		{
 			ch = KEY_DOWNARROW;
-			::g->joywait = I_GetTime() + 5;
+			Globals::g->joywait = I_GetTime() + 5;
 		}
 
 		if (ev->data2 == -1)
 		{
 			ch = KEY_LEFTARROW;
-			::g->joywait = I_GetTime() + 2;
+			Globals::g->joywait = I_GetTime() + 2;
 		}
 		else if (ev->data2 == 1)
 		{
 			ch = KEY_RIGHTARROW;
-			::g->joywait = I_GetTime() + 2;
+			Globals::g->joywait = I_GetTime() + 2;
 		}
 
 		if (ev->data1&1)
 		{
 			ch = KEY_ENTER;
-			::g->joywait = I_GetTime() + 5;
+			Globals::g->joywait = I_GetTime() + 5;
 		}
 		if (ev->data1&2)
 		{
 			ch = KEY_BACKSPACE;
-			::g->joywait = I_GetTime() + 5;
+			Globals::g->joywait = I_GetTime() + 5;
 		}
 	}
 	else
 	{
-		if (ev->type == ev_mouse && ::g->mousewait < I_GetTime())
+		if (ev->type == ev_mouse && Globals::g->mousewait < I_GetTime())
 		{
-			::g->mmenu_mousey += ev->data3;
-			if (::g->mmenu_mousey < ::g->lasty-30)
+			Globals::g->mmenu_mousey += ev->data3;
+			if (Globals::g->mmenu_mousey < Globals::g->lasty-30)
 			{
 				ch = KEY_DOWNARROW;
-				::g->mousewait = I_GetTime() + 5;
-				::g->mmenu_mousey = ::g->lasty -= 30;
+				Globals::g->mousewait = I_GetTime() + 5;
+				Globals::g->mmenu_mousey = Globals::g->lasty -= 30;
 			}
-			else if (::g->mmenu_mousey > ::g->lasty+30)
+			else if (Globals::g->mmenu_mousey > Globals::g->lasty+30)
 			{
 				ch = KEY_UPARROW;
-				::g->mousewait = I_GetTime() + 5;
-				::g->mmenu_mousey = ::g->lasty += 30;
+				Globals::g->mousewait = I_GetTime() + 5;
+				Globals::g->mmenu_mousey = Globals::g->lasty += 30;
 			}
 
-			::g->mmenu_mousex += ev->data2;
-			if (::g->mmenu_mousex < ::g->lastx-30)
+			Globals::g->mmenu_mousex += ev->data2;
+			if (Globals::g->mmenu_mousex < Globals::g->lastx-30)
 			{
 				ch = KEY_LEFTARROW;
-				::g->mousewait = I_GetTime() + 5;
-				::g->mmenu_mousex = ::g->lastx -= 30;
+				Globals::g->mousewait = I_GetTime() + 5;
+				Globals::g->mmenu_mousex = Globals::g->lastx -= 30;
 			}
-			else if (::g->mmenu_mousex > ::g->lastx+30)
+			else if (Globals::g->mmenu_mousex > Globals::g->lastx+30)
 			{
 				ch = KEY_RIGHTARROW;
-				::g->mousewait = I_GetTime() + 5;
-				::g->mmenu_mousex = ::g->lastx += 30;
+				Globals::g->mousewait = I_GetTime() + 5;
+				Globals::g->mmenu_mousex = Globals::g->lastx += 30;
 			}
 
 			if (ev->data1&1)
 			{
 				ch = KEY_ENTER;
-				::g->mousewait = I_GetTime() + 15;
+				Globals::g->mousewait = I_GetTime() + 15;
 			}
 
 			if (ev->data1&2)
 			{
 				ch = KEY_BACKSPACE;
-				::g->mousewait = I_GetTime() + 15;
+				Globals::g->mousewait = I_GetTime() + 15;
 			}
 		} else 
 	if (ev->type == ev_keydown)
@@ -1268,27 +1268,27 @@ qboolean M_Responder (event_t* ev)
 
 
 	// Save Game string input
-	if (::g->saveStringEnter)
+	if (Globals::g->saveStringEnter)
 	{
 		switch(ch)
 		{
 		case KEY_BACKSPACE:
-			if (::g->saveCharIndex > 0)
+			if (Globals::g->saveCharIndex > 0)
 			{
-				::g->saveCharIndex--;
-				::g->savegamestrings[::g->saveSlot][::g->saveCharIndex] = 0;
+				Globals::g->saveCharIndex--;
+				Globals::g->savegamestrings[Globals::g->saveSlot][Globals::g->saveCharIndex] = 0;
 			}
 			break;
 
 		case KEY_ESCAPE:
-			::g->saveStringEnter = 0;
-			strcpy(&::g->savegamestrings[::g->saveSlot][0],::g->saveOldString);
+			Globals::g->saveStringEnter = 0;
+			strcpy(&Globals::g->savegamestrings[Globals::g->saveSlot][0],Globals::g->saveOldString);
 			break;
 
 		case KEY_ENTER:
-			::g->saveStringEnter = 0;
-			if (::g->savegamestrings[::g->saveSlot][0])
-				M_DoSave(::g->saveSlot);
+			Globals::g->saveStringEnter = 0;
+			if (Globals::g->savegamestrings[Globals::g->saveSlot][0])
+				M_DoSave(Globals::g->saveSlot);
 			break;
 
 		default:
@@ -1297,12 +1297,12 @@ qboolean M_Responder (event_t* ev)
 				if (ch-HU_FONTSTART < 0 || ch-HU_FONTSTART >= HU_FONTSIZE)
 					break;
 			if (ch >= 32 && ch <= 127 &&
-				::g->saveCharIndex < SAVESTRINGSIZE-1 &&
-				M_StringWidth(::g->savegamestrings[::g->saveSlot]) <
+				Globals::g->saveCharIndex < SAVESTRINGSIZE-1 &&
+				M_StringWidth(Globals::g->savegamestrings[Globals::g->saveSlot]) <
 				(SAVESTRINGSIZE-2)*8)
 			{
-				::g->savegamestrings[::g->saveSlot][::g->saveCharIndex++] = ch;
-				::g->savegamestrings[::g->saveSlot][::g->saveCharIndex] = 0;
+				Globals::g->savegamestrings[Globals::g->saveSlot][Globals::g->saveCharIndex++] = ch;
+				Globals::g->savegamestrings[Globals::g->saveSlot][Globals::g->saveCharIndex] = 0;
 			}
 			break;
 		}
@@ -1310,40 +1310,40 @@ qboolean M_Responder (event_t* ev)
 	}
 
 	// Take care of any messages that need input
-	if (::g->messageToPrint)
+	if (Globals::g->messageToPrint)
 	{
-		if (::g->messageNeedsInput == true &&
+		if (Globals::g->messageNeedsInput == true &&
 			!(ch == KEY_ENTER || ch == KEY_BACKSPACE || ch == KEY_ESCAPE))
 			return false;
 
-		::g->menuactive = ::g->messageLastMenuActive;
-		::g->messageToPrint = 0;
-		if (::g->messageRoutine)
-			::g->messageRoutine(ch);
+		Globals::g->menuactive = Globals::g->messageLastMenuActive;
+		Globals::g->messageToPrint = 0;
+		if (Globals::g->messageRoutine)
+			Globals::g->messageRoutine(ch);
 
 		S_StartSound(NULL,sfx_swtchx);
 		return true;
 	}
 /*
-	if (::g->devparm && ch == KEY_F1)
+	if (Globals::g->devparm && ch == KEY_F1)
 	{
 		G_ScreenShot ();
 		return true;
 	}
 
 	// F-Keys
-	if (!::g->menuactive)
+	if (!Globals::g->menuactive)
 		switch(ch)
 	{
 		case KEY_MINUS:         // Screen size down
-			if (::g->automapactive || ::g->chat_on)
+			if (Globals::g->automapactive || Globals::g->chat_on)
 				return false;
 			//M_SizeDisplay(0);
 			S_StartSound(NULL,sfx_stnmov);
 			return true;
 
 		case KEY_EQUALS:        // Screen size up
-			if (::g->automapactive || ::g->chat_on)
+			if (Globals::g->automapactive || Globals::g->chat_on)
 				return false;
 			//M_SizeDisplay(1);
 			S_StartSound(NULL,sfx_stnmov);
@@ -1352,12 +1352,12 @@ qboolean M_Responder (event_t* ev)
 		case KEY_F1:            // Help key
 			M_StartControlPanel ();
 
-			if ( ::g->gamemode == retail )
-				::g->currentMenu = &::g->ReadDef2;
+			if ( Globals::g->gamemode == retail )
+				Globals::g->currentMenu = &Globals::g->ReadDef2;
 			else
-				::g->currentMenu = &::g->ReadDef1;
+				Globals::g->currentMenu = &Globals::g->ReadDef1;
 
-			::g->itemOn = 0;
+			Globals::g->itemOn = 0;
 			S_StartSound(NULL,sfx_swtchn);
 			return true;
 
@@ -1375,8 +1375,8 @@ qboolean M_Responder (event_t* ev)
 
 		case KEY_F4:            // Sound Volume
 			M_StartControlPanel ();
-			::g->currentMenu = &::g->SoundDef;
-			::g->itemOn = sfx_vol;
+			Globals::g->currentMenu = &Globals::g->SoundDef;
+			Globals::g->itemOn = sfx_vol;
 			S_StartSound(NULL,sfx_swtchn);
 			return true;
 
@@ -1411,20 +1411,20 @@ qboolean M_Responder (event_t* ev)
 			return true;
 
 		case KEY_F11:           // gamma toggle
-			::g->usegamma++;
-			if (::g->usegamma > 4)
-				::g->usegamma = 0;
-			::g->players[::g->consoleplayer].message = gammamsg[::g->usegamma];
-			I_SetPalette ((byte*)W_CacheLumpName ("PLAYPAL",PU_CACHE_SHARED));
+			Globals::g->usegamma++;
+			if (Globals::g->usegamma > 4)
+				Globals::g->usegamma = 0;
+			Globals::g->players[Globals::g->consoleplayer].message = gammamsg[Globals::g->usegamma];
+			I_SetPalette ((unsigned char*)W_CacheLumpName ("PLAYPAL",PU_CACHE_SHARED));
 			return true;
 
 	}
 */
 
 	// Pop-up menu?
-	if (!::g->menuactive)
+	if (!Globals::g->menuactive)
 	{
-		if (ch == KEY_ESCAPE && ( ::g->gamestate == GS_LEVEL || ::g->gamestate == GS_INTERMISSION || ::g->gamestate == GS_FINALE  ) )
+		if (ch == KEY_ESCAPE && ( Globals::g->gamestate == GS_LEVEL || Globals::g->gamestate == GS_INTERMISSION || Globals::g->gamestate == GS_FINALE  ) )
 		{
 			M_StartControlPanel ();
 
@@ -1441,54 +1441,54 @@ qboolean M_Responder (event_t* ev)
 	case KEY_DOWNARROW:
 		do
 		{
-			if (::g->itemOn+1 > ::g->currentMenu->numitems-1)
-				::g->itemOn = 0;
-			else ::g->itemOn++;
+			if (Globals::g->itemOn+1 > Globals::g->currentMenu->numitems-1)
+				Globals::g->itemOn = 0;
+			else Globals::g->itemOn++;
 			S_StartSound(NULL,sfx_pstop);
-		} while(::g->currentMenu->menuitems[::g->itemOn].status==-1);
+		} while(Globals::g->currentMenu->menuitems[Globals::g->itemOn].status==-1);
 		return true;
 
 	case KEY_UPARROW:
 		do
 		{
-			if (!::g->itemOn)
-				::g->itemOn = ::g->currentMenu->numitems-1;
-			else ::g->itemOn--;
+			if (!Globals::g->itemOn)
+				Globals::g->itemOn = Globals::g->currentMenu->numitems-1;
+			else Globals::g->itemOn--;
 			S_StartSound(NULL,sfx_pstop);
-		} while(::g->currentMenu->menuitems[::g->itemOn].status==-1);
+		} while(Globals::g->currentMenu->menuitems[Globals::g->itemOn].status==-1);
 		return true;
 
 	case KEY_LEFTARROW:
-		if (::g->currentMenu->menuitems[::g->itemOn].routine &&
-			::g->currentMenu->menuitems[::g->itemOn].status == 2)
+		if (Globals::g->currentMenu->menuitems[Globals::g->itemOn].routine &&
+			Globals::g->currentMenu->menuitems[Globals::g->itemOn].status == 2)
 		{
 			S_StartSound(NULL,sfx_stnmov);
-			::g->currentMenu->menuitems[::g->itemOn].routine(0);
+			Globals::g->currentMenu->menuitems[Globals::g->itemOn].routine(0);
 		}
 		return true;
 
 	case KEY_RIGHTARROW:
-		if (::g->currentMenu->menuitems[::g->itemOn].routine &&
-			::g->currentMenu->menuitems[::g->itemOn].status == 2)
+		if (Globals::g->currentMenu->menuitems[Globals::g->itemOn].routine &&
+			Globals::g->currentMenu->menuitems[Globals::g->itemOn].status == 2)
 		{
 			S_StartSound(NULL,sfx_stnmov);
-			::g->currentMenu->menuitems[::g->itemOn].routine(1);
+			Globals::g->currentMenu->menuitems[Globals::g->itemOn].routine(1);
 		}
 		return true;
 
 	case KEY_ENTER:
-		if (::g->currentMenu->menuitems[::g->itemOn].routine &&
-			::g->currentMenu->menuitems[::g->itemOn].status)
+		if (Globals::g->currentMenu->menuitems[Globals::g->itemOn].routine &&
+			Globals::g->currentMenu->menuitems[Globals::g->itemOn].status)
 		{
-			::g->currentMenu->lastOn = ::g->itemOn;
-			if (::g->currentMenu->menuitems[::g->itemOn].status == 2)
+			Globals::g->currentMenu->lastOn = Globals::g->itemOn;
+			if (Globals::g->currentMenu->menuitems[Globals::g->itemOn].status == 2)
 			{
-				::g->currentMenu->menuitems[::g->itemOn].routine(1);      // right arrow
+				Globals::g->currentMenu->menuitems[Globals::g->itemOn].routine(1);      // right arrow
 				S_StartSound(NULL,sfx_stnmov);
 			}
 			else
 			{
-				::g->currentMenu->menuitems[::g->itemOn].routine(::g->itemOn);
+				Globals::g->currentMenu->menuitems[Globals::g->itemOn].routine(Globals::g->itemOn);
 				S_StartSound(NULL,sfx_pistol);
 			}
 		}
@@ -1496,30 +1496,30 @@ qboolean M_Responder (event_t* ev)
 
 	case KEY_ESCAPE:
 	case KEY_BACKSPACE:
-		::g->currentMenu->lastOn = ::g->itemOn;
-		if (::g->currentMenu->prevMenu)
+		Globals::g->currentMenu->lastOn = Globals::g->itemOn;
+		if (Globals::g->currentMenu->prevMenu)
 		{
-			::g->currentMenu = ::g->currentMenu->prevMenu;
-			::g->itemOn = ::g->currentMenu->lastOn;
+			Globals::g->currentMenu = Globals::g->currentMenu->prevMenu;
+			Globals::g->itemOn = Globals::g->currentMenu->lastOn;
 			S_StartSound(NULL,sfx_swtchn);
-		} else if ( ::g->currentMenu == &::g->MainDef && ( !::g->demoplayback && ::g->gamestate != GS_DEMOSCREEN ) ) {
+		} else if ( Globals::g->currentMenu == &Globals::g->MainDef && ( !Globals::g->demoplayback && Globals::g->gamestate != GS_DEMOSCREEN ) ) {
 			M_ClearMenus();
-			::g->paused = false;
+			Globals::g->paused = false;
 		}
 		return true;
 
 	default:
-		for (i = ::g->itemOn+1;i < ::g->currentMenu->numitems;i++)
-			if (::g->currentMenu->menuitems[i].alphaKey == ch)
+		for (i = Globals::g->itemOn+1;i < Globals::g->currentMenu->numitems;i++)
+			if (Globals::g->currentMenu->menuitems[i].alphaKey == ch)
 			{
-				::g->itemOn = i;
+				Globals::g->itemOn = i;
 				S_StartSound(NULL,sfx_pstop);
 				return true;
 			}
-			for (i = 0;i <= ::g->itemOn;i++)
-				if (::g->currentMenu->menuitems[i].alphaKey == ch)
+			for (i = 0;i <= Globals::g->itemOn;i++)
+				if (Globals::g->currentMenu->menuitems[i].alphaKey == ch)
 				{
-					::g->itemOn = i;
+					Globals::g->itemOn = i;
 					S_StartSound(NULL,sfx_pstop);
 					return true;
 				}
@@ -1538,12 +1538,12 @@ qboolean M_Responder (event_t* ev)
 void M_StartControlPanel (void)
 {
 	// intro might call this repeatedly
-	if (::g->menuactive)
+	if (Globals::g->menuactive)
 		return;
 
-	::g->menuactive = 1;
-	::g->currentMenu = &::g->MainDef;
-	::g->itemOn = ::g->currentMenu->lastOn;
+	Globals::g->menuactive = 1;
+	Globals::g->currentMenu = &Globals::g->MainDef;
+	Globals::g->itemOn = Globals::g->currentMenu->lastOn;
 }
 
 
@@ -1559,62 +1559,62 @@ void M_Drawer (void)
 	char		string[40];
 	int			start;
 
-	::g->inhelpscreens = false;
+	Globals::g->inhelpscreens = false;
 
 
 	// Horiz. & Vertically center string and print it.
-	if (::g->messageToPrint)
+	if (Globals::g->messageToPrint)
 	{
 		start = 0;
-		::g->md_y = 100 - M_StringHeight(::g->messageString)/2;
-		while(*(::g->messageString+start))
+		Globals::g->md_y = 100 - M_StringHeight(Globals::g->messageString)/2;
+		while(*(Globals::g->messageString+start))
 		{
-			for (i = 0;i < strlen(::g->messageString+start);i++)
-				if (*(::g->messageString+start+i) == '\n')
+			for (i = 0;i < strlen(Globals::g->messageString+start);i++)
+				if (*(Globals::g->messageString+start+i) == '\n')
 				{
 					memset(string,0,40);
-					strncpy(string,::g->messageString+start,i);
+					strncpy(string,Globals::g->messageString+start,i);
 					start += i+1;
 					break;
 				}
 
-				if (i == strlen(::g->messageString+start))
+				if (i == strlen(Globals::g->messageString+start))
 				{
-					strcpy(string,::g->messageString+start);
+					strcpy(string,Globals::g->messageString+start);
 					start += i;
 				}
 
-				::g->md_x = 160 - M_StringWidth(string)/2;
-				M_WriteText(::g->md_x,::g->md_y,string);
-				::g->md_y += SHORT(::g->hu_font[0]->height);
+				Globals::g->md_x = 160 - M_StringWidth(string)/2;
+				M_WriteText(Globals::g->md_x,Globals::g->md_y,string);
+				Globals::g->md_y += SHORT(Globals::g->hu_font[0]->height);
 		}
 		return;
 	}
 
 
-	if (!::g->menuactive)
+	if (!Globals::g->menuactive)
 		return;
 
-	if (::g->currentMenu->routine)
-		::g->currentMenu->routine();         // call Draw routine
+	if (Globals::g->currentMenu->routine)
+		Globals::g->currentMenu->routine();         // call Draw routine
 
 	// DRAW MENU
-	::g->md_x = ::g->currentMenu->x;
-	::g->md_y = ::g->currentMenu->y;
-	max = ::g->currentMenu->numitems;
+	Globals::g->md_x = Globals::g->currentMenu->x;
+	Globals::g->md_y = Globals::g->currentMenu->y;
+	max = Globals::g->currentMenu->numitems;
 
 	for (i=0;i<max;i++)
 	{
-		if (::g->currentMenu->menuitems[i].name[0])
-			V_DrawPatchDirect (::g->md_x,::g->md_y,0,
-			(patch_t*)W_CacheLumpName(::g->currentMenu->menuitems[i].name ,PU_CACHE_SHARED));
-		::g->md_y += LINEHEIGHT;
+		if (Globals::g->currentMenu->menuitems[i].name[0])
+			V_DrawPatchDirect (Globals::g->md_x,Globals::g->md_y,0,
+			(patch_t*)W_CacheLumpName(Globals::g->currentMenu->menuitems[i].name ,PU_CACHE_SHARED));
+		Globals::g->md_y += LINEHEIGHT;
 	}
 
 
 	// DRAW SKULL
-	V_DrawPatchDirect(::g->md_x + SKULLXOFF,::g->currentMenu->y - 5 + ::g->itemOn*LINEHEIGHT, 0,
-		(patch_t*)W_CacheLumpName(skullName[::g->whichSkull],PU_CACHE_SHARED));
+	V_DrawPatchDirect(Globals::g->md_x + SKULLXOFF,Globals::g->currentMenu->y - 5 + Globals::g->itemOn*LINEHEIGHT, 0,
+		(patch_t*)W_CacheLumpName(skullName[Globals::g->whichSkull],PU_CACHE_SHARED));
 }
 
 
@@ -1623,9 +1623,9 @@ void M_Drawer (void)
 //
 void M_ClearMenus (void)
 {
-	::g->menuactive = 0;
-	// if (!::g->netgame && ::g->usergame && ::g->paused)
-	//       ::g->sendpause = true;
+	Globals::g->menuactive = 0;
+	// if (!Globals::g->netgame && Globals::g->usergame && Globals::g->paused)
+	//       Globals::g->sendpause = true;
 }
 
 
@@ -1636,8 +1636,8 @@ void M_ClearMenus (void)
 //
 void M_SetupNextMenu(menu_t *menudef)
 {
-	::g->currentMenu = menudef;
-	::g->itemOn = ::g->currentMenu->lastOn;
+	Globals::g->currentMenu = menudef;
+	Globals::g->itemOn = Globals::g->currentMenu->lastOn;
 }
 
 
@@ -1646,10 +1646,10 @@ void M_SetupNextMenu(menu_t *menudef)
 //
 void M_Ticker (void)
 {
-	if (--::g->skullAnimCounter <= 0)
+	if (--Globals::g->skullAnimCounter <= 0)
 	{
-		::g->whichSkull ^= 1;
-		::g->skullAnimCounter = 8;
+		Globals::g->whichSkull ^= 1;
+		Globals::g->skullAnimCounter = 8;
 	}
 }
 
@@ -1660,42 +1660,42 @@ void M_Ticker (void)
 void M_Init (void)
 {	
 
-	::g->currentMenu = &::g->MainDef;
-	::g->menuactive = 1;
-	::g->itemOn = ::g->currentMenu->lastOn;
-	::g->whichSkull = 0;
-	::g->skullAnimCounter = 10;
-	::g->screenSize = ::g->screenblocks - 3;
-	::g->messageToPrint = 0;
-	::g->messageString = NULL;
-	::g->messageLastMenuActive = ::g->menuactive;
-	::g->quickSaveSlot = -1;
+	Globals::g->currentMenu = &Globals::g->MainDef;
+	Globals::g->menuactive = 1;
+	Globals::g->itemOn = Globals::g->currentMenu->lastOn;
+	Globals::g->whichSkull = 0;
+	Globals::g->skullAnimCounter = 10;
+	Globals::g->screenSize = Globals::g->screenblocks - 3;
+	Globals::g->messageToPrint = 0;
+	Globals::g->messageString = NULL;
+	Globals::g->messageLastMenuActive = Globals::g->menuactive;
+	Globals::g->quickSaveSlot = -1;
 
 	// Here we could catch other version dependencies,
 	//  like HELP1/2, and four episodes.
 
 
-	switch ( ::g->gamemode )
+	switch ( Globals::g->gamemode )
 	{
 	case commercial:
 		// This is used because DOOM 2 had only one HELP
 		//  page. I use CREDIT as second page now, but
 		//  kept this hack for educational purposes.
-		//::g->MainMenu[readthis] = ::g->MainMenu[quitdoom];
-		//::g->MainDef.numitems--;
-		::g->MainDef.y += 8;
-		::g->NewDef.prevMenu = &::g->MainDef;
-		//::g->ReadDef1.routine = M_DrawReadThis1;
-		//::g->ReadDef1.x = 330;
-		//::g->ReadDef1.y = 165;
-		//::g->ReadMenu1[0].routine = M_FinishReadThis;
+		//Globals::g->MainMenu[readthis] = Globals::g->MainMenu[quitdoom];
+		//Globals::g->MainDef.numitems--;
+		Globals::g->MainDef.y += 8;
+		Globals::g->NewDef.prevMenu = &Globals::g->MainDef;
+		//Globals::g->ReadDef1.routine = M_DrawReadThis1;
+		//Globals::g->ReadDef1.x = 330;
+		//Globals::g->ReadDef1.y = 165;
+		//Globals::g->ReadMenu1[0].routine = M_FinishReadThis;
 		break;
 	case shareware:
 		// Episode 2 and 3 are handled,
 		//  branching to an ad screen.
 	case registered:
 		// We need to remove the fourth episode.
-		::g->EpiDef.numitems--;
+		Globals::g->EpiDef.numitems--;
 		break;
 	case retail:
 		// We are fine.

@@ -72,15 +72,15 @@ namespace
 
 
 // scale on entry
-// how much the automap moves window per tic in frame-::g->buffer coordinates
+// how much the automap moves window per tic in frame-Globals::g->buffer coordinates
 // moves 140 pixels in 1 second
 // how much zoom-in per tic
 // goes to 2x in 1 second
 // how much zoom-out per tic
 // pulls out to 0.5x in 1 second
 
-// translates between frame-::g->buffer and map distances
-// translates between frame-::g->buffer and map coordinates
+// translates between frame-Globals::g->buffer and map distances
+// translates between frame-Globals::g->buffer and map coordinates
 
 // the following is crap
 
@@ -177,8 +177,8 @@ mline_t thintriangle_guy[] =
 
 // old location used by the Follower routine
 
-// used by MTOF to scale from map-to-frame-::g->buffer coords
-// used by FTOM to scale from frame-::g->buffer-to-map coords (=1/::g->scale_mtof)
+// used by MTOF to scale from map-to-frame-Globals::g->buffer coords
+// used by FTOM to scale from frame-Globals::g->buffer-to-map coords (=1/Globals::g->scale_mtof)
 
 
 
@@ -190,7 +190,7 @@ const unsigned char cheat_amap_seq[] =
 cheatseq_t cheat_amap = cheatseq_t( cheat_amap_seq, 0 );
 
 
-//extern byte ::g->screens[][SCREENWIDTH*SCREENHEIGHT];
+//extern unsigned char Globals::g->screens[][SCREENWIDTH*SCREENHEIGHT];
 
 
 
@@ -226,14 +226,14 @@ AM_getIslope
 //
 void AM_activateNewScale(void)
 {
-	::g->m_x += ::g->m_w/2;
-	::g->m_y += ::g->m_h/2;
-	::g->m_w = FTOM(::g->f_w);
-	::g->m_h = FTOM(::g->f_h);
-	::g->m_x -= ::g->m_w/2;
-	::g->m_y -= ::g->m_h/2;
-	::g->m_x2 = ::g->m_x + ::g->m_w;
-	::g->m_y2 = ::g->m_y + ::g->m_h;
+	Globals::g->m_x += Globals::g->m_w/2;
+	Globals::g->m_y += Globals::g->m_h/2;
+	Globals::g->m_w = FTOM(Globals::g->f_w);
+	Globals::g->m_h = FTOM(Globals::g->f_h);
+	Globals::g->m_x -= Globals::g->m_w/2;
+	Globals::g->m_y -= Globals::g->m_h/2;
+	Globals::g->m_x2 = Globals::g->m_x + Globals::g->m_w;
+	Globals::g->m_y2 = Globals::g->m_y + Globals::g->m_h;
 }
 
 //
@@ -241,10 +241,10 @@ void AM_activateNewScale(void)
 //
 void AM_saveScaleAndLoc(void)
 {
-	::g->old_m_x = ::g->m_x;
-	::g->old_m_y = ::g->m_y;
-	::g->old_m_w = ::g->m_w;
-	::g->old_m_h = ::g->m_h;
+	Globals::g->old_m_x = Globals::g->m_x;
+	Globals::g->old_m_y = Globals::g->m_y;
+	Globals::g->old_m_w = Globals::g->m_w;
+	Globals::g->old_m_h = Globals::g->m_h;
 }
 
 //
@@ -253,22 +253,22 @@ void AM_saveScaleAndLoc(void)
 void AM_restoreScaleAndLoc(void)
 {
 
-	::g->m_w = ::g->old_m_w;
-	::g->m_h = ::g->old_m_h;
-	if (!::g->followplayer)
+	Globals::g->m_w = Globals::g->old_m_w;
+	Globals::g->m_h = Globals::g->old_m_h;
+	if (!Globals::g->followplayer)
 	{
-		::g->m_x = ::g->old_m_x;
-		::g->m_y = ::g->old_m_y;
+		Globals::g->m_x = Globals::g->old_m_x;
+		Globals::g->m_y = Globals::g->old_m_y;
 	} else {
-		::g->m_x = ::g->amap_plr->mo->x - ::g->m_w/2;
-		::g->m_y = ::g->amap_plr->mo->y - ::g->m_h/2;
+		Globals::g->m_x = Globals::g->amap_plr->mo->x - Globals::g->m_w/2;
+		Globals::g->m_y = Globals::g->amap_plr->mo->y - Globals::g->m_h/2;
 	}
-	::g->m_x2 = ::g->m_x + ::g->m_w;
-	::g->m_y2 = ::g->m_y + ::g->m_h;
+	Globals::g->m_x2 = Globals::g->m_x + Globals::g->m_w;
+	Globals::g->m_y2 = Globals::g->m_y + Globals::g->m_h;
 
 	// Change the scaling multipliers
-	::g->scale_mtof = FixedDiv(::g->f_w<<FRACBITS, ::g->m_w);
-	::g->scale_ftom = FixedDiv(FRACUNIT, ::g->scale_mtof);
+	Globals::g->scale_mtof = FixedDiv(Globals::g->f_w<<FRACBITS, Globals::g->m_w);
+	Globals::g->scale_ftom = FixedDiv(FRACUNIT, Globals::g->scale_mtof);
 }
 
 //
@@ -276,9 +276,9 @@ void AM_restoreScaleAndLoc(void)
 //
 void AM_addMark(void)
 {
-	::g->markpoints[::g->markpointnum].x = ::g->m_x + ::g->m_w/2;
-	::g->markpoints[::g->markpointnum].y = ::g->m_y + ::g->m_h/2;
-	::g->markpointnum = (::g->markpointnum + 1) % AM_NUMMARKPOINTS;
+	Globals::g->markpoints[Globals::g->markpointnum].x = Globals::g->m_x + Globals::g->m_w/2;
+	Globals::g->markpoints[Globals::g->markpointnum].y = Globals::g->m_y + Globals::g->m_h/2;
+	Globals::g->markpointnum = (Globals::g->markpointnum + 1) % AM_NUMMARKPOINTS;
 
 }
 
@@ -292,33 +292,33 @@ void AM_findMinMaxBoundaries(void)
 	fixed_t a;
 	fixed_t b;
 
-	::g->min_x = ::g->min_y =  MAXINT;
-	::g->max_x = ::g->max_y = -MAXINT;
+	Globals::g->min_x = Globals::g->min_y =  MAXINT;
+	Globals::g->max_x = Globals::g->max_y = -MAXINT;
 
-	for (i=0; i < ::g->numvertexes; i++)
+	for (i=0; i < Globals::g->numvertexes; i++)
 	{
-		if (::g->vertexes[i].x < ::g->min_x)
-			::g->min_x = ::g->vertexes[i].x;
-		else if (::g->vertexes[i].x > ::g->max_x)
-			::g->max_x = ::g->vertexes[i].x;
+		if (Globals::g->vertexes[i].x < Globals::g->min_x)
+			Globals::g->min_x = Globals::g->vertexes[i].x;
+		else if (Globals::g->vertexes[i].x > Globals::g->max_x)
+			Globals::g->max_x = Globals::g->vertexes[i].x;
 
-		if (::g->vertexes[i].y < ::g->min_y)
-			::g->min_y = ::g->vertexes[i].y;
-		else if (::g->vertexes[i].y > ::g->max_y)
-			::g->max_y = ::g->vertexes[i].y;
+		if (Globals::g->vertexes[i].y < Globals::g->min_y)
+			Globals::g->min_y = Globals::g->vertexes[i].y;
+		else if (Globals::g->vertexes[i].y > Globals::g->max_y)
+			Globals::g->max_y = Globals::g->vertexes[i].y;
 	}
 
-	::g->max_w = ::g->max_x - ::g->min_x;
-	::g->max_h = ::g->max_y - ::g->min_y;
+	Globals::g->max_w = Globals::g->max_x - Globals::g->min_x;
+	Globals::g->max_h = Globals::g->max_y - Globals::g->min_y;
 
-	::g->min_w = 2*PLAYERRADIUS; // const? never changed?
-	::g->min_h = 2*PLAYERRADIUS;
+	Globals::g->min_w = 2*PLAYERRADIUS; // const? never changed?
+	Globals::g->min_h = 2*PLAYERRADIUS;
 
-	a = FixedDiv(::g->f_w<<FRACBITS, ::g->max_w);
-	b = FixedDiv(::g->f_h<<FRACBITS, ::g->max_h);
+	a = FixedDiv(Globals::g->f_w<<FRACBITS, Globals::g->max_w);
+	b = FixedDiv(Globals::g->f_h<<FRACBITS, Globals::g->max_h);
 
-	::g->min_scale_mtof = a < b ? a : b;
-	::g->max_scale_mtof = FixedDiv(::g->f_h<<FRACBITS, 2*PLAYERRADIUS);
+	Globals::g->min_scale_mtof = a < b ? a : b;
+	Globals::g->max_scale_mtof = FixedDiv(Globals::g->f_h<<FRACBITS, 2*PLAYERRADIUS);
 
 }
 
@@ -328,27 +328,27 @@ void AM_findMinMaxBoundaries(void)
 //
 void AM_changeWindowLoc(void)
 {
-	if (::g->m_paninc.x || ::g->m_paninc.y)
+	if (Globals::g->m_paninc.x || Globals::g->m_paninc.y)
 	{
-		::g->followplayer = 0;
-		::g->f_oldloc.x = MAXINT;
+		Globals::g->followplayer = 0;
+		Globals::g->f_oldloc.x = MAXINT;
 	}
 
-	::g->m_x += ::g->m_paninc.x;
-	::g->m_y += ::g->m_paninc.y;
+	Globals::g->m_x += Globals::g->m_paninc.x;
+	Globals::g->m_y += Globals::g->m_paninc.y;
 
-	if (::g->m_x + ::g->m_w/2 > ::g->max_x)
-		::g->m_x = ::g->max_x - ::g->m_w/2;
-	else if (::g->m_x + ::g->m_w/2 < ::g->min_x)
-		::g->m_x = ::g->min_x - ::g->m_w/2;
+	if (Globals::g->m_x + Globals::g->m_w/2 > Globals::g->max_x)
+		Globals::g->m_x = Globals::g->max_x - Globals::g->m_w/2;
+	else if (Globals::g->m_x + Globals::g->m_w/2 < Globals::g->min_x)
+		Globals::g->m_x = Globals::g->min_x - Globals::g->m_w/2;
 
-	if (::g->m_y + ::g->m_h/2 > ::g->max_y)
-		::g->m_y = ::g->max_y - ::g->m_h/2;
-	else if (::g->m_y + ::g->m_h/2 < ::g->min_y)
-		::g->m_y = ::g->min_y - ::g->m_h/2;
+	if (Globals::g->m_y + Globals::g->m_h/2 > Globals::g->max_y)
+		Globals::g->m_y = Globals::g->max_y - Globals::g->m_h/2;
+	else if (Globals::g->m_y + Globals::g->m_h/2 < Globals::g->min_y)
+		Globals::g->m_y = Globals::g->min_y - Globals::g->m_h/2;
 
-	::g->m_x2 = ::g->m_x + ::g->m_w;
-	::g->m_y2 = ::g->m_y + ::g->m_h;
+	Globals::g->m_x2 = Globals::g->m_x + Globals::g->m_w;
+	Globals::g->m_y2 = Globals::g->m_y + Globals::g->m_h;
 }
 
 
@@ -360,36 +360,36 @@ void AM_initVariables(void)
 	static event_t st_notify = { ev_keyup, AM_MSGENTERED };
 	int pnum;
 
-	::g->automapactive = true;
-	::g->fb = ::g->screens[0];
+	Globals::g->automapactive = true;
+	Globals::g->fb = Globals::g->screens[0];
 
-	::g->f_oldloc.x = MAXINT;
-	::g->amclock = 0;
-	::g->lightlev = 0;
+	Globals::g->f_oldloc.x = MAXINT;
+	Globals::g->amclock = 0;
+	Globals::g->lightlev = 0;
 
-	::g->m_paninc.x = ::g->m_paninc.y = 0;
-	::g->ftom_zoommul = FRACUNIT;
-	::g->mtof_zoommul = FRACUNIT;
+	Globals::g->m_paninc.x = Globals::g->m_paninc.y = 0;
+	Globals::g->ftom_zoommul = FRACUNIT;
+	Globals::g->mtof_zoommul = FRACUNIT;
 
-	::g->m_w = FTOM(::g->f_w);
-	::g->m_h = FTOM(::g->f_h);
+	Globals::g->m_w = FTOM(Globals::g->f_w);
+	Globals::g->m_h = FTOM(Globals::g->f_h);
 
 	// find player to center on initially
-	if (!::g->playeringame[pnum = ::g->consoleplayer])
+	if (!Globals::g->playeringame[pnum = Globals::g->consoleplayer])
 		for (pnum=0;pnum<MAXPLAYERS;pnum++)
-			if (::g->playeringame[pnum])
+			if (Globals::g->playeringame[pnum])
 				break;
 
-	::g->amap_plr = &::g->players[pnum];
-	::g->m_x = ::g->amap_plr->mo->x - ::g->m_w/2;
-	::g->m_y = ::g->amap_plr->mo->y - ::g->m_h/2;
+	Globals::g->amap_plr = &Globals::g->players[pnum];
+	Globals::g->m_x = Globals::g->amap_plr->mo->x - Globals::g->m_w/2;
+	Globals::g->m_y = Globals::g->amap_plr->mo->y - Globals::g->m_h/2;
 	AM_changeWindowLoc();
 
 	// for saving & restoring
-	::g->old_m_x = ::g->m_x;
-	::g->old_m_y = ::g->m_y;
-	::g->old_m_w = ::g->m_w;
-	::g->old_m_h = ::g->m_h;
+	Globals::g->old_m_x = Globals::g->m_x;
+	Globals::g->old_m_y = Globals::g->m_y;
+	Globals::g->old_m_w = Globals::g->m_w;
+	Globals::g->old_m_h = Globals::g->m_h;
 
 	// inform the status bar of the change
 	ST_Responder(&st_notify);
@@ -407,7 +407,7 @@ void AM_loadPics(void)
 	for (i=0;i<10;i++)
 	{
 		sprintf(namebuf, "AMMNUM%d", i);
-		::g->marknums[i] = (patch_t*)W_CacheLumpName(namebuf, PU_STATIC_SHARED);
+		Globals::g->marknums[i] = (patch_t*)W_CacheLumpName(namebuf, PU_STATIC_SHARED);
 	}
 
 }
@@ -423,8 +423,8 @@ void AM_clearMarks(void)
 	int i;
 
 	for (i=0;i<AM_NUMMARKPOINTS;i++)
-		::g->markpoints[i].x = -1; // means empty
-	::g->markpointnum = 0;
+		Globals::g->markpoints[i].x = -1; // means empty
+	Globals::g->markpointnum = 0;
 }
 
 //
@@ -433,19 +433,19 @@ void AM_clearMarks(void)
 //
 void AM_LevelInit(void)
 {
-	::g->leveljuststarted = 0;
+	Globals::g->leveljuststarted = 0;
 
-	::g->f_x = ::g->f_y = 0;
-	::g->f_w = ::g->finit_width;
-	::g->f_h = ::g->finit_height;
+	Globals::g->f_x = Globals::g->f_y = 0;
+	Globals::g->f_w = Globals::g->finit_width;
+	Globals::g->f_h = Globals::g->finit_height;
 
 	AM_clearMarks();
 
 	AM_findMinMaxBoundaries();
-	::g->scale_mtof = FixedDiv(::g->min_scale_mtof, (int) (0.7*FRACUNIT));
-	if (::g->scale_mtof > ::g->max_scale_mtof)
-		::g->scale_mtof = ::g->min_scale_mtof;
-	::g->scale_ftom = FixedDiv(FRACUNIT, ::g->scale_mtof);
+	Globals::g->scale_mtof = FixedDiv(Globals::g->min_scale_mtof, (int) (0.7*FRACUNIT));
+	if (Globals::g->scale_mtof > Globals::g->max_scale_mtof)
+		Globals::g->scale_mtof = Globals::g->min_scale_mtof;
+	Globals::g->scale_ftom = FixedDiv(FRACUNIT, Globals::g->scale_mtof);
 }
 
 
@@ -459,9 +459,9 @@ void AM_Stop (void)
 	static event_t st_notify = { (evtype_t)0, ev_keyup, AM_MSGEXITED };
 
 	AM_unloadPics();
-	::g->automapactive = false;
+	Globals::g->automapactive = false;
 	ST_Responder(&st_notify);
-	::g->stopped = true;
+	Globals::g->stopped = true;
 }
 
 //
@@ -470,13 +470,13 @@ void AM_Stop (void)
 void AM_Start (void)
 {
 
-	if (!::g->stopped) AM_Stop();
-	::g->stopped = false;
-	if (::g->lastlevel != ::g->gamemap || ::g->lastepisode != ::g->gameepisode)
+	if (!Globals::g->stopped) AM_Stop();
+	Globals::g->stopped = false;
+	if (Globals::g->lastlevel != Globals::g->gamemap || Globals::g->lastepisode != Globals::g->gameepisode)
 	{
 		AM_LevelInit();
-		::g->lastlevel = ::g->gamemap;
-		::g->lastepisode = ::g->gameepisode;
+		Globals::g->lastlevel = Globals::g->gamemap;
+		Globals::g->lastepisode = Globals::g->gameepisode;
 	}
 	AM_initVariables();
 	AM_loadPics();
@@ -487,8 +487,8 @@ void AM_Start (void)
 //
 void AM_minOutWindowScale(void)
 {
-	::g->scale_mtof = ::g->min_scale_mtof;
-	::g->scale_ftom = FixedDiv(FRACUNIT, ::g->scale_mtof);
+	Globals::g->scale_mtof = Globals::g->min_scale_mtof;
+	Globals::g->scale_ftom = FixedDiv(FRACUNIT, Globals::g->scale_mtof);
 	AM_activateNewScale();
 }
 
@@ -497,14 +497,14 @@ void AM_minOutWindowScale(void)
 //
 void AM_maxOutWindowScale(void)
 {
-	::g->scale_mtof = ::g->max_scale_mtof;
-	::g->scale_ftom = FixedDiv(FRACUNIT, ::g->scale_mtof);
+	Globals::g->scale_mtof = Globals::g->max_scale_mtof;
+	Globals::g->scale_ftom = FixedDiv(FRACUNIT, Globals::g->scale_mtof);
 	AM_activateNewScale();
 }
 
 
 //
-// Handle ::g->events (user inputs) in automap mode
+// Handle Globals::g->events (user inputs) in automap mode
 //
 qboolean
 AM_Responder
@@ -514,12 +514,12 @@ AM_Responder
 	int rc;
 	rc = false;
 
-	if (!::g->automapactive)
+	if (!Globals::g->automapactive)
 	{
 		if (ev->type == ev_keydown && ev->data1 == AM_STARTKEY)
 		{
 			AM_Start ();
-			::g->viewactive = false;
+			Globals::g->viewactive = false;
 			rc = true;
 		}
 	}
@@ -531,37 +531,37 @@ AM_Responder
 		switch(ev->data1)
 		{
 		case AM_PANRIGHTKEY: // pan right
-			if (!::g->followplayer) ::g->m_paninc.x = FTOM(F_PANINC);
+			if (!Globals::g->followplayer) Globals::g->m_paninc.x = FTOM(F_PANINC);
 			else rc = false;
 			break;
 		case AM_PANLEFTKEY: // pan left
-			if (!::g->followplayer) ::g->m_paninc.x = -FTOM(F_PANINC);
+			if (!Globals::g->followplayer) Globals::g->m_paninc.x = -FTOM(F_PANINC);
 			else rc = false;
 			break;
 		case AM_PANUPKEY: // pan up
-			if (!::g->followplayer) ::g->m_paninc.y = FTOM(F_PANINC);
+			if (!Globals::g->followplayer) Globals::g->m_paninc.y = FTOM(F_PANINC);
 			else rc = false;
 			break;
 		case AM_PANDOWNKEY: // pan down
-			if (!::g->followplayer) ::g->m_paninc.y = -FTOM(F_PANINC);
+			if (!Globals::g->followplayer) Globals::g->m_paninc.y = -FTOM(F_PANINC);
 			else rc = false;
 			break;
 		case AM_ZOOMOUTKEY: // zoom out
-			::g->mtof_zoommul = M_ZOOMOUT;
-			::g->ftom_zoommul = M_ZOOMIN;
+			Globals::g->mtof_zoommul = M_ZOOMOUT;
+			Globals::g->ftom_zoommul = M_ZOOMIN;
 			break;
 		case AM_ZOOMINKEY: // zoom in
-			::g->mtof_zoommul = M_ZOOMIN;
-			::g->ftom_zoommul = M_ZOOMOUT;
+			Globals::g->mtof_zoommul = M_ZOOMIN;
+			Globals::g->ftom_zoommul = M_ZOOMOUT;
 			break;
 		case AM_ENDKEY:
-			::g->bigstate = 0;
-			::g->viewactive = true;
+			Globals::g->bigstate = 0;
+			Globals::g->viewactive = true;
 			AM_Stop ();
 			break;
 		case AM_GOBIGKEY:
-			::g->bigstate = !::g->bigstate;
-			if (::g->bigstate)
+			Globals::g->bigstate = !Globals::g->bigstate;
+			if (Globals::g->bigstate)
 			{
 				AM_saveScaleAndLoc();
 				AM_minOutWindowScale();
@@ -569,31 +569,31 @@ AM_Responder
 			else AM_restoreScaleAndLoc();
 			break;
 		case AM_FOLLOWKEY:
-			::g->followplayer = !::g->followplayer;
-			::g->f_oldloc.x = MAXINT;
-			::g->amap_plr->message = ::g->followplayer ? AMSTR_FOLLOWON : AMSTR_FOLLOWOFF;
+			Globals::g->followplayer = !Globals::g->followplayer;
+			Globals::g->f_oldloc.x = MAXINT;
+			Globals::g->amap_plr->message = Globals::g->followplayer ? AMSTR_FOLLOWON : AMSTR_FOLLOWOFF;
 			break;
 		case AM_GRIDKEY:
-			::g->grid = !::g->grid;
-			::g->amap_plr->message = ::g->grid ? AMSTR_GRIDON : AMSTR_GRIDOFF;
+			Globals::g->grid = !Globals::g->grid;
+			Globals::g->amap_plr->message = Globals::g->grid ? AMSTR_GRIDON : AMSTR_GRIDOFF;
 			break;
 		case AM_MARKKEY:
-			sprintf(::g->buffer, "%s %d", AMSTR_MARKEDSPOT, ::g->markpointnum);
-			::g->amap_plr->message = ::g->buffer;
+			sprintf(Globals::g->buffer, "%s %d", AMSTR_MARKEDSPOT, Globals::g->markpointnum);
+			Globals::g->amap_plr->message = Globals::g->buffer;
 			AM_addMark();
 			break;
 		case AM_CLEARMARKKEY:
 			AM_clearMarks();
-			::g->amap_plr->message = AMSTR_MARKSCLEARED;
+			Globals::g->amap_plr->message = AMSTR_MARKSCLEARED;
 			break;
 		default:
-			::g->cheatstate=0;
+			Globals::g->cheatstate=0;
 			rc = false;
 		}
-		if (!::g->deathmatch && cht_CheckCheat(&cheat_amap, ev->data1))
+		if (!Globals::g->deathmatch && cht_CheckCheat(&cheat_amap, ev->data1))
 		{
 			rc = false;
-			::g->cheating = (::g->cheating+1) % 3;
+			Globals::g->cheating = (Globals::g->cheating+1) % 3;
 		}
 	}
 
@@ -603,21 +603,21 @@ AM_Responder
 		switch (ev->data1)
 		{
 		case AM_PANRIGHTKEY:
-			if (!::g->followplayer) ::g->m_paninc.x = 0;
+			if (!Globals::g->followplayer) Globals::g->m_paninc.x = 0;
 			break;
 		case AM_PANLEFTKEY:
-			if (!::g->followplayer) ::g->m_paninc.x = 0;
+			if (!Globals::g->followplayer) Globals::g->m_paninc.x = 0;
 			break;
 		case AM_PANUPKEY:
-			if (!::g->followplayer) ::g->m_paninc.y = 0;
+			if (!Globals::g->followplayer) Globals::g->m_paninc.y = 0;
 			break;
 		case AM_PANDOWNKEY:
-			if (!::g->followplayer) ::g->m_paninc.y = 0;
+			if (!Globals::g->followplayer) Globals::g->m_paninc.y = 0;
 			break;
 		case AM_ZOOMOUTKEY:
 		case AM_ZOOMINKEY:
-			::g->mtof_zoommul = FRACUNIT;
-			::g->ftom_zoommul = FRACUNIT;
+			Globals::g->mtof_zoommul = FRACUNIT;
+			Globals::g->ftom_zoommul = FRACUNIT;
 			break;
 		}
 	}
@@ -634,12 +634,12 @@ void AM_changeWindowScale(void)
 {
 
 	// Change the scaling multipliers
-	::g->scale_mtof = FixedMul(::g->scale_mtof, ::g->mtof_zoommul);
-	::g->scale_ftom = FixedDiv(FRACUNIT, ::g->scale_mtof);
+	Globals::g->scale_mtof = FixedMul(Globals::g->scale_mtof, Globals::g->mtof_zoommul);
+	Globals::g->scale_ftom = FixedDiv(FRACUNIT, Globals::g->scale_mtof);
 
-	if (::g->scale_mtof < ::g->min_scale_mtof)
+	if (Globals::g->scale_mtof < Globals::g->min_scale_mtof)
 		AM_minOutWindowScale();
-	else if (::g->scale_mtof > ::g->max_scale_mtof)
+	else if (Globals::g->scale_mtof > Globals::g->max_scale_mtof)
 		AM_maxOutWindowScale();
 	else
 		AM_activateNewScale();
@@ -652,19 +652,19 @@ void AM_changeWindowScale(void)
 void AM_doFollowPlayer(void)
 {
 
-	if (::g->f_oldloc.x != ::g->amap_plr->mo->x || ::g->f_oldloc.y != ::g->amap_plr->mo->y)
+	if (Globals::g->f_oldloc.x != Globals::g->amap_plr->mo->x || Globals::g->f_oldloc.y != Globals::g->amap_plr->mo->y)
 	{
-		::g->m_x = FTOM(MTOF(::g->amap_plr->mo->x)) - ::g->m_w/2;
-		::g->m_y = FTOM(MTOF(::g->amap_plr->mo->y)) - ::g->m_h/2;
-		::g->m_x2 = ::g->m_x + ::g->m_w;
-		::g->m_y2 = ::g->m_y + ::g->m_h;
-		::g->f_oldloc.x = ::g->amap_plr->mo->x;
-		::g->f_oldloc.y = ::g->amap_plr->mo->y;
+		Globals::g->m_x = FTOM(MTOF(Globals::g->amap_plr->mo->x)) - Globals::g->m_w/2;
+		Globals::g->m_y = FTOM(MTOF(Globals::g->amap_plr->mo->y)) - Globals::g->m_h/2;
+		Globals::g->m_x2 = Globals::g->m_x + Globals::g->m_w;
+		Globals::g->m_y2 = Globals::g->m_y + Globals::g->m_h;
+		Globals::g->f_oldloc.x = Globals::g->amap_plr->mo->x;
+		Globals::g->f_oldloc.y = Globals::g->amap_plr->mo->y;
 
-		//  ::g->m_x = FTOM(MTOF(::g->amap_plr->mo->x - ::g->m_w/2));
-		//  ::g->m_y = FTOM(MTOF(::g->amap_plr->mo->y - ::g->m_h/2));
-		//  ::g->m_x = ::g->amap_plr->mo->x - ::g->m_w/2;
-		//  ::g->m_y = ::g->amap_plr->mo->y - ::g->m_h/2;
+		//  Globals::g->m_x = FTOM(MTOF(Globals::g->amap_plr->mo->x - Globals::g->m_w/2));
+		//  Globals::g->m_y = FTOM(MTOF(Globals::g->amap_plr->mo->y - Globals::g->m_h/2));
+		//  Globals::g->m_x = Globals::g->amap_plr->mo->x - Globals::g->m_w/2;
+		//  Globals::g->m_y = Globals::g->amap_plr->mo->y - Globals::g->m_h/2;
 
 	}
 
@@ -679,11 +679,11 @@ void AM_updateLightLev(void)
 	const static int litelevels[] = { 0, 4, 7, 10, 12, 14, 15, 15 };
 
 	// Change light level
-	if (::g->amclock>::g->nexttic)
+	if (Globals::g->amclock>Globals::g->nexttic)
 	{
-		::g->lightlev = litelevels[::g->litelevelscnt++];
-		if (::g->litelevelscnt == sizeof(litelevels)/sizeof(int)) ::g->litelevelscnt = 0;
-		::g->nexttic = ::g->amclock + 6 - (::g->amclock % 6);
+		Globals::g->lightlev = litelevels[Globals::g->litelevelscnt++];
+		if (Globals::g->litelevelscnt == sizeof(litelevels)/sizeof(int)) Globals::g->litelevelscnt = 0;
+		Globals::g->nexttic = Globals::g->amclock + 6 - (Globals::g->amclock % 6);
 	}
 
 }
@@ -695,20 +695,20 @@ void AM_updateLightLev(void)
 void AM_Ticker (void)
 {
 
-	if (!::g->automapactive)
+	if (!Globals::g->automapactive)
 		return;
 
-	::g->amclock++;
+	Globals::g->amclock++;
 
-	if (::g->followplayer)
+	if (Globals::g->followplayer)
 		AM_doFollowPlayer();
 
 	// Change the zoom if necessary
-	if (::g->ftom_zoommul != FRACUNIT)
+	if (Globals::g->ftom_zoommul != FRACUNIT)
 		AM_changeWindowScale();
 
 	// Change x,y location
-	if (::g->m_paninc.x || ::g->m_paninc.y)
+	if (Globals::g->m_paninc.x || Globals::g->m_paninc.y)
 		AM_changeWindowLoc();
 
 	// Update light level
@@ -718,16 +718,16 @@ void AM_Ticker (void)
 
 
 //
-// Clear automap frame ::g->buffer.
+// Clear automap frame Globals::g->buffer.
 //
 void AM_clearFB(int color)
 {
-	memset(::g->fb, color, ::g->f_w*::g->f_h);
+	memset(Globals::g->fb, color, Globals::g->f_w*Globals::g->f_h);
 }
 
 
 //
-// Automap clipping of ::g->lines.
+// Automap clipping of Globals::g->lines.
 //
 // Based on Cohen-Sutherland clipping algorithm but with a slightly
 // faster reject and precalculated slopes.  If the speed is needed,
@@ -758,33 +758,33 @@ AM_clipMline
 
 
 	// do trivial rejects and outcodes
-	if (ml->a.y > ::g->m_y2)
+	if (ml->a.y > Globals::g->m_y2)
 		outcode1 = TOP;
-	else if (ml->a.y < ::g->m_y)
+	else if (ml->a.y < Globals::g->m_y)
 		outcode1 = BOTTOM;
 
-	if (ml->b.y > ::g->m_y2)
+	if (ml->b.y > Globals::g->m_y2)
 		outcode2 = TOP;
-	else if (ml->b.y < ::g->m_y)
+	else if (ml->b.y < Globals::g->m_y)
 		outcode2 = BOTTOM;
 
 	if (outcode1 & outcode2)
 		return false; // trivially outside
 
-	if (ml->a.x < ::g->m_x)
+	if (ml->a.x < Globals::g->m_x)
 		outcode1 |= LEFT;
-	else if (ml->a.x > ::g->m_x2)
+	else if (ml->a.x > Globals::g->m_x2)
 		outcode1 |= RIGHT;
 
-	if (ml->b.x < ::g->m_x)
+	if (ml->b.x < Globals::g->m_x)
 		outcode2 |= LEFT;
-	else if (ml->b.x > ::g->m_x2)
+	else if (ml->b.x > Globals::g->m_x2)
 		outcode2 |= RIGHT;
 
 	if (outcode1 & outcode2)
 		return false; // trivially outside
 
-	// transform to frame-::g->buffer coordinates.
+	// transform to frame-Globals::g->buffer coordinates.
 	fl->a.x = CXMTOF(ml->a.x);
 	fl->a.y = CYMTOF(ml->a.y);
 	fl->b.x = CXMTOF(ml->b.x);
@@ -817,15 +817,15 @@ AM_clipMline
 		{
 			dy = fl->a.y - fl->b.y;
 			dx = fl->b.x - fl->a.x;
-			tmp.x = fl->a.x + (dx*(fl->a.y-::g->f_h))/dy;
-			tmp.y = ::g->f_h-1;
+			tmp.x = fl->a.x + (dx*(fl->a.y-Globals::g->f_h))/dy;
+			tmp.y = Globals::g->f_h-1;
 		}
 		else if (outside & RIGHT)
 		{
 			dy = fl->b.y - fl->a.y;
 			dx = fl->b.x - fl->a.x;
-			tmp.y = fl->a.y + (dy*(::g->f_w-1 - fl->a.x))/dx;
-			tmp.x = ::g->f_w-1;
+			tmp.y = fl->a.y + (dy*(Globals::g->f_w-1 - fl->a.x))/dx;
+			tmp.x = Globals::g->f_w-1;
 		}
 		else if (outside & LEFT)
 		{
@@ -876,10 +876,10 @@ AM_drawFline
 	static int fuck = 0;
 
 	// For debugging only
-	if (      fl->a.x < 0 || fl->a.x >= ::g->f_w
-		|| fl->a.y < 0 || fl->a.y >= ::g->f_h
-		|| fl->b.x < 0 || fl->b.x >= ::g->f_w
-		|| fl->b.y < 0 || fl->b.y >= ::g->f_h)
+	if (      fl->a.x < 0 || fl->a.x >= Globals::g->f_w
+		|| fl->a.y < 0 || fl->a.y >= Globals::g->f_h
+		|| fl->b.x < 0 || fl->b.x >= Globals::g->f_w
+		|| fl->b.y < 0 || fl->b.y >= Globals::g->f_h)
 	{
 		I_PrintfE("fuck %d \r", fuck++);
 		return;
@@ -933,7 +933,7 @@ AM_drawFline
 
 
 //
-// Clip ::g->lines, draw visible part sof ::g->lines.
+// Clip Globals::g->lines, draw visible part sof Globals::g->lines.
 //
 void
 AM_drawMline
@@ -943,13 +943,13 @@ AM_drawMline
 	static fline_t fl;
 
 	if (AM_clipMline(ml, &fl))
-		AM_drawFline(&fl, color); // draws it on frame ::g->buffer using ::g->fb coords
+		AM_drawFline(&fl, color); // draws it on frame Globals::g->buffer using Globals::g->fb coords
 }
 
 
 
 //
-// Draws flat (floor/ceiling tile) aligned ::g->grid ::g->lines.
+// Draws flat (floor/ceiling tile) aligned Globals::g->grid Globals::g->lines.
 //
 void AM_drawGrid(int color)
 {
@@ -958,15 +958,15 @@ void AM_drawGrid(int color)
 	mline_t ml;
 
 	// Figure out start of vertical gridlines
-	start = ::g->m_x;
-	if ((start-::g->bmaporgx)%(MAPBLOCKUNITS<<FRACBITS))
+	start = Globals::g->m_x;
+	if ((start-Globals::g->bmaporgx)%(MAPBLOCKUNITS<<FRACBITS))
 		start += (MAPBLOCKUNITS<<FRACBITS)
-		- ((start-::g->bmaporgx)%(MAPBLOCKUNITS<<FRACBITS));
-	end = ::g->m_x + ::g->m_w;
+		- ((start-Globals::g->bmaporgx)%(MAPBLOCKUNITS<<FRACBITS));
+	end = Globals::g->m_x + Globals::g->m_w;
 
 	// draw vertical gridlines
-	ml.a.y = ::g->m_y;
-	ml.b.y = ::g->m_y+::g->m_h;
+	ml.a.y = Globals::g->m_y;
+	ml.b.y = Globals::g->m_y+Globals::g->m_h;
 	for (x=start; x<end; x+=(MAPBLOCKUNITS<<FRACBITS))
 	{
 		ml.a.x = x;
@@ -975,15 +975,15 @@ void AM_drawGrid(int color)
 	}
 
 	// Figure out start of horizontal gridlines
-	start = ::g->m_y;
-	if ((start-::g->bmaporgy)%(MAPBLOCKUNITS<<FRACBITS))
+	start = Globals::g->m_y;
+	if ((start-Globals::g->bmaporgy)%(MAPBLOCKUNITS<<FRACBITS))
 		start += (MAPBLOCKUNITS<<FRACBITS)
-		- ((start-::g->bmaporgy)%(MAPBLOCKUNITS<<FRACBITS));
-	end = ::g->m_y + ::g->m_h;
+		- ((start-Globals::g->bmaporgy)%(MAPBLOCKUNITS<<FRACBITS));
+	end = Globals::g->m_y + Globals::g->m_h;
 
 	// draw horizontal gridlines
-	ml.a.x = ::g->m_x;
-	ml.b.x = ::g->m_x + ::g->m_w;
+	ml.a.x = Globals::g->m_x;
+	ml.b.x = Globals::g->m_x + Globals::g->m_w;
 	for (y=start; y<end; y+=(MAPBLOCKUNITS<<FRACBITS))
 	{
 		ml.a.y = y;
@@ -994,7 +994,7 @@ void AM_drawGrid(int color)
 }
 
 //
-// Determines visible ::g->lines, draws them.
+// Determines visible Globals::g->lines, draws them.
 // This is LineDef based, not LineSeg based.
 //
 void AM_drawWalls(void)
@@ -1002,47 +1002,47 @@ void AM_drawWalls(void)
 	int i;
 	static mline_t l;
 
-	for (i = 0; i < ::g->numlines; i++)
+	for (i = 0; i < Globals::g->numlines; i++)
 	{
-		l.a.x = ::g->lines[i].v1->x;
-		l.a.y = ::g->lines[i].v1->y;
-		l.b.x = ::g->lines[i].v2->x;
-		l.b.y = ::g->lines[i].v2->y;
-		if (::g->cheating || (::g->lines[i].flags & ML_MAPPED))
+		l.a.x = Globals::g->lines[i].v1->x;
+		l.a.y = Globals::g->lines[i].v1->y;
+		l.b.x = Globals::g->lines[i].v2->x;
+		l.b.y = Globals::g->lines[i].v2->y;
+		if (Globals::g->cheating || (Globals::g->lines[i].flags & ML_MAPPED))
 		{
-			if ((::g->lines[i].flags & LINE_NEVERSEE) && !::g->cheating)
+			if ((Globals::g->lines[i].flags & LINE_NEVERSEE) && !Globals::g->cheating)
 				continue;
-			if (!::g->lines[i].backsector)
+			if (!Globals::g->lines[i].backsector)
 			{
-				AM_drawMline(&l, WALLCOLORS+::g->lightlev);
+				AM_drawMline(&l, WALLCOLORS+Globals::g->lightlev);
 			}
 			else
 			{
-				if (::g->lines[i].special == 39)
+				if (Globals::g->lines[i].special == 39)
 				{ // teleporters
 					AM_drawMline(&l, WALLCOLORS+WALLRANGE/2);
 				}
-				else if (::g->lines[i].flags & ML_SECRET) // secret door
+				else if (Globals::g->lines[i].flags & ML_SECRET) // secret door
 				{
-					if (::g->cheating) AM_drawMline(&l, SECRETWALLCOLORS + ::g->lightlev);
-					else AM_drawMline(&l, WALLCOLORS+::g->lightlev);
+					if (Globals::g->cheating) AM_drawMline(&l, SECRETWALLCOLORS + Globals::g->lightlev);
+					else AM_drawMline(&l, WALLCOLORS+Globals::g->lightlev);
 				}
-				else if (::g->lines[i].backsector->floorheight
-					!= ::g->lines[i].frontsector->floorheight) {
-						AM_drawMline(&l, FDWALLCOLORS + ::g->lightlev); // floor level change
+				else if (Globals::g->lines[i].backsector->floorheight
+					!= Globals::g->lines[i].frontsector->floorheight) {
+						AM_drawMline(&l, FDWALLCOLORS + Globals::g->lightlev); // floor level change
 					}
-				else if (::g->lines[i].backsector->ceilingheight
-					!= ::g->lines[i].frontsector->ceilingheight) {
-						AM_drawMline(&l, CDWALLCOLORS+::g->lightlev); // ceiling level change
+				else if (Globals::g->lines[i].backsector->ceilingheight
+					!= Globals::g->lines[i].frontsector->ceilingheight) {
+						AM_drawMline(&l, CDWALLCOLORS+Globals::g->lightlev); // ceiling level change
 					}
-				else if (::g->cheating) {
-					AM_drawMline(&l, TSWALLCOLORS+::g->lightlev);
+				else if (Globals::g->cheating) {
+					AM_drawMline(&l, TSWALLCOLORS+Globals::g->lightlev);
 				}
 			}
 		}
-		else if (::g->amap_plr->powers[pw_allmap])
+		else if (Globals::g->amap_plr->powers[pw_allmap])
 		{
-			if (!(::g->lines[i].flags & LINE_NEVERSEE)) AM_drawMline(&l, GRAYS+3);
+			if (!(Globals::g->lines[i].flags & LINE_NEVERSEE)) AM_drawMline(&l, GRAYS+3);
 		}
 	}
 }
@@ -1128,28 +1128,28 @@ void AM_drawPlayers(void)
 	int		their_color = -1;
 	int		color;
 
-	if (!::g->netgame)
+	if (!Globals::g->netgame)
 	{
-		if (::g->cheating)
+		if (Globals::g->cheating)
 			AM_drawLineCharacter
 			(cheat_player_arrow, NUMCHEATPLYRLINES, 0,
-			::g->amap_plr->mo->angle, WHITE, ::g->amap_plr->mo->x, ::g->amap_plr->mo->y);
+			Globals::g->amap_plr->mo->angle, WHITE, Globals::g->amap_plr->mo->x, Globals::g->amap_plr->mo->y);
 		else
 			AM_drawLineCharacter
-			(player_arrow, NUMPLYRLINES, 0, ::g->amap_plr->mo->angle,
-			WHITE, ::g->amap_plr->mo->x, ::g->amap_plr->mo->y);
+			(player_arrow, NUMPLYRLINES, 0, Globals::g->amap_plr->mo->angle,
+			WHITE, Globals::g->amap_plr->mo->x, Globals::g->amap_plr->mo->y);
 		return;
 	}
 
 	for (i=0;i<MAXPLAYERS;i++)
 	{
 		their_color++;
-		p = &::g->players[i];
+		p = &Globals::g->players[i];
 
-		if ( (::g->deathmatch && !::g->singledemo) && p != ::g->amap_plr)
+		if ( (Globals::g->deathmatch && !Globals::g->singledemo) && p != Globals::g->amap_plr)
 			continue;
 
-		if (!::g->playeringame[i])
+		if (!Globals::g->playeringame[i])
 			continue;
 
 		if (p->powers[pw_invisibility])
@@ -1172,14 +1172,14 @@ AM_drawThings
 	int		i;
 	mobj_t*	t;
 
-	for (i = 0; i < ::g->numsectors; i++)
+	for (i = 0; i < Globals::g->numsectors; i++)
 	{
-		t = ::g->sectors[i].thinglist;
+		t = Globals::g->sectors[i].thinglist;
 		while (t)
 		{
 			AM_drawLineCharacter
 				(thintriangle_guy, NUMTHINTRIANGLEGUYLINES,
-				16<<FRACBITS, t->angle, colors+::g->lightlev, t->x, t->y);
+				16<<FRACBITS, t->angle, colors+Globals::g->lightlev, t->x, t->y);
 			t = t->snext;
 		}
 	}
@@ -1191,16 +1191,16 @@ void AM_drawMarks(void)
 
 	for (i=0;i<AM_NUMMARKPOINTS;i++)
 	{
-		if (::g->markpoints[i].x != -1)
+		if (Globals::g->markpoints[i].x != -1)
 		{
-			//      w = SHORT(::g->marknums[i]->width);
-			//      h = SHORT(::g->marknums[i]->height);
+			//      w = SHORT(Globals::g->marknums[i]->width);
+			//      h = SHORT(Globals::g->marknums[i]->height);
 			w = 5; // because something's wrong with the wad, i guess
 			h = 6; // because something's wrong with the wad, i guess
-			fx = CXMTOF(::g->markpoints[i].x);
-			fy = CYMTOF(::g->markpoints[i].y);
-			if (fx >= ::g->f_x && fx <= ::g->f_w - w && fy >= ::g->f_y && fy <= ::g->f_h - h)
-				V_DrawPatch(fx/GLOBAL_IMAGE_SCALER, fy/GLOBAL_IMAGE_SCALER, FB, ::g->marknums[i]);
+			fx = CXMTOF(Globals::g->markpoints[i].x);
+			fy = CYMTOF(Globals::g->markpoints[i].y);
+			if (fx >= Globals::g->f_x && fx <= Globals::g->f_w - w && fy >= Globals::g->f_y && fy <= Globals::g->f_h - h)
+				V_DrawPatch(fx/GLOBAL_IMAGE_SCALER, fy/GLOBAL_IMAGE_SCALER, FB, Globals::g->marknums[i]);
 		}
 	}
 
@@ -1208,26 +1208,26 @@ void AM_drawMarks(void)
 
 void AM_drawCrosshair(int color)
 {
-	::g->fb[(::g->f_w*(::g->f_h+1))/2] = color; // single point for now
+	Globals::g->fb[(Globals::g->f_w*(Globals::g->f_h+1))/2] = color; // single point for now
 
 }
 
 void AM_Drawer (void)
 {
-	if (!::g->automapactive) return;
+	if (!Globals::g->automapactive) return;
 
 	AM_clearFB(BACKGROUND);
-	if (::g->grid)
+	if (Globals::g->grid)
 		AM_drawGrid(GRIDCOLORS);
 	AM_drawWalls();
 	AM_drawPlayers();
-	if (::g->cheating==2)
+	if (Globals::g->cheating==2)
 		AM_drawThings(THINGCOLORS, THINGRANGE);
 	AM_drawCrosshair(XHAIRCOLORS);
 
 	AM_drawMarks();
 
-	V_MarkRect(::g->f_x, ::g->f_y, ::g->f_w, ::g->f_h);
+	V_MarkRect(Globals::g->f_x, Globals::g->f_y, Globals::g->f_w, Globals::g->f_h);
 
 }
 

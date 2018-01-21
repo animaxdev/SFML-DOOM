@@ -36,8 +36,6 @@ If you have questions concerning this license or the applicable additional terms
 
 #include <SFML/Network.hpp>
 
-class idSysMutex;
-class idUserCmdMgr;
 
 #define IN_NUM_DIGITAL_BUTTONS 8
 #define IN_NUM_ANALOG_BUTTONS 8
@@ -106,7 +104,7 @@ namespace DoomLib
 	void InitControlRemap();
 	//keyNum_t RemapControl( keyNum_t key );
 	bool Poll();
-	bool Tic( idUserCmdMgr * userCmdMgr );
+	bool Tic(  );
 	void Wipe();
 	void Frame( int realoffset = 0, int buffer = 0 );
 	void Draw();
@@ -117,8 +115,8 @@ namespace DoomLib
 	void SetPlayer( int id );
 	int GetPlayer();
 
-	byte BuildSourceDest( int toNode );
-	void GetSourceDest( byte sourceDest, int* source, int* dest );
+	unsigned char BuildSourceDest( int toNode );
+	void GetSourceDest( unsigned char sourceDest, int* source, int* dest );
 
 	int RemoteNodeToPlayerIndex( int node );
 	int PlayerIndexToRemoteNode( int index );

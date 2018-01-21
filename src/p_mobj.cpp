@@ -71,7 +71,7 @@ P_SetMobjState
 			return false;
 		}
 
-		st = &::g->states[state];
+		st = &Globals::g->states[state];
 		mobj->state = st;
 		mobj->tics = st->tics;
 		mobj->sprite = st->sprite;
@@ -176,9 +176,9 @@ void P_XYMovement (mobj_t* mo)
 			else if (mo->flags & MF_MISSILE)
 			{
 				// explode a missile
-				if (::g->ceilingline &&
-					::g->ceilingline->backsector &&
-					::g->ceilingline->backsector->ceilingpic == ::g->skyflatnum)
+				if (Globals::g->ceilingline &&
+					Globals::g->ceilingline->backsector &&
+					Globals::g->ceilingline->backsector->ceilingpic == Globals::g->skyflatnum)
 				{
 					// Hack to prevent missiles exploding
 					// against the sky.
@@ -230,7 +230,7 @@ void P_XYMovement (mobj_t* mo)
 		&& player->cmd.sidemove == 0 ) ) )
 	{
 		// if in a walking frame, stop moving
-		if ( player&&(unsigned)((player->mo->state - ::g->states)- S_PLAY_RUN1) < 4)
+		if ( player&&(unsigned)((player->mo->state - Globals::g->states)- S_PLAY_RUN1) < 4)
 			P_SetMobjState (player->mo, S_PLAY);
 
 		mo->momx = 0;
@@ -303,11 +303,11 @@ void P_ZMovement (mobj_t* mo)
 				&& mo->momz < -GRAVITY*8)	
 			{
 				// Squat down.
-				// Decrease ::g->viewheight for a moment
+				// Decrease Globals::g->viewheight for a moment
 				// after hitting the ground (hard),
 				// and utter appropriate sound.
 				mo->player->deltaviewheight = mo->momz>>3;
-				if (globalNetworking || (mo->player == &::g->players[::g->consoleplayer]))
+				if (globalNetworking || (mo->player == &Globals::g->players[Globals::g->consoleplayer]))
 					S_StartSound (mo, sfx_oof);
 			}
 			mo->momz = 0;
@@ -457,7 +457,7 @@ void P_MobjThinker (mobj_t* mobj)
 		if (! (mobj->flags & MF_COUNTKILL) )
 			return;
 
-		if (!::g->respawnmonsters)
+		if (!Globals::g->respawnmonsters)
 			return;
 
 		mobj->movecount++;
@@ -465,7 +465,7 @@ void P_MobjThinker (mobj_t* mobj)
 		if (mobj->movecount < 12*TICRATE)
 			return;
 
-		if ( ::g->leveltime&31 )
+		if ( Globals::g->leveltime&31 )
 			return;
 
 		if (P_Random () > 4)
@@ -504,13 +504,13 @@ P_SpawnMobj
 	mobj->flags = info->flags;
 	mobj->health = info->spawnhealth;
 
-	if (::g->gameskill != sk_nightmare)
+	if (Globals::g->gameskill != sk_nightmare)
 		mobj->reactiontime = info->reactiontime;
 
 	mobj->lastlook = P_Random () % MAXPLAYERS;
 	// do not set the state with P_SetMobjState,
 	// because action routines can not be called yet
-	st = &::g->states[info->spawnstate];
+	st = &Globals::g->states[info->spawnstate];
 
 	mobj->state = st;
 	mobj->tics = st->tics;
@@ -550,13 +550,13 @@ void P_RemoveMobj (mobj_t* mobj)
 		&& (mobj->type != MT_INV)
 		&& (mobj->type != MT_INS))
 	{
-		::g->itemrespawnque[::g->iquehead] = mobj->spawnpoint;
-		::g->itemrespawntime[::g->iquehead] = ::g->leveltime;
-		::g->iquehead = (::g->iquehead+1)&(ITEMQUESIZE-1);
+		Globals::g->itemrespawnque[Globals::g->iquehead] = mobj->spawnpoint;
+		Globals::g->itemrespawntime[Globals::g->iquehead] = Globals::g->leveltime;
+		Globals::g->iquehead = (Globals::g->iquehead+1)&(ITEMQUESIZE-1);
 
 		// lose one off the end?
-		if (::g->iquehead == ::g->iquetail)
-			::g->iquetail = (::g->iquetail+1)&(ITEMQUESIZE-1);
+		if (Globals::g->iquehead == Globals::g->iquetail)
+			Globals::g->iquetail = (Globals::g->iquetail+1)&(ITEMQUESIZE-1);
 	}
 
 	// unlink from sector and block lists
@@ -587,19 +587,19 @@ void P_RespawnSpecials (void)
 
 	int			i;
 
-	// only respawn items in ::g->deathmatch
-	if (::g->deathmatch != 2)
+	// only respawn items in Globals::g->deathmatch
+	if (Globals::g->deathmatch != 2)
 		return;	// 
 
 	// nothing left to respawn?
-	if (::g->iquehead == ::g->iquetail)
+	if (Globals::g->iquehead == Globals::g->iquetail)
 		return;		
 
 	// wait at least 30 seconds
-	if (::g->leveltime - ::g->itemrespawntime[::g->iquetail] < 30*TICRATE)
+	if (Globals::g->leveltime - Globals::g->itemrespawntime[Globals::g->iquetail] < 30*TICRATE)
 		return;			
 
-	mthing = &::g->itemrespawnque[::g->iquetail];
+	mthing = &Globals::g->itemrespawnque[Globals::g->iquetail];
 
 	x = mthing->x << FRACBITS; 
 	y = mthing->y << FRACBITS; 
@@ -627,7 +627,7 @@ void P_RespawnSpecials (void)
 	mo->angle = ANG45 * (mthing->angle/45);
 
 	// pull it from the que
-	::g->iquetail = (::g->iquetail+1)&(ITEMQUESIZE-1);
+	Globals::g->iquetail = (Globals::g->iquetail+1)&(ITEMQUESIZE-1);
 }
 
 
@@ -651,10 +651,10 @@ void P_SpawnPlayer (mapthing_t* mthing)
 	int			i;
 
 	// not playing?
-	if (!::g->playeringame[mthing->type-1])
+	if (!Globals::g->playeringame[mthing->type-1])
 		return;					
 
-	p = &::g->players[mthing->type-1];
+	p = &Globals::g->players[mthing->type-1];
 
 	if (p->playerstate == PST_REBORN)
 		G_PlayerReborn (mthing->type-1);
@@ -664,7 +664,7 @@ void P_SpawnPlayer (mapthing_t* mthing)
 	z		= ONFLOORZ;
 	mobj	= P_SpawnMobj (x,y,z, MT_PLAYER);
 
-	// set color translations for player ::g->sprites
+	// set color translations for player Globals::g->sprites
 	if (mthing->type > 1)		
 		mobj->flags |= (mthing->type-1)<<MF_TRANSSHIFT;
 
@@ -686,11 +686,11 @@ void P_SpawnPlayer (mapthing_t* mthing)
 	P_SetupPsprites (p);
 
 	// give all cards in death match mode
-	if (::g->deathmatch)
+	if (Globals::g->deathmatch)
 		for (i=0 ; i<NUMCARDS ; i++)
 			p->cards[i] = true;
 
-	if (mthing->type-1 == ::g->consoleplayer)
+	if (mthing->type-1 == Globals::g->consoleplayer)
 	{
 		// wake up the status bar
 		ST_Start ();
@@ -720,7 +720,7 @@ void P_SpawnPlayer (mapthing_t* mthing)
 //
 // P_SpawnMapThing
 // The fields of the mapthing should
-// already be in host byte order.
+// already be in host unsigned char order.
 //
 void P_SpawnMapThing (mapthing_t* mthing)
 {
@@ -731,38 +731,38 @@ void P_SpawnMapThing (mapthing_t* mthing)
 	fixed_t		y;
 	fixed_t		z;
 
-	// count ::g->deathmatch start positions
+	// count Globals::g->deathmatch start positions
 	if (mthing->type == 11)
 	{
-		if (::g->deathmatch_p < &::g->deathmatchstarts[10])
+		if (Globals::g->deathmatch_p < &Globals::g->deathmatchstarts[10])
 		{
-			memcpy (::g->deathmatch_p, mthing, sizeof(*mthing));
-			::g->deathmatch_p++;
+			memcpy (Globals::g->deathmatch_p, mthing, sizeof(*mthing));
+			Globals::g->deathmatch_p++;
 		}
 		return;
 	}
 
-	// check for ::g->players specially
+	// check for Globals::g->players specially
 	if (mthing->type <= 4)
 	{
 		// save spots for respawning in network games
-		::g->playerstarts[mthing->type-1] = *mthing;
-		if (!::g->deathmatch)
+		Globals::g->playerstarts[mthing->type-1] = *mthing;
+		if (!Globals::g->deathmatch)
 			P_SpawnPlayer (mthing);
 
 		return;
 	}
 
 	// check for apropriate skill level
-	if (!::g->netgame && (mthing->options & 16) )
+	if (!Globals::g->netgame && (mthing->options & 16) )
 		return;
 
-	if (::g->gameskill == sk_baby)
+	if (Globals::g->gameskill == sk_baby)
 		bit = 1;
-	else if (::g->gameskill == sk_nightmare)
+	else if (Globals::g->gameskill == sk_nightmare)
 		bit = 4;
 	else
-		bit = 1<<(::g->gameskill-1);
+		bit = 1<<(Globals::g->gameskill-1);
 
 	if (!(mthing->options & bit) )
 		return;
@@ -780,12 +780,12 @@ void P_SpawnMapThing (mapthing_t* mthing)
 		//mthing->x, mthing->y);
 	}
 
-	// don't spawn keycards and ::g->players in ::g->deathmatch
-	if (::g->deathmatch && mobjinfo[i].flags & MF_NOTDMATCH)
+	// don't spawn keycards and Globals::g->players in Globals::g->deathmatch
+	if (Globals::g->deathmatch && mobjinfo[i].flags & MF_NOTDMATCH)
 		return;
 
-	// don't spawn any monsters if -::g->nomonsters
-	if (::g->nomonsters
+	// don't spawn any monsters if -Globals::g->nomonsters
+	if (Globals::g->nomonsters
 		&& ( i == MT_SKULL
 		|| (mobjinfo[i].flags & MF_COUNTKILL)) )
 	{
@@ -807,9 +807,9 @@ void P_SpawnMapThing (mapthing_t* mthing)
 	if (mobj->tics > 0)
 		mobj->tics = 1 + (P_Random () % mobj->tics);
 	if (mobj->flags & MF_COUNTKILL)
-		::g->totalkills++;
+		Globals::g->totalkills++;
 	if (mobj->flags & MF_COUNTITEM)
-		::g->totalitems++;
+		Globals::g->totalitems++;
 
 	mobj->angle = ANG45 * (mthing->angle/45);
 	if (mthing->options & MTF_AMBUSH)
@@ -845,7 +845,7 @@ P_SpawnPuff
 		th->tics = 1;
 
 	// don't make punches spark on the wall
-	if (::g->attackrange == MELEERANGE) {
+	if (Globals::g->attackrange == MELEERANGE) {
 
 		P_SetMobjState (th, S_PUFF3);
 		
@@ -970,18 +970,18 @@ P_SpawnPlayerMissile
 	an = source->angle;
 	slope = P_AimLineAttack (source, an, 16*64*FRACUNIT);
 
-	if (!::g->linetarget)
+	if (!Globals::g->linetarget)
 	{
 		an += 1<<26;
 		slope = P_AimLineAttack (source, an, 16*64*FRACUNIT);
 
-		if (!::g->linetarget)
+		if (!Globals::g->linetarget)
 		{
 			an -= 2<<26;
 			slope = P_AimLineAttack (source, an, 16*64*FRACUNIT);
 		}
 
-		if (!::g->linetarget)
+		if (!Globals::g->linetarget)
 		{
 			an = source->angle;
 			slope = 0;
@@ -994,7 +994,7 @@ P_SpawnPlayerMissile
 
 	th = P_SpawnMobj (x,y,z, type);
 
-	if (th->info->seesound && (source->player == &::g->players[::g->consoleplayer]) ) {
+	if (th->info->seesound && (source->player == &Globals::g->players[Globals::g->consoleplayer]) ) {
 		S_StartSound (th, th->info->seesound);
 	}
 

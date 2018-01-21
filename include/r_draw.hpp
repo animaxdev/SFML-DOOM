@@ -43,31 +43,31 @@ extern fixed_t		dc_iscale;
 extern fixed_t		dc_texturemid;
 
 // first pixel in a column
-extern byte*		dc_source;		
+extern unsigned char*		dc_source;		
 
 
 // The span blitting interface.
 // Hook in assembler or system specific BLT
 //  here.
 void 	R_DrawColumn ( lighttable_t * dc_colormap,
-						byte * dc_source );
+						unsigned char * dc_source );
 
 void 	R_DrawColumnLow ( lighttable_t * dc_colormap,
-						  byte * dc_source );
+						  unsigned char * dc_source );
 
 // The Spectre/Invisibility effect.
 void 	R_DrawFuzzColumn ( lighttable_t * dc_colormap,
-						  byte * dc_source );
+						  unsigned char * dc_source );
 void 	R_DrawFuzzColumnLow ( lighttable_t * dc_colormap,
-						  byte * dc_source );
+						  unsigned char * dc_source );
 
 // Draw with color translation tables,
 //  for player sprite rendering,
 //  Green/Red/Blue/Indigo shirts.
 void	R_DrawTranslatedColumn ( lighttable_t * dc_colormap,
-						  byte * dc_source );
+						  unsigned char * dc_source );
 void	R_DrawTranslatedColumnLow ( lighttable_t * dc_colormap,
-						  byte * dc_source );
+						  unsigned char * dc_source );
 
 void
 R_VideoErase
@@ -86,10 +86,10 @@ extern fixed_t		ds_xstep;
 extern fixed_t		ds_ystep;
 
 // start of a 64*64 tile image
-extern byte*		ds_source;		
+extern unsigned char*		ds_source;		
 
-extern byte*		translationtables;
-extern byte*		dc_translation;
+extern unsigned char*		translationtables;
+extern unsigned char*		dc_translation;
 
 
 // Span blitting for rows, floor/ceiling.
@@ -103,7 +103,7 @@ void 	R_DrawSpan (
 	fixed_t ds_xstep,
 	fixed_t ds_ystep,
 	lighttable_t * ds_colormap,
-	byte * ds_source );
+	unsigned char * ds_source );
 
 // Low resolution mode, 160x200?
 void 	R_DrawSpanLow ( fixed_t xfrac,
@@ -114,7 +114,7 @@ void 	R_DrawSpanLow ( fixed_t xfrac,
 				  fixed_t ds_xstep,
 				  fixed_t ds_ystep,
 				  lighttable_t * ds_colormap,
-				  byte * ds_source );
+				  unsigned char * ds_source );
 
 
 void

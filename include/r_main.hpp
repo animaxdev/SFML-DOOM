@@ -104,11 +104,11 @@ extern	int		detailshift;
 // Used to select shadow mode etc.
 //
 extern void		(*colfunc) ( lighttable_t * ds_colormap,
-						byte * ds_source );
+						unsigned char * ds_source );
 extern void		(*basecolfunc) ( lighttable_t * ds_colormap,
-						byte * ds_source );
+						unsigned char * ds_source );
 extern void		(*fuzzcolfunc) ( lighttable_t * ds_colormap,
-						byte * ds_source );
+						unsigned char * ds_source );
 // No shadow effects on floors.
 extern void		(*spanfunc) (
 	fixed_t xfrac,
@@ -119,7 +119,7 @@ extern void		(*spanfunc) (
 	fixed_t ds_xstep,
 	fixed_t ds_ystep,
 	lighttable_t * ds_colormap,
-	byte * ds_source );
+	unsigned char * ds_source );
 
 
 //

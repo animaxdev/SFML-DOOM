@@ -45,7 +45,7 @@ If you have questions concerning this license or the applicable additional terms
 
 void I_GetEvents( controller_t * );
 void D_ProcessEvents (void); 
-void G_BuildTiccmd (ticcmd_t *cmd, idUserCmdMgr *, int newTics ); 
+void G_BuildTiccmd (ticcmd_t *cmd, int newTics ); 
 void D_DoAdvanceDemo (void);
 
 extern bool globalNetworking;
@@ -53,11 +53,11 @@ extern bool globalNetworking;
 //
 // NETWORKING
 //
-// ::g->gametic is the tic about to (or currently being) run
-// ::g->maketic is the tick that hasn't had control made for it yet
-// ::g->nettics[] has the maketics for all ::g->players 
+// Globals::g->gametic is the tic about to (or currently being) run
+// Globals::g->maketic is the tick that hasn't had control made for it yet
+// Globals::g->nettics[] has the maketics for all Globals::g->players 
 //
-// a ::g->gametic cannot be run until ::g->nettics[] > ::g->gametic for all ::g->players
+// a Globals::g->gametic cannot be run until Globals::g->nettics[] > Globals::g->gametic for all Globals::g->players
 //
 
 
@@ -75,7 +75,7 @@ extern bool globalNetworking;
 int NetbufferSize (void)
 {
     // hrm...
-	//int size = (int)&(((doomdata_t *)0)->cmds[::g->netbuffer->numtics]);
+	//int size = (int)&(((doomdata_t *)0)->cmds[Globals::g->netbuffer->numtics]);
 
 	//return size;
     return 0;
@@ -95,7 +95,7 @@ unsigned NetbufferChecksum (void)
 	if ( globalNetworking ) {
 		l = (NetbufferSize () - (int)&(((doomdata_t *)0)->retransmitfrom))/4;
 		for (i=0 ; i<l ; i++)
-			c += ((unsigned *)&::g->netbuffer->retransmitfrom)[i] * (i+1);
+			c += ((unsigned *)&Globals::g->netbuffer->retransmitfrom)[i] * (i+1);
 	}*/
 
 	return c & NCMD_CHECKSUM;
@@ -108,16 +108,16 @@ int ExpandTics (int low)
 {
 	int	delta;
 
-	delta = low - (::g->maketic&0xff);
+	delta = low - (Globals::g->maketic&0xff);
 
 	if (delta >= -64 && delta <= 64)
-		return (::g->maketic&~0xff) + low;
+		return (Globals::g->maketic&~0xff) + low;
 	if (delta > 64)
-		return (::g->maketic&~0xff) - 256 + low;
+		return (Globals::g->maketic&~0xff) - 256 + low;
 	if (delta < -64)
-		return (::g->maketic&~0xff) + 256 + low;
+		return (Globals::g->maketic&~0xff) + 256 + low;
 
-	I_Error ("ExpandTics: strange value %i at ::g->maketic %i",low,::g->maketic);
+	I_Error ("ExpandTics: strange value %i at Globals::g->maketic %i",low,Globals::g->maketic);
 	return 0;
 }
 
@@ -131,42 +131,42 @@ HSendPacket
 (int	node,
  int	flags )
 {
-	::g->netbuffer->checksum = NetbufferChecksum () | flags;
+	Globals::g->netbuffer->checksum = NetbufferChecksum () | flags;
 
 	if (!node)
 	{
-		::g->reboundstore = *::g->netbuffer;
-		::g->reboundpacket = true;
+		Globals::g->reboundstore = *Globals::g->netbuffer;
+		Globals::g->reboundpacket = true;
 		return;
 	}
 
-	if (::g->demoplayback)
+	if (Globals::g->demoplayback)
 		return;
 
-	if (!::g->netgame)
+	if (!Globals::g->netgame)
 		I_Error ("Tried to transmit to another node");
 
-	::g->doomcom.command = CMD_SEND;
-	::g->doomcom.remotenode = node;
-	::g->doomcom.datalength = NetbufferSize ();
+	Globals::g->doomcom.command = CMD_SEND;
+	Globals::g->doomcom.remotenode = node;
+	Globals::g->doomcom.datalength = NetbufferSize ();
 
-	if (::g->debugfile)
+	if (Globals::g->debugfile)
 	{
 		int		i;
 		int		realretrans;
-		if (::g->netbuffer->checksum & NCMD_RETRANSMIT)
-			realretrans = ExpandTics (::g->netbuffer->retransmitfrom);
+		if (Globals::g->netbuffer->checksum & NCMD_RETRANSMIT)
+			realretrans = ExpandTics (Globals::g->netbuffer->retransmitfrom);
 		else
 			realretrans = -1;
 
-		fprintf (::g->debugfile,"send (%i + %i, R %i) [%i] ",
-			ExpandTics(::g->netbuffer->starttic),
-			::g->netbuffer->numtics, realretrans, ::g->doomcom.datalength);
+		fprintf (Globals::g->debugfile,"send (%i + %i, R %i) [%i] ",
+			ExpandTics(Globals::g->netbuffer->starttic),
+			Globals::g->netbuffer->numtics, realretrans, Globals::g->doomcom.datalength);
 
-		for (i=0 ; i < ::g->doomcom.datalength ; i++)
-			fprintf (::g->debugfile,"%i ",((byte *)::g->netbuffer)[i]);
+		for (i=0 ; i < Globals::g->doomcom.datalength ; i++)
+			fprintf (Globals::g->debugfile,"%i ",((unsigned char *)Globals::g->netbuffer)[i]);
 
-		fprintf (::g->debugfile,"\n");
+		fprintf (Globals::g->debugfile,"\n");
 	}
 
 	I_NetCmd ();
@@ -178,68 +178,68 @@ HSendPacket
 //
 qboolean HGetPacket (void)
 {	
-	if (::g->reboundpacket)
+	if (Globals::g->reboundpacket)
 	{
-		*::g->netbuffer = ::g->reboundstore;
-		::g->doomcom.remotenode = 0;
-		::g->reboundpacket = false;
+		*Globals::g->netbuffer = Globals::g->reboundstore;
+		Globals::g->doomcom.remotenode = 0;
+		Globals::g->reboundpacket = false;
 		return true;
 	}
 
-	if (!::g->netgame)
+	if (!Globals::g->netgame)
 		return false;
 
-	if (::g->demoplayback)
+	if (Globals::g->demoplayback)
 		return false;
 
-	::g->doomcom.command = CMD_GET;
+	Globals::g->doomcom.command = CMD_GET;
 	I_NetCmd ();
 
-	if (::g->doomcom.remotenode == -1)
+	if (Globals::g->doomcom.remotenode == -1)
 		return false;
 
-	if (::g->doomcom.datalength != NetbufferSize ())
+	if (Globals::g->doomcom.datalength != NetbufferSize ())
 	{
-		if (::g->debugfile)
-			fprintf (::g->debugfile,"bad packet length %i\n",::g->doomcom.datalength);
+		if (Globals::g->debugfile)
+			fprintf (Globals::g->debugfile,"bad packet length %i\n",Globals::g->doomcom.datalength);
 		return false;
 	}
 
 	// ALAN NETWORKING -- this fails a lot on 4 player split debug!!
 	// TODO: Networking
 #ifdef ID_ENABLE_DOOM_CLASSIC_NETWORKING
-	if ( !gameLocal->IsSplitscreen() && NetbufferChecksum() != (::g->netbuffer->checksum&NCMD_CHECKSUM) )
+	if ( !gameLocal->IsSplitscreen() && NetbufferChecksum() != (Globals::g->netbuffer->checksum&NCMD_CHECKSUM) )
 	{
-		if (::g->debugfile) {
-			fprintf (::g->debugfile,"bad packet checksum\n");
+		if (Globals::g->debugfile) {
+			fprintf (Globals::g->debugfile,"bad packet checksum\n");
 		}
 
 		return false;
 	}
 #endif
 
-	if (::g->debugfile)
+	if (Globals::g->debugfile)
 	{
 		int		realretrans;
 		int	i;
 
-		if (::g->netbuffer->checksum & NCMD_SETUP)
-			fprintf (::g->debugfile,"setup packet\n");
+		if (Globals::g->netbuffer->checksum & NCMD_SETUP)
+			fprintf (Globals::g->debugfile,"setup packet\n");
 		else
 		{
-			if (::g->netbuffer->checksum & NCMD_RETRANSMIT)
-				realretrans = ExpandTics (::g->netbuffer->retransmitfrom);
+			if (Globals::g->netbuffer->checksum & NCMD_RETRANSMIT)
+				realretrans = ExpandTics (Globals::g->netbuffer->retransmitfrom);
 			else
 				realretrans = -1;
 
-			fprintf (::g->debugfile,"get %i = (%i + %i, R %i)[%i] ",
-				::g->doomcom.remotenode,
-				ExpandTics(::g->netbuffer->starttic),
-				::g->netbuffer->numtics, realretrans, ::g->doomcom.datalength);
+			fprintf (Globals::g->debugfile,"get %i = (%i + %i, R %i)[%i] ",
+				Globals::g->doomcom.remotenode,
+				ExpandTics(Globals::g->netbuffer->starttic),
+				Globals::g->netbuffer->numtics, realretrans, Globals::g->doomcom.datalength);
 
-			for (i=0 ; i < ::g->doomcom.datalength ; i++)
-				fprintf (::g->debugfile,"%i ",((byte *)::g->netbuffer)[i]);
-			fprintf (::g->debugfile,"\n");
+			for (i=0 ; i < Globals::g->doomcom.datalength ; i++)
+				fprintf (Globals::g->debugfile,"%i ",((unsigned char *)Globals::g->netbuffer)[i]);
+			fprintf (Globals::g->debugfile,"\n");
 		}
 	}
 	return true;	
@@ -260,29 +260,29 @@ void GetPackets (void)
 
 	while ( HGetPacket() )
 	{
-		if (::g->netbuffer->checksum & NCMD_SETUP)
+		if (Globals::g->netbuffer->checksum & NCMD_SETUP)
 			continue;		// extra setup packet
 
-		netconsole = ::g->netbuffer->player & ~PL_DRONE;
-		netnode = ::g->doomcom.remotenode;
+		netconsole = Globals::g->netbuffer->player & ~PL_DRONE;
+		netnode = Globals::g->doomcom.remotenode;
 
-		// to save bytes, only the low byte of tic numbers are sent
-		// Figure out what the rest of the bytes are
-		realstart = ExpandTics (::g->netbuffer->starttic);		
-		realend = (realstart+::g->netbuffer->numtics);
+		// to save unsigned chars, only the low unsigned char of tic numbers are sent
+		// Figure out what the rest of the unsigned chars are
+		realstart = ExpandTics (Globals::g->netbuffer->starttic);		
+		realend = (realstart+Globals::g->netbuffer->numtics);
 
 		// check for exiting the game
-		if (::g->netbuffer->checksum & NCMD_EXIT)
+		if (Globals::g->netbuffer->checksum & NCMD_EXIT)
 		{
-			if (!::g->nodeingame[netnode])
+			if (!Globals::g->nodeingame[netnode])
 				continue;
-			::g->nodeingame[netnode] = false;
-			::g->playeringame[netconsole] = false;
-			strcpy (::g->exitmsg, "Player 1 left the game");
-			::g->exitmsg[7] += netconsole;
-			::g->players[::g->consoleplayer].message = ::g->exitmsg;
+			Globals::g->nodeingame[netnode] = false;
+			Globals::g->playeringame[netconsole] = false;
+			strcpy (Globals::g->exitmsg, "Player 1 left the game");
+			Globals::g->exitmsg[7] += netconsole;
+			Globals::g->players[Globals::g->consoleplayer].message = Globals::g->exitmsg;
 
-			if( ::g->demorecording ) {
+			if( Globals::g->demorecording ) {
 				G_CheckDemoStatus();
 			}
 			continue;
@@ -290,46 +290,46 @@ void GetPackets (void)
 
 		// check for a remote game kill
 /*
-		if (::g->netbuffer->checksum & NCMD_KILL)
+		if (Globals::g->netbuffer->checksum & NCMD_KILL)
 			I_Error ("Killed by network driver");
 */
 
-		::g->nodeforplayer[netconsole] = netnode;
+		Globals::g->nodeforplayer[netconsole] = netnode;
 
 		// check for retransmit request
-		if ( ::g->resendcount[netnode] <= 0 
-			&& (::g->netbuffer->checksum & NCMD_RETRANSMIT) )
+		if ( Globals::g->resendcount[netnode] <= 0 
+			&& (Globals::g->netbuffer->checksum & NCMD_RETRANSMIT) )
 		{
-			::g->resendto[netnode] = ExpandTics(::g->netbuffer->retransmitfrom);
-			if (::g->debugfile)
-				fprintf (::g->debugfile,"retransmit from %i\n", ::g->resendto[netnode]);
-			::g->resendcount[netnode] = RESENDCOUNT;
+			Globals::g->resendto[netnode] = ExpandTics(Globals::g->netbuffer->retransmitfrom);
+			if (Globals::g->debugfile)
+				fprintf (Globals::g->debugfile,"retransmit from %i\n", Globals::g->resendto[netnode]);
+			Globals::g->resendcount[netnode] = RESENDCOUNT;
 		}
 		else
-			::g->resendcount[netnode]--;
+			Globals::g->resendcount[netnode]--;
 
 		// check for out of order / duplicated packet		
-		if (realend == ::g->nettics[netnode])
+		if (realend == Globals::g->nettics[netnode])
 			continue;
 
-		if (realend < ::g->nettics[netnode])
+		if (realend < Globals::g->nettics[netnode])
 		{
-			if (::g->debugfile)
-				fprintf (::g->debugfile,
+			if (Globals::g->debugfile)
+				fprintf (Globals::g->debugfile,
 				"out of order packet (%i + %i)\n" ,
-				realstart,::g->netbuffer->numtics);
+				realstart,Globals::g->netbuffer->numtics);
 			continue;
 		}
 
 		// check for a missed packet
-		if (realstart > ::g->nettics[netnode])
+		if (realstart > Globals::g->nettics[netnode])
 		{
 			// stop processing until the other system resends the missed tics
-			if (::g->debugfile)
-				fprintf (::g->debugfile,
+			if (Globals::g->debugfile)
+				fprintf (Globals::g->debugfile,
 				"missed tics from %i (%i - %i)\n",
-				netnode, realstart, ::g->nettics[netnode]);
-			::g->remoteresend[netnode] = true;
+				netnode, realstart, Globals::g->nettics[netnode]);
+			Globals::g->remoteresend[netnode] = true;
 			continue;
 		}
 
@@ -337,15 +337,15 @@ void GetPackets (void)
 		{
 			int		start;
 
-			::g->remoteresend[netnode] = false;
+			Globals::g->remoteresend[netnode] = false;
 
-			start = ::g->nettics[netnode] - realstart;		
-			src = &::g->netbuffer->cmds[start];
+			start = Globals::g->nettics[netnode] - realstart;		
+			src = &Globals::g->netbuffer->cmds[start];
 
-			while (::g->nettics[netnode] < realend)
+			while (Globals::g->nettics[netnode] < realend)
 			{
-				dest = &::g->netcmds[netconsole][::g->nettics[netnode]%BACKUPTICS];
-				::g->nettics[netnode]++;
+				dest = &Globals::g->netcmds[netconsole][Globals::g->nettics[netnode]%BACKUPTICS];
+				Globals::g->nettics[netnode]++;
 				*dest = *src;
 				src++;
 			}
@@ -360,7 +360,7 @@ void GetPackets (void)
 // sends out a packet
 //
 
-void NetUpdate ( idUserCmdMgr * userCmdMgr )
+void NetUpdate (  )
 {
 	int             nowtime;
 	int             newtics;
@@ -369,73 +369,73 @@ void NetUpdate ( idUserCmdMgr * userCmdMgr )
 	int				gameticdiv;
 
 	// check time
-	nowtime = I_GetTime ()/::g->ticdup;
-	newtics = nowtime - ::g->gametime;
-	::g->gametime = nowtime;
+	nowtime = I_GetTime ()/Globals::g->ticdup;
+	newtics = nowtime - Globals::g->gametime;
+	Globals::g->gametime = nowtime;
 
 	if (newtics <= 0) 	// nothing new to update
 		goto listen; 
 
-	if (::g->skiptics <= newtics)
+	if (Globals::g->skiptics <= newtics)
 	{
-		newtics -= ::g->skiptics;
-		::g->skiptics = 0;
+		newtics -= Globals::g->skiptics;
+		Globals::g->skiptics = 0;
 	}
 	else
 	{
-		::g->skiptics -= newtics;
+		Globals::g->skiptics -= newtics;
 		newtics = 0;
 	}
 
 
-	::g->netbuffer->player = ::g->consoleplayer;
+	Globals::g->netbuffer->player = Globals::g->consoleplayer;
 
 	// build new ticcmds for console player
-	gameticdiv = ::g->gametic/::g->ticdup;
+	gameticdiv = Globals::g->gametic/Globals::g->ticdup;
 	for (i=0 ; i<newtics ; i++)
 	{
-		//I_GetEvents( ::g->I_StartTicCallback () );
+		//I_GetEvents( Globals::g->I_StartTicCallback () );
 		D_ProcessEvents ();
-		if (::g->maketic - gameticdiv >= BACKUPTICS/2-1) {
-			printf( "Out of room for ticcmds: maketic = %d, gameticdiv = %d\n", ::g->maketic, gameticdiv );
+		if (Globals::g->maketic - gameticdiv >= BACKUPTICS/2-1) {
+			printf( "Out of room for ticcmds: maketic = %d, gameticdiv = %d\n", Globals::g->maketic, gameticdiv );
 			break;          // can't hold any more
 		}
 
-		//I_Printf ("mk:%i ",::g->maketic);
+		//I_Printf ("mk:%i ",Globals::g->maketic);
 
 		// Grab the latest tech5 command
 
-		G_BuildTiccmd (&::g->localcmds[::g->maketic%BACKUPTICS], userCmdMgr, newtics );
-		::g->maketic++;
+		G_BuildTiccmd (&Globals::g->localcmds[Globals::g->maketic%BACKUPTICS], newtics );
+		Globals::g->maketic++;
 	}
 
 
-	if (::g->singletics)
+	if (Globals::g->singletics)
 		return;         // singletic update is syncronous
 
-	// send the packet to the other ::g->nodes
-	for (i=0 ; i < ::g->doomcom.numnodes ; i++) {
+	// send the packet to the other Globals::g->nodes
+	for (i=0 ; i < Globals::g->doomcom.numnodes ; i++) {
 
-		if (::g->nodeingame[i])	{
-			::g->netbuffer->starttic = realstart = ::g->resendto[i];
-			::g->netbuffer->numtics = ::g->maketic - realstart;
-			if (::g->netbuffer->numtics > BACKUPTICS)
-				I_Error ("NetUpdate: ::g->netbuffer->numtics > BACKUPTICS");
+		if (Globals::g->nodeingame[i])	{
+			Globals::g->netbuffer->starttic = realstart = Globals::g->resendto[i];
+			Globals::g->netbuffer->numtics = Globals::g->maketic - realstart;
+			if (Globals::g->netbuffer->numtics > BACKUPTICS)
+				I_Error ("NetUpdate: Globals::g->netbuffer->numtics > BACKUPTICS");
 
-			::g->resendto[i] = ::g->maketic - ::g->doomcom.extratics;
+			Globals::g->resendto[i] = Globals::g->maketic - Globals::g->doomcom.extratics;
 
-			for (j=0 ; j< ::g->netbuffer->numtics ; j++)
-				::g->netbuffer->cmds[j] = 
-				::g->localcmds[(realstart+j)%BACKUPTICS];
+			for (j=0 ; j< Globals::g->netbuffer->numtics ; j++)
+				Globals::g->netbuffer->cmds[j] = 
+				Globals::g->localcmds[(realstart+j)%BACKUPTICS];
 
-			if (::g->remoteresend[i])
+			if (Globals::g->remoteresend[i])
 			{
-				::g->netbuffer->retransmitfrom = ::g->nettics[i];
+				Globals::g->netbuffer->retransmitfrom = Globals::g->nettics[i];
 				HSendPacket (i, NCMD_RETRANSMIT);
 			}
 			else
 			{
-				::g->netbuffer->retransmitfrom = 0;
+				Globals::g->netbuffer->retransmitfrom = 0;
 				HSendPacket (i, 0);
 			}
 		}
@@ -476,26 +476,26 @@ bool D_ArbitrateNetStart (void)
 {
 	int		i;
 
-	::g->autostart = true;
-	if (::g->doomcom.consoleplayer)
+	Globals::g->autostart = true;
+	if (Globals::g->doomcom.consoleplayer)
 	{
 		// listen for setup info from key player
 		CheckAbort ();
 		if (!HGetPacket ())
 			return false;
-		if (::g->netbuffer->checksum & NCMD_SETUP)
+		if (Globals::g->netbuffer->checksum & NCMD_SETUP)
 		{
 			printf( "Received setup info\n" );
 
-			if (::g->netbuffer->player != VERSION)
+			if (Globals::g->netbuffer->player != VERSION)
 				I_Error ("Different DOOM versions cannot play a net game!");
-			::g->startskill = (skill_t)(::g->netbuffer->retransmitfrom & 15);
-			::g->deathmatch = (::g->netbuffer->retransmitfrom & 0xc0) >> 6;
-			::g->nomonsters = (::g->netbuffer->retransmitfrom & 0x20) > 0;
-			::g->respawnparm = (::g->netbuffer->retransmitfrom & 0x10) > 0;
+			Globals::g->startskill = (skill_t)(Globals::g->netbuffer->retransmitfrom & 15);
+			Globals::g->deathmatch = (Globals::g->netbuffer->retransmitfrom & 0xc0) >> 6;
+			Globals::g->nomonsters = (Globals::g->netbuffer->retransmitfrom & 0x20) > 0;
+			Globals::g->respawnparm = (Globals::g->netbuffer->retransmitfrom & 0x10) > 0;
 			// VV original xbox doom :: don't do this.. it will be setup from the launcher
-			//::g->startmap = ::g->netbuffer->starttic & 0x3f;
-			//::g->startepisode = ::g->netbuffer->starttic >> 6;
+			//Globals::g->startmap = Globals::g->netbuffer->starttic & 0x3f;
+			//Globals::g->startepisode = Globals::g->netbuffer->starttic >> 6;
 			return true;
 		}
 		return false;
@@ -504,34 +504,34 @@ bool D_ArbitrateNetStart (void)
 	{
 		// key player, send the setup info
 		CheckAbort ();
-		for (i=0 ; i < ::g->doomcom.numnodes ; i++)
+		for (i=0 ; i < Globals::g->doomcom.numnodes ; i++)
 		{
 			printf( "Sending setup info to node %d\n", i );
 
-			::g->netbuffer->retransmitfrom = ::g->startskill;
-			if (::g->deathmatch)
-				::g->netbuffer->retransmitfrom |= (::g->deathmatch<<6);
-			if (::g->nomonsters)
-				::g->netbuffer->retransmitfrom |= 0x20;
-			if (::g->respawnparm)
-				::g->netbuffer->retransmitfrom |= 0x10;
-			::g->netbuffer->starttic = ::g->startepisode * 64 + ::g->startmap;
-			::g->netbuffer->player = VERSION;
-			::g->netbuffer->numtics = 0;
+			Globals::g->netbuffer->retransmitfrom = Globals::g->startskill;
+			if (Globals::g->deathmatch)
+				Globals::g->netbuffer->retransmitfrom |= (Globals::g->deathmatch<<6);
+			if (Globals::g->nomonsters)
+				Globals::g->netbuffer->retransmitfrom |= 0x20;
+			if (Globals::g->respawnparm)
+				Globals::g->netbuffer->retransmitfrom |= 0x10;
+			Globals::g->netbuffer->starttic = Globals::g->startepisode * 64 + Globals::g->startmap;
+			Globals::g->netbuffer->player = VERSION;
+			Globals::g->netbuffer->numtics = 0;
 			HSendPacket (i, NCMD_SETUP);
 		}
 
 		while (HGetPacket ())
 		{
-			::g->gotinfo[::g->netbuffer->player&0x7f] = true;
+			Globals::g->gotinfo[Globals::g->netbuffer->player&0x7f] = true;
 		}
 
-		for (i=1 ; i < ::g->doomcom.numnodes ; i++) {
-			if (!::g->gotinfo[i])
+		for (i=1 ; i < Globals::g->doomcom.numnodes ; i++) {
+			if (!Globals::g->gotinfo[i])
 				break;
 		}
 
-		if (i >= ::g->doomcom.numnodes)
+		if (i >= Globals::g->doomcom.numnodes)
 			return true;
 
 		return false;
@@ -549,48 +549,48 @@ void D_CheckNetGame (void)
 
 	for (i=0 ; i<MAXNETNODES ; i++)
 	{
-		::g->nodeingame[i] = false;
-		::g->nettics[i] = 0;
-		::g->remoteresend[i] = false;	// set when local needs tics
-		::g->resendto[i] = 0;		// which tic to start sending
+		Globals::g->nodeingame[i] = false;
+		Globals::g->nettics[i] = 0;
+		Globals::g->remoteresend[i] = false;	// set when local needs tics
+		Globals::g->resendto[i] = 0;		// which tic to start sending
 	}
 
-	// I_InitNetwork sets ::g->doomcom and ::g->netgame
+	// I_InitNetwork sets Globals::g->doomcom and Globals::g->netgame
 	I_InitNetwork ();
 #ifdef ID_ENABLE_DOOM_CLASSIC_NETWORKING
-	if (::g->doomcom.id != DOOMCOM_ID)
+	if (Globals::g->doomcom.id != DOOMCOM_ID)
 		I_Error ("Doomcom buffer invalid!");
 #endif
 
-	::g->netbuffer = &::g->doomcom.data;
-	::g->consoleplayer = ::g->displayplayer = ::g->doomcom.consoleplayer;
+	Globals::g->netbuffer = &Globals::g->doomcom.data;
+	Globals::g->consoleplayer = Globals::g->displayplayer = Globals::g->doomcom.consoleplayer;
 }
 
 bool D_PollNetworkStart()
 {
 	int             i;
-	if (::g->netgame)
+	if (Globals::g->netgame)
 	{
 		if (D_ArbitrateNetStart () == false)
 			return false;
 	}
 
 	I_Printf ("startskill %i  deathmatch: %i  startmap: %i  startepisode: %i\n",
-		::g->startskill, ::g->deathmatch, ::g->startmap, ::g->startepisode);
+		Globals::g->startskill, Globals::g->deathmatch, Globals::g->startmap, Globals::g->startepisode);
 
-	// read values out of ::g->doomcom
-	::g->ticdup = ::g->doomcom.ticdup;
-	::g->maxsend = BACKUPTICS/(2*::g->ticdup)-1;
-	if (::g->maxsend<1)
-		::g->maxsend = 1;
+	// read values out of Globals::g->doomcom
+	Globals::g->ticdup = Globals::g->doomcom.ticdup;
+	Globals::g->maxsend = BACKUPTICS/(2*Globals::g->ticdup)-1;
+	if (Globals::g->maxsend<1)
+		Globals::g->maxsend = 1;
 
-	for (i=0 ; i < ::g->doomcom.numplayers ; i++)
-		::g->playeringame[i] = true;
-	for (i=0 ; i < ::g->doomcom.numnodes ; i++)
-		::g->nodeingame[i] = true;
+	for (i=0 ; i < Globals::g->doomcom.numplayers ; i++)
+		Globals::g->playeringame[i] = true;
+	for (i=0 ; i < Globals::g->doomcom.numnodes ; i++)
+		Globals::g->nodeingame[i] = true;
 
-	I_Printf ("player %i of %i (%i ::g->nodes)\n",
-		::g->consoleplayer+1, ::g->doomcom.numplayers, ::g->doomcom.numnodes);
+	I_Printf ("player %i of %i (%i Globals::g->nodes)\n",
+		Globals::g->consoleplayer+1, Globals::g->doomcom.numplayers, Globals::g->doomcom.numnodes);
 
 	return true;
 }
@@ -599,21 +599,21 @@ bool D_PollNetworkStart()
 //
 // D_QuitNetGame
 // Called before quitting to leave a net game
-// without hanging the other ::g->players
+// without hanging the other Globals::g->players
 //
 void D_QuitNetGame (void)
 {
 	int i;
 
-	if ( (!::g->netgame && !::g->usergame) || ::g->consoleplayer == -1 || ::g->demoplayback || ::g->netbuffer == NULL )
+	if ( (!Globals::g->netgame && !Globals::g->usergame) || Globals::g->consoleplayer == -1 || Globals::g->demoplayback || Globals::g->netbuffer == NULL )
 		return;
 
 	// send a quit packet to the other nodes
-	::g->netbuffer->player = ::g->consoleplayer;
-	::g->netbuffer->numtics = 0;
+	Globals::g->netbuffer->player = Globals::g->consoleplayer;
+	Globals::g->netbuffer->numtics = 0;
 
-	for ( i=1; i < ::g->doomcom.numnodes; i++ ) {
-		if ( ::g->nodeingame[i] ) {
+	for ( i=1; i < Globals::g->doomcom.numnodes; i++ ) {
+		if ( Globals::g->nodeingame[i] ) {
 			HSendPacket( i, NCMD_EXIT );
 		}
 	}
@@ -621,35 +621,35 @@ void D_QuitNetGame (void)
 
 	for (i=1 ; i<MAXNETNODES ; i++)
 	{
-		::g->nodeingame[i] = false;
-		::g->nettics[i] = 0;
-		::g->remoteresend[i] = false;	// set when local needs tics
-		::g->resendto[i] = 0;		// which tic to start sending
+		Globals::g->nodeingame[i] = false;
+		Globals::g->nettics[i] = 0;
+		Globals::g->remoteresend[i] = false;	// set when local needs tics
+		Globals::g->resendto[i] = 0;		// which tic to start sending
 	}
 
-	//memset (&::g->doomcom, 0, sizeof(::g->doomcom) );
+	//memset (&Globals::g->doomcom, 0, sizeof(Globals::g->doomcom) );
 
 	// Reset singleplayer state
-	::g->doomcom.id = DOOMCOM_ID;
-	::g->doomcom.ticdup = 1;
-	::g->doomcom.extratics = 0;
-	::g->doomcom.numplayers = ::g->doomcom.numnodes = 1;
-	::g->doomcom.deathmatch = false;
-	::g->doomcom.consoleplayer = 0;
-	::g->netgame = false;
+	Globals::g->doomcom.id = DOOMCOM_ID;
+	Globals::g->doomcom.ticdup = 1;
+	Globals::g->doomcom.extratics = 0;
+	Globals::g->doomcom.numplayers = Globals::g->doomcom.numnodes = 1;
+	Globals::g->doomcom.deathmatch = false;
+	Globals::g->doomcom.consoleplayer = 0;
+	Globals::g->netgame = false;
 
-	::g->netbuffer = &::g->doomcom.data;
-	::g->consoleplayer = ::g->displayplayer = ::g->doomcom.consoleplayer;
+	Globals::g->netbuffer = &Globals::g->doomcom.data;
+	Globals::g->consoleplayer = Globals::g->displayplayer = Globals::g->doomcom.consoleplayer;
 
-	::g->ticdup = ::g->doomcom.ticdup;
-	::g->maxsend = BACKUPTICS/(2*::g->ticdup)-1;
-	if (::g->maxsend<1)
-		::g->maxsend = 1;
+	Globals::g->ticdup = Globals::g->doomcom.ticdup;
+	Globals::g->maxsend = BACKUPTICS/(2*Globals::g->ticdup)-1;
+	if (Globals::g->maxsend<1)
+		Globals::g->maxsend = 1;
 
-	for (i=0 ; i < ::g->doomcom.numplayers ; i++)
-		::g->playeringame[i] = true;
-	for (i=0 ; i < ::g->doomcom.numnodes ; i++)
-		::g->nodeingame[i] = true;
+	for (i=0 ; i < Globals::g->doomcom.numplayers ; i++)
+		Globals::g->playeringame[i] = true;
+	for (i=0 ; i < Globals::g->doomcom.numnodes ; i++)
+		Globals::g->nodeingame[i] = true;
 }
 
 
@@ -657,104 +657,104 @@ void D_QuitNetGame (void)
 //
 // TryRunTics
 //
-bool TryRunTics ( idUserCmdMgr * userCmdMgr )
+bool TryRunTics (  )
 {
 	int		i;
 	int		lowtic_node = -1;
 
 	// get real tics		
-	::g->trt_entertic = I_GetTime ()/::g->ticdup;
-	::g->trt_realtics = ::g->trt_entertic - ::g->oldtrt_entertics;
-	::g->oldtrt_entertics = ::g->trt_entertic;
+	Globals::g->trt_entertic = I_GetTime ()/Globals::g->ticdup;
+	Globals::g->trt_realtics = Globals::g->trt_entertic - Globals::g->oldtrt_entertics;
+	Globals::g->oldtrt_entertics = Globals::g->trt_entertic;
 
 	// get available tics
-	NetUpdate ( userCmdMgr );
+	NetUpdate ( );
 
-    ::g->trt_lowtic = std::numeric_limits<int>::max();
-	::g->trt_numplaying = 0;
+    Globals::g->trt_lowtic = std::numeric_limits<int>::max();
+	Globals::g->trt_numplaying = 0;
 
-	for (i=0 ; i < ::g->doomcom.numnodes ; i++) {
+	for (i=0 ; i < Globals::g->doomcom.numnodes ; i++) {
 
-		if (::g->nodeingame[i]) {
-			::g->trt_numplaying++;
+		if (Globals::g->nodeingame[i]) {
+			Globals::g->trt_numplaying++;
 
-			if (::g->nettics[i] < ::g->trt_lowtic) {
-				::g->trt_lowtic = ::g->nettics[i];
+			if (Globals::g->nettics[i] < Globals::g->trt_lowtic) {
+				Globals::g->trt_lowtic = Globals::g->nettics[i];
 				lowtic_node = i;
 			}
 		}
 	}
 
-	::g->trt_availabletics = ::g->trt_lowtic - ::g->gametic/::g->ticdup;
+	Globals::g->trt_availabletics = Globals::g->trt_lowtic - Globals::g->gametic/Globals::g->ticdup;
 
 	// decide how many tics to run
-	if (::g->trt_realtics < ::g->trt_availabletics-1) {
-		::g->trt_counts = ::g->trt_realtics+1;
-	} else if (::g->trt_realtics < ::g->trt_availabletics) {
-		::g->trt_counts = ::g->trt_realtics;
+	if (Globals::g->trt_realtics < Globals::g->trt_availabletics-1) {
+		Globals::g->trt_counts = Globals::g->trt_realtics+1;
+	} else if (Globals::g->trt_realtics < Globals::g->trt_availabletics) {
+		Globals::g->trt_counts = Globals::g->trt_realtics;
 	} else {
-		::g->trt_counts = ::g->trt_availabletics;
+		Globals::g->trt_counts = Globals::g->trt_availabletics;
 	}
 
-	if (::g->trt_counts < 1) {
-		::g->trt_counts = 1;
+	if (Globals::g->trt_counts < 1) {
+		Globals::g->trt_counts = 1;
 	}
 
-	::g->frameon++;
+	Globals::g->frameon++;
 
-	if (::g->debugfile) {
-		fprintf (::g->debugfile, "=======real: %i  avail: %i  game: %i\n", ::g->trt_realtics, ::g->trt_availabletics,::g->trt_counts);
+	if (Globals::g->debugfile) {
+		fprintf (Globals::g->debugfile, "=======real: %i  avail: %i  game: %i\n", Globals::g->trt_realtics, Globals::g->trt_availabletics,Globals::g->trt_counts);
 	}
 
-	if ( !::g->demoplayback )
+	if ( !Globals::g->demoplayback )
 	{	
-		// ideally ::g->nettics[0] should be 1 - 3 tics above ::g->trt_lowtic
+		// ideally Globals::g->nettics[0] should be 1 - 3 tics above Globals::g->trt_lowtic
 		// if we are consistantly slower, speed up time
 		for (i=0 ; i<MAXPLAYERS ; i++) {
-			if (::g->playeringame[i]) {
+			if (Globals::g->playeringame[i]) {
 				break;
 			}
 		}
 
-		if (::g->consoleplayer == i) {
+		if (Globals::g->consoleplayer == i) {
 			// the key player does not adapt
 		}
 		else {
-			if (::g->nettics[0] <= ::g->nettics[::g->nodeforplayer[i]])	{
-				::g->gametime--;
+			if (Globals::g->nettics[0] <= Globals::g->nettics[Globals::g->nodeforplayer[i]])	{
+				Globals::g->gametime--;
 				//OutputDebugString("-");
 			}
 
-			::g->frameskip[::g->frameon&3] = (::g->oldnettics > ::g->nettics[::g->nodeforplayer[i]]);
-			::g->oldnettics = ::g->nettics[0];
+			Globals::g->frameskip[Globals::g->frameon&3] = (Globals::g->oldnettics > Globals::g->nettics[Globals::g->nodeforplayer[i]]);
+			Globals::g->oldnettics = Globals::g->nettics[0];
 
-			if (::g->frameskip[0] && ::g->frameskip[1] && ::g->frameskip[2] && ::g->frameskip[3]) {
-				::g->skiptics = 1;
+			if (Globals::g->frameskip[0] && Globals::g->frameskip[1] && Globals::g->frameskip[2] && Globals::g->frameskip[3]) {
+				Globals::g->skiptics = 1;
 				//OutputDebugString("+");
 			}
 		}
 	}
 
 	// wait for new tics if needed
-	if (::g->trt_lowtic < ::g->gametic/::g->ticdup + ::g->trt_counts)	
+	if (Globals::g->trt_lowtic < Globals::g->gametic/Globals::g->ticdup + Globals::g->trt_counts)	
 	{
 		int lagtime = 0;
 
-		if (::g->trt_lowtic < ::g->gametic/::g->ticdup) {
-			I_Error ("TryRunTics: ::g->trt_lowtic < gametic");
+		if (Globals::g->trt_lowtic < Globals::g->gametic/Globals::g->ticdup) {
+			I_Error ("TryRunTics: Globals::g->trt_lowtic < gametic");
 		}
 
-		if ( ::g->lastnettic == 0 ) {
-			::g->lastnettic = ::g->trt_entertic;
+		if ( Globals::g->lastnettic == 0 ) {
+			Globals::g->lastnettic = Globals::g->trt_entertic;
 		}
-		lagtime = ::g->trt_entertic - ::g->lastnettic;
+		lagtime = Globals::g->trt_entertic - Globals::g->lastnettic;
 
 		// Detect if a client has stopped sending updates, remove them from the game after 5 secs.
-		/*if ( common->IsMultiplayer() && (!::g->demoplayback && ::g->netgame) && lagtime >= TICRATE ) {
+		/*if ( common->IsMultiplayer() && (!Globals::g->demoplayback && Globals::g->netgame) && lagtime >= TICRATE ) {
 
 			if ( lagtime > NET_TIMEOUT ) {
 
-				if ( lowtic_node == ::g->nodeforplayer[::g->consoleplayer] ) {
+				if ( lowtic_node == Globals::g->nodeforplayer[Globals::g->consoleplayer] ) {
 
 #ifdef ID_ENABLE_DOOM_CLASSIC_NETWORKING
 #ifndef __PS3__
@@ -763,21 +763,21 @@ bool TryRunTics ( idUserCmdMgr * userCmdMgr )
 #endif
 #endif
 				} else {
-					if (::g->nodeingame[lowtic_node]) {
+					if (Globals::g->nodeingame[lowtic_node]) {
 						int i, consoleNum = lowtic_node;
 
-						for ( i=0; i < ::g->doomcom.numnodes; i++ ) {
-							if ( ::g->nodeforplayer[i] == lowtic_node ) {
+						for ( i=0; i < Globals::g->doomcom.numnodes; i++ ) {
+							if ( Globals::g->nodeforplayer[i] == lowtic_node ) {
 								consoleNum = i;
 								break;
 							}
 						}
 
-						::g->nodeingame[lowtic_node] = false;
-						::g->playeringame[consoleNum] = false;
-						strcpy (::g->exitmsg, "Player 1 left the game");
-						::g->exitmsg[7] += consoleNum;
-						::g->players[::g->consoleplayer].message = ::g->exitmsg;
+						Globals::g->nodeingame[lowtic_node] = false;
+						Globals::g->playeringame[consoleNum] = false;
+						strcpy (Globals::g->exitmsg, "Player 1 left the game");
+						Globals::g->exitmsg[7] += consoleNum;
+						Globals::g->players[Globals::g->consoleplayer].message = Globals::g->exitmsg;
 
 						// Stop a demo record now, as playback doesn't support losing players
 						G_CheckDemoStatus();
@@ -789,44 +789,44 @@ bool TryRunTics ( idUserCmdMgr * userCmdMgr )
 		return false;
 	}
 
-	::g->lastnettic = 0;
+	Globals::g->lastnettic = 0;
 
-	// run the count * ::g->ticdup dics
-	while (::g->trt_counts--)
+	// run the count * Globals::g->ticdup dics
+	while (Globals::g->trt_counts--)
 	{
-		for (i=0 ; i < ::g->ticdup ; i++)
+		for (i=0 ; i < Globals::g->ticdup ; i++)
 		{
-			if (::g->gametic/::g->ticdup > ::g->trt_lowtic) {
-				I_Error ("gametic(%d) greater than trt_lowtic(%d), trt_counts(%d)", ::g->gametic, ::g->trt_lowtic, ::g->trt_counts );
+			if (Globals::g->gametic/Globals::g->ticdup > Globals::g->trt_lowtic) {
+				I_Error ("gametic(%d) greater than trt_lowtic(%d), trt_counts(%d)", Globals::g->gametic, Globals::g->trt_lowtic, Globals::g->trt_counts );
 				return false;
 			}
 
-			if (::g->advancedemo) {
+			if (Globals::g->advancedemo) {
 				D_DoAdvanceDemo ();
 			}
 
 			M_Ticker ();
 			G_Ticker ();
-			::g->gametic++;
+			Globals::g->gametic++;
 
 			// modify command for duplicated tics
-			if (i != ::g->ticdup-1)
+			if (i != Globals::g->ticdup-1)
 			{
 				ticcmd_t	*cmd;
 				int			buf;
 				int			j;
 
-				buf = (::g->gametic/::g->ticdup)%BACKUPTICS; 
+				buf = (Globals::g->gametic/Globals::g->ticdup)%BACKUPTICS; 
 				for (j=0 ; j<MAXPLAYERS ; j++)
 				{
-					cmd = &::g->netcmds[j][buf];
+					cmd = &Globals::g->netcmds[j][buf];
 					if (cmd->buttons & BT_SPECIAL)
 						cmd->buttons = 0;
 				}
 			}
 		}
 
-		NetUpdate ( userCmdMgr );	// check for new console commands
+		NetUpdate ( );	// check for new console commands
 	}
 
 	return true;

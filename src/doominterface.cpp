@@ -112,21 +112,21 @@ void DoomInterface::Startup( int playerscount, bool multiplayer )
 		if( DoomLib::skipToLoad ) {
 			G_LoadGame( DoomLib::loadGamePath );
 			 DoomLib::skipToLoad = false;
-			 ::g->menuactive = 0;
+			 Globals::g->menuactive = 0;
 		}
 
 		if( DoomLib::skipToNew ) {
 			static int startLevel = 1;
 			G_DeferedInitNew((skill_t)DoomLib::chosenSkill,DoomLib::chosenEpisode+1, startLevel);
 			DoomLib::skipToNew = false;
-			::g->menuactive = 0;
+			Globals::g->menuactive = 0;
 		}
 
 		DoomLib::SetPlayer(-1);
 	}
 }
 
-bool DoomInterface::Frame( int iTime, idUserCmdMgr * userCmdMgr )
+bool DoomInterface::Frame( int iTime )
 {
 	int i;
 	bool bAllFinished = true;
@@ -149,9 +149,9 @@ bool DoomInterface::Frame( int iTime, idUserCmdMgr * userCmdMgr )
 				bFinished[i] = DoomLib::Poll();
 			} else {
 
-				if (::g->wipedone) {
+				if (Globals::g->wipedone) {
 					if ( !waitingForWipe ) {
-						const bool didRunTic = DoomLib::Tic( userCmdMgr );
+						const bool didRunTic = DoomLib::Tic();
 						if ( didRunTic == false ) {
 							//printf( "Skipping tic and yielding because not enough time has passed.\n" );
 						
@@ -161,13 +161,13 @@ bool DoomInterface::Frame( int iTime, idUserCmdMgr * userCmdMgr )
 					}
 					DoomLib::Frame();
 				}
-				if (::g->wipe) {
+				if (Globals::g->wipe) {
 					DoomLib::Wipe();
 					// Draw the menus over the wipe.
 					M_Drawer();
 				}
 
-				if( ::g->gamestate != GS_LEVEL && GetNumPlayers() > 2 ) {
+				if( Globals::g->gamestate != GS_LEVEL && GetNumPlayers() > 2 ) {
 					drawFullScreen = true;
 				}
 			}
@@ -217,7 +217,7 @@ void DoomInterface::QuitCurrentGame() {
 	for ( int i = 0; i < numplayers; i++ ) {
 		DoomLib::SetPlayer( i );
 
-		if(::g->netgame) {
+		if(Globals::g->netgame) {
 			// Shut down networking
 			D_QuitNetGame();
 		}
@@ -225,9 +225,9 @@ void DoomInterface::QuitCurrentGame() {
 		G_CheckDemoStatus();
 
 		globalPauseTime = false;
-		::g->menuactive = false;
-		::g->usergame = false;
-		::g->netgame = false;
+		Globals::g->menuactive = false;
+		Globals::g->usergame = false;
+		Globals::g->netgame = false;
 
 		lastTicRun = 0;
 
@@ -246,16 +246,16 @@ void DoomInterface::EndDMGame() {
 	for ( int i = 0; i < numplayers; i++ ) {
 		DoomLib::SetPlayer( i );
 
-		if(::g->netgame) {
+		if(Globals::g->netgame) {
 			D_QuitNetGame();
 		}
 
 		G_CheckDemoStatus();
 
 		globalPauseTime = false;
-		::g->menuactive = false;
-		::g->usergame = false;
-		::g->netgame = false;
+		Globals::g->menuactive = false;
+		Globals::g->usergame = false;
+		Globals::g->netgame = false;
 
 		lastTicRun = 0;
 

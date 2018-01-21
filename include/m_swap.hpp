@@ -41,7 +41,7 @@ If you have questions concerning this license or the applicable additional terms
 //short	SwapSHORT(short);
 //long	SwapLONG(long);
 
-// Swap 16bit, that is, MSB and LSB byte.
+// Swap 16bit, that is, MSB and LSB unsigned char.
 inline unsigned short SwapSHORT(unsigned short x)
 {
     // No masking with 0xFF should be necessary. 

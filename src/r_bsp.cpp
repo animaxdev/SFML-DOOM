@@ -64,7 +64,7 @@ R_StoreWallRange
 //
 void R_ClearDrawSegs (void)
 {
-    ::g->ds_p = ::g->drawsegs;
+    Globals::g->ds_p = Globals::g->drawsegs;
 }
 
 
@@ -77,7 +77,7 @@ void R_ClearDrawSegs (void)
 
 
 
-// ::g->newend is one past the last valid seg
+// Globals::g->newend is one past the last valid seg
 
 
 
@@ -98,7 +98,7 @@ R_ClipSolidWallSegment
 
     // Find the first range that touches the range
     //  (adjacent pixels are touching).
-    start = ::g->solidsegs;
+    start = Globals::g->solidsegs;
     while (start->last < first-1)
 		start++;
 
@@ -109,8 +109,8 @@ R_ClipSolidWallSegment
 	    // Post is entirely visible (above start),
 	    //  so insert a new clippost.
 	    R_StoreWallRange (first, last);
-	    next = ::g->newend;
-	    ::g->newend++;
+	    next = Globals::g->newend;
+	    Globals::g->newend++;
 	    
 	    while (next != start)
 	    {
@@ -163,13 +163,13 @@ R_ClipSolidWallSegment
     }
     
 
-    while (next++ != ::g->newend)
+    while (next++ != Globals::g->newend)
     {
 	// Remove a post.
 	*++start = *next;
     }
 
-    ::g->newend = start+1;
+    Globals::g->newend = start+1;
 }
 
 
@@ -190,7 +190,7 @@ R_ClipPassWallSegment
 
     // Find the first range that touches the range
     //  (adjacent pixels are touching).
-    start = ::g->solidsegs;
+    start = Globals::g->solidsegs;
     while (start->last < first-1)
 	start++;
 
@@ -232,11 +232,11 @@ R_ClipPassWallSegment
 //
 void R_ClearClipSegs (void)
 {
-    ::g->solidsegs[0].first = -0x7fffffff;
-    ::g->solidsegs[0].last = -1;
-    ::g->solidsegs[1].first = ::g->viewwidth;
-    ::g->solidsegs[1].last = 0x7fffffff;
-    ::g->newend = ::g->solidsegs+2;
+    Globals::g->solidsegs[0].first = -0x7fffffff;
+    Globals::g->solidsegs[0].last = -1;
+    Globals::g->solidsegs[1].first = Globals::g->viewwidth;
+    Globals::g->solidsegs[1].last = 0x7fffffff;
+    Globals::g->newend = Globals::g->solidsegs+2;
 }
 
 //
@@ -253,14 +253,14 @@ void R_AddLine (seg_t*	line)
     angle_t		span;
     angle_t		tspan;
     
-    ::g->curline = line;
+    Globals::g->curline = line;
 
-    // OPTIMIZE: quickly reject orthogonal back ::g->sides.
+    // OPTIMIZE: quickly reject orthogonal back Globals::g->sides.
     angle1 = R_PointToAngle (line->v1->x, line->v1->y);
     angle2 = R_PointToAngle (line->v2->x, line->v2->y);
     
     // Clip to view edges.
-    // OPTIMIZE: make constant out of 2*::g->clipangle (FIELDOFVIEW).
+    // OPTIMIZE: make constant out of 2*Globals::g->clipangle (FIELDOFVIEW).
     span = angle1 - angle2;
     
     // Back side? I.e. backface culling?
@@ -269,68 +269,68 @@ void R_AddLine (seg_t*	line)
 
 	extern angle_t GetViewAngle();
     // Global angle needed by segcalc.
-    ::g->rw_angle1 = angle1;
+    Globals::g->rw_angle1 = angle1;
     angle1 -= GetViewAngle();
     angle2 -= GetViewAngle();
 	
-    tspan = angle1 + ::g->clipangle;
-    if (tspan > 2*::g->clipangle)
+    tspan = angle1 + Globals::g->clipangle;
+    if (tspan > 2*Globals::g->clipangle)
     {
-		tspan -= 2*::g->clipangle;
+		tspan -= 2*Globals::g->clipangle;
 
 		// Totally off the left edge?
 		if (tspan >= span)
 			return;
 		
-		angle1 = ::g->clipangle;
+		angle1 = Globals::g->clipangle;
     }
-    tspan = ::g->clipangle - angle2;
-    if (tspan > 2*::g->clipangle)
+    tspan = Globals::g->clipangle - angle2;
+    if (tspan > 2*Globals::g->clipangle)
     {
-		tspan -= 2*::g->clipangle;
+		tspan -= 2*Globals::g->clipangle;
 
 		// Totally off the left edge?
 		if (tspan >= span)
 			return;	
-		angle2 = -::g->clipangle; // ALANHACK UNSIGNED
+		angle2 = -Globals::g->clipangle; // ALANHACK UNSIGNED
     }
     
     // The seg is in the view range,
     // but not necessarily visible.
     angle1 = (angle1+ANG90)>>ANGLETOFINESHIFT;
     angle2 = (angle2+ANG90)>>ANGLETOFINESHIFT;
-    x1 = ::g->viewangletox[angle1];
-    x2 = ::g->viewangletox[angle2];
+    x1 = Globals::g->viewangletox[angle1];
+    x2 = Globals::g->viewangletox[angle2];
 
     // Does not cross a pixel?
     if (x1 == x2)
 		return;				
 	
-    ::g->backsector = line->backsector;
+    Globals::g->backsector = line->backsector;
 
     // Single sided line?
-    if (!::g->backsector)
+    if (!Globals::g->backsector)
 		goto clipsolid;		
 
     // Closed door.
-    if (::g->backsector->ceilingheight <= ::g->frontsector->floorheight
-	|| ::g->backsector->floorheight >= ::g->frontsector->ceilingheight)
+    if (Globals::g->backsector->ceilingheight <= Globals::g->frontsector->floorheight
+	|| Globals::g->backsector->floorheight >= Globals::g->frontsector->ceilingheight)
 		goto clipsolid;		
 
     // Window.
-    if (::g->backsector->ceilingheight != ::g->frontsector->ceilingheight
-	|| ::g->backsector->floorheight != ::g->frontsector->floorheight)
+    if (Globals::g->backsector->ceilingheight != Globals::g->frontsector->ceilingheight
+	|| Globals::g->backsector->floorheight != Globals::g->frontsector->floorheight)
 		goto clippass;	
 		
-    // Reject empty ::g->lines used for triggers
-    //  and special ::g->events.
-    // Identical floor and ceiling on both ::g->sides,
-    // identical light levels on both ::g->sides,
+    // Reject empty Globals::g->lines used for triggers
+    //  and special Globals::g->events.
+    // Identical floor and ceiling on both Globals::g->sides,
+    // identical light levels on both Globals::g->sides,
     // and no middle texture.
-    if (::g->backsector->ceilingpic == ::g->frontsector->ceilingpic
-	&& ::g->backsector->floorpic == ::g->frontsector->floorpic
-	&& ::g->backsector->lightlevel == ::g->frontsector->lightlevel
-	&& ::g->curline->sidedef->midtexture == 0)
+    if (Globals::g->backsector->ceilingpic == Globals::g->frontsector->ceilingpic
+	&& Globals::g->backsector->floorpic == Globals::g->frontsector->floorpic
+	&& Globals::g->backsector->lightlevel == Globals::g->frontsector->lightlevel
+	&& Globals::g->curline->sidedef->midtexture == 0)
     {
 		return;
     }
@@ -395,10 +395,10 @@ qboolean R_CheckBBox (fixed_t*	bspcoord)
     if (boxpos == 5)
 	return true;
 	
-    x1 = bspcoord[::g->checkcoord[boxpos][0]];
-    y1 = bspcoord[::g->checkcoord[boxpos][1]];
-    x2 = bspcoord[::g->checkcoord[boxpos][2]];
-    y2 = bspcoord[::g->checkcoord[boxpos][3]];
+    x1 = bspcoord[Globals::g->checkcoord[boxpos][0]];
+    y1 = bspcoord[Globals::g->checkcoord[boxpos][1]];
+    x2 = bspcoord[Globals::g->checkcoord[boxpos][2]];
+    y2 = bspcoord[Globals::g->checkcoord[boxpos][3]];
     
     // check clip list for an open space
 	extern angle_t GetViewAngle();
@@ -411,28 +411,28 @@ qboolean R_CheckBBox (fixed_t*	bspcoord)
     if (span >= ANG180)
 	return true;
     
-    tspan = angle1 + ::g->clipangle;
+    tspan = angle1 + Globals::g->clipangle;
 
-    if (tspan > 2*::g->clipangle)
+    if (tspan > 2*Globals::g->clipangle)
     {
-	tspan -= 2*::g->clipangle;
+	tspan -= 2*Globals::g->clipangle;
 
 	// Totally off the left edge?
 	if (tspan >= span)
 	    return false;	
 
-	angle1 = ::g->clipangle;
+	angle1 = Globals::g->clipangle;
     }
-    tspan = ::g->clipangle - angle2;
-    if (tspan > 2*::g->clipangle)
+    tspan = Globals::g->clipangle - angle2;
+    if (tspan > 2*Globals::g->clipangle)
     {
-	tspan -= 2*::g->clipangle;
+	tspan -= 2*Globals::g->clipangle;
 
 	// Totally off the left edge?
 	if (tspan >= span)
 	    return false;
 	
-	angle2 = -::g->clipangle;// ALANHACK UNSIGNED
+	angle2 = -Globals::g->clipangle;// ALANHACK UNSIGNED
     }
 
 
@@ -441,15 +441,15 @@ qboolean R_CheckBBox (fixed_t*	bspcoord)
     //  (adjacent pixels are touching).
     angle1 = (angle1+ANG90)>>ANGLETOFINESHIFT;
     angle2 = (angle2+ANG90)>>ANGLETOFINESHIFT;
-    sx1 = ::g->viewangletox[angle1];
-    sx2 = ::g->viewangletox[angle2];
+    sx1 = Globals::g->viewangletox[angle1];
+    sx2 = Globals::g->viewangletox[angle2];
 
     // Does not cross a pixel.
     if (sx1 == sx2)
 	return false;			
     sx2--;
 	
-    start = ::g->solidsegs;
+    start = Globals::g->solidsegs;
     while (start->last < sx2)
 	start++;
     
@@ -468,7 +468,7 @@ qboolean R_CheckBBox (fixed_t*	bspcoord)
 //
 // R_Subsector
 // Determine floor/ceiling planes.
-// Add ::g->sprites of things in sector.
+// Add Globals::g->sprites of things in sector.
 // Draw one or more line segments.
 //
 void R_Subsector (int num)
@@ -478,38 +478,38 @@ void R_Subsector (int num)
     subsector_t*	sub;
 	
 #ifdef RANGECHECK
-    if (num>=::g->numsubsectors)
+    if (num>=Globals::g->numsubsectors)
 	I_Error ("R_Subsector: ss %i with numss = %i",
 		 num,
-		 ::g->numsubsectors);
+		 Globals::g->numsubsectors);
 #endif
 
-    ::g->sscount++;
-    sub = &::g->subsectors[num];
-    ::g->frontsector = sub->sector;
+    Globals::g->sscount++;
+    sub = &Globals::g->subsectors[num];
+    Globals::g->frontsector = sub->sector;
     count = sub->numlines;
-    line = &::g->segs[sub->firstline];
+    line = &Globals::g->segs[sub->firstline];
 
-    if (::g->frontsector->floorheight < ::g->viewz)
+    if (Globals::g->frontsector->floorheight < Globals::g->viewz)
     {
-		::g->floorplane = R_FindPlane (::g->frontsector->floorheight,
-					::g->frontsector->floorpic,
-					::g->frontsector->lightlevel);
+		Globals::g->floorplane = R_FindPlane (Globals::g->frontsector->floorheight,
+					Globals::g->frontsector->floorpic,
+					Globals::g->frontsector->lightlevel);
     }
     else
-		::g->floorplane = NULL;
+		Globals::g->floorplane = NULL;
     
-    if (::g->frontsector->ceilingheight > ::g->viewz 
-	|| ::g->frontsector->ceilingpic == ::g->skyflatnum)
+    if (Globals::g->frontsector->ceilingheight > Globals::g->viewz 
+	|| Globals::g->frontsector->ceilingpic == Globals::g->skyflatnum)
     {
-		 ::g->ceilingplane = R_FindPlane (::g->frontsector->ceilingheight,
-						::g->frontsector->ceilingpic,
-						::g->frontsector->lightlevel);
+		 Globals::g->ceilingplane = R_FindPlane (Globals::g->frontsector->ceilingheight,
+						Globals::g->frontsector->ceilingpic,
+						Globals::g->frontsector->lightlevel);
     }
     else
-		::g->ceilingplane = NULL;
+		Globals::g->ceilingplane = NULL;
 		
-    R_AddSprites (::g->frontsector);	
+    R_AddSprites (Globals::g->frontsector);	
 
     while (count--)
     {
@@ -523,7 +523,7 @@ void R_Subsector (int num)
 
 //
 // RenderBSPNode
-// Renders all ::g->subsectors below a given node,
+// Renders all Globals::g->subsectors below a given node,
 //  traversing subtree recursively.
 // Just call with BSP root.
 void R_RenderBSPNode (int bspnum)
@@ -541,7 +541,7 @@ void R_RenderBSPNode (int bspnum)
 	return;
     }
 		
-    bsp = &::g->nodes[bspnum];
+    bsp = &Globals::g->nodes[bspnum];
     
 	extern fixed_t GetViewX(); extern fixed_t GetViewY();
     // Decide which side the view point is on.
